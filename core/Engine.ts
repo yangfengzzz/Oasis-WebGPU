@@ -3,16 +3,16 @@ import {WebCanvas} from "./WebCanvas";
 import {EngineSettings} from "./EngineSettings";
 import {ColorSpace} from "./enums/ColorSpace";
 import {Entity} from "./Entity";
-import {Application} from "./Application";
 import {View} from "./View";
 import {ComponentsManager} from "./ComponentsManager";
 import {ResourceManager} from "./asset/ResourceManager";
+import {RenderPassDescriptor} from "./webgpu/RenderPassDescriptor";
+import {RenderPass} from "./rendering/RenderPass";
 
 export class Engine {
     _componentsManager: ComponentsManager = new ComponentsManager();
 
     protected _canvas: WebCanvas;
-    protected _activeApp: Application;
 
     private _settings: EngineSettings = {};
     private _resourceManager: ResourceManager = new ResourceManager();
@@ -24,6 +24,12 @@ export class Engine {
     private _timeoutId: number;
     private _vSyncCounter: number = 1;
     private _targetFrameInterval: number = 1000 / 60;
+
+    private _adapter: GPUAdapter;
+    private _device: GPUDevice;
+    private _view: View;
+    private _renderPassDescriptor: RenderPassDescriptor;
+    private _renderPass: RenderPass;
 
     private _animate = () => {
         if (this._vSyncCount) {
@@ -101,9 +107,8 @@ export class Engine {
         this._targetFrameInterval = 1000 / value;
     }
 
-    constructor(canvas: WebCanvas, app:Application, settings?: EngineSettings) {
+    constructor(canvas: WebCanvas, settings?: EngineSettings) {
         this._canvas = canvas;
-        this._activeApp = app;
 
         const colorSpace = settings?.colorSpace || ColorSpace.Linear;
         // colorSpace === ColorSpace.Gamma && this._macroCollection.enable(Engine._gammaMacro);
@@ -116,7 +121,7 @@ export class Engine {
      * @returns Entity
      */
     createEntity(name?: string): Entity {
-        return new Entity(name);
+        return new Entity(this, name);
     }
 
     /**
@@ -128,8 +133,22 @@ export class Engine {
         clearTimeout(this._timeoutId);
     }
 
-    init() {
-        return this._activeApp.prepare(this);
+    async init() {
+        this._adapter = await navigator.gpu.requestAdapter({
+            powerPreference: 'high-performance'
+        });
+
+        this._device = await this._adapter.requestDevice();
+        this._view = this.createView(this._adapter, this._device);
+
+        this._renderPassDescriptor = new RenderPassDescriptor();
+        this._renderPassDescriptor.colorAttachments[0].storeOp = 'store';
+        this._renderPassDescriptor.colorAttachments[0].loadValue = {r: 0.4, g: 0.4, b: 0.4, a: 1.0};
+        this._renderPassDescriptor.colorAttachments[0].view = this._view.colorAttachmentView;
+        this._renderPassDescriptor.depthStencilAttachment.depthLoadValue = 'load';
+        this._renderPassDescriptor.depthStencilAttachment.stencilLoadValue = 'load';
+        this._renderPassDescriptor.depthStencilAttachment.view = this._view.depthStencilAttachmentView;
+        this._renderPass = new RenderPass(this._renderPassDescriptor);
     }
 
     /**
@@ -143,7 +162,7 @@ export class Engine {
         requestAnimationFrame(this._animate);
     }
 
-    createView(adapter: GPUAdapter, device: GPUDevice):View {
+    createView(adapter: GPUAdapter, device: GPUDevice): View {
         return this._canvas.createView(adapter, device);
     }
 
@@ -155,7 +174,9 @@ export class Engine {
         const deltaTime = time.deltaTime;
 
         time.tick();
-        this._activeApp.update(deltaTime);
+        const commandEncoder = this._device.createCommandEncoder();
+        this._renderPass.draw(commandEncoder);
+        this._device.queue.submit([commandEncoder.finish()]);
     }
 
     /**
