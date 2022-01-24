@@ -10,6 +10,10 @@ export class View {
     colorAttachmentView:GPUTextureView;
     depthStencilAttachmentView:GPUTextureView;
 
+    get device():GPUDevice {
+        return this._device;
+    }
+
     constructor(format:GPUTextureFormat, device: GPUDevice, canvas:Canvas) {
         this._format = format;
         this._device = device;
