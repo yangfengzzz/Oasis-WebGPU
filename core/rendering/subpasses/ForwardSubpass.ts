@@ -9,10 +9,8 @@ export class ForwardSubpass extends Subpass {
     private _forwardPipelineDescriptor: RenderPipelineDescriptor;
     private _pipelineLayoutDescriptor: PipelineLayoutDescriptor;
 
-    constructor(view: View,
-                scene: Scene,
-                camera: Camera) {
-        super(view, scene, camera);
+    constructor(view: View) {
+        super(view);
     }
 
     prepare(): void {
@@ -28,7 +26,7 @@ export class ForwardSubpass extends Subpass {
         this._forwardPipelineDescriptor.depthStencil.depthCompare = 'less';
     }
 
-    draw(commandEncoder: GPURenderPassEncoder): void {
+    draw(scene: Scene, camera: Camera, commandEncoder: GPURenderPassEncoder): void {
         commandEncoder.pushDebugGroup("Draw Element");
         this._drawMeshes(commandEncoder);
         commandEncoder.popDebugGroup();

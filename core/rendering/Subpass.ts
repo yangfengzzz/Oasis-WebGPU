@@ -5,17 +5,10 @@ import {RenderPass} from "./RenderPass";
 
 export abstract class Subpass {
     protected _pass: RenderPass;
-
     protected _view: View;
-    protected _scene: Scene;
-    protected _camera: Camera;
 
-    protected constructor(view: View,
-                          scene: Scene,
-                          camera: Camera) {
+    protected constructor(view: View) {
         this._view = view;
-        this._scene = scene;
-        this._camera = camera;
     }
 
     /**
@@ -25,9 +18,11 @@ export abstract class Subpass {
 
     /**
      * @brief Draw virtual function
+     * @param scene
+     * @param camera
      * @param renderPassEncoder GPURenderPassEncoder to use to record draw commands
      */
-    abstract draw(renderPassEncoder: GPURenderPassEncoder);
+    abstract draw(scene: Scene, camera: Camera, renderPassEncoder: GPURenderPassEncoder);
 
     setRenderPass(pass: RenderPass): void {
         this._pass = pass;

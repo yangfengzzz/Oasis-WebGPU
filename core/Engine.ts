@@ -245,7 +245,9 @@ export class Engine {
                 if (camera.enabled && cameraEntity.isActiveInHierarchy) {
                     componentsManager.callCameraOnBeginRender(camera);
 
-
+                    const commandEncoder = this._device.createCommandEncoder();
+                    this._renderPass.draw(scene, camera, commandEncoder);
+                    this._device.queue.submit([commandEncoder.finish()]);
 
                     componentsManager.callCameraOnEndRender(camera);
                 }
