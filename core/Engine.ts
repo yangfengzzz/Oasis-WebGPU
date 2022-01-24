@@ -3,13 +3,13 @@ import {Canvas} from "./Canvas";
 import {EngineSettings} from "./EngineSettings";
 import {ColorSpace} from "./enums/ColorSpace";
 import {Entity} from "./Entity";
+import {Application} from "./Application";
 
 export class Engine {
     protected _canvas: Canvas;
+    protected _activeApp: Application;
 
     private _settings: EngineSettings = {};
-    // private _resourceManager: ResourceManager = new ResourceManager(this);
-    // private _sceneManager: SceneManager = new SceneManager(this);
     private _vSyncCount: number = 1;
     private _targetFrameRate: number = 60;
     private _time: Time = new Time();
@@ -88,8 +88,9 @@ export class Engine {
         this._targetFrameInterval = 1000 / value;
     }
 
-    constructor(canvas: Canvas, settings?: EngineSettings) {
+    constructor(canvas: Canvas, app:Application, settings?: EngineSettings) {
         this._canvas = canvas;
+        this._activeApp = app;
 
         const colorSpace = settings?.colorSpace || ColorSpace.Linear;
         // colorSpace === ColorSpace.Gamma && this._macroCollection.enable(Engine._gammaMacro);
@@ -121,6 +122,8 @@ export class Engine {
         if (!this._isPaused) return;
         this._isPaused = false;
         this.time.reset();
+
+        this._activeApp.prepare(this);
         requestAnimationFrame(this._animate);
     }
 
@@ -128,26 +131,17 @@ export class Engine {
      * @brief Runs the application for one frame
      */
     update(): void {
+        const time = this._time;
+        const deltaTime = time.deltaTime;
 
+        time.tick();
+        this._activeApp.update(deltaTime);
     }
 
     /**
      * Destroy engine.
      */
     destroy(): void {
-
-    }
-
-    resize(win_width: number, win_height: number,
-           fb_width: number, fb_height: number): void {
-
-    }
-
-    inputEvent(inputEvent: InputEvent): void {
-
-    }
-
-    createRenderView(device: GPUDevice): GPUTextureView {
 
     }
 }
