@@ -13,6 +13,7 @@ import {Scene} from "./Scene";
 import {ShaderMacro} from "./shader/ShaderMacro";
 import {Shader} from "./shader";
 import {ShaderMacroCollection} from "./shader/ShaderMacroCollection";
+import {ForwardSubpass} from "./rendering/subpasses/ForwardSubpass";
 
 export class Engine {
     /** @internal */
@@ -168,6 +169,7 @@ export class Engine {
         this._renderPassDescriptor.depthStencilAttachment.stencilLoadValue = 'load';
         this._renderPassDescriptor.depthStencilAttachment.view = this._view.depthStencilAttachmentView;
         this._renderPass = new RenderPass(this._renderPassDescriptor);
+        this._renderPass.addSubpass(new ForwardSubpass(this._view));
     }
 
     createView(adapter: GPUAdapter, device: GPUDevice): View {
