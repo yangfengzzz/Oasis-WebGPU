@@ -16,7 +16,6 @@ export class BlendState {
     /** Whether to use (Alpha-to-Coverage) technology. */
     alphaToCoverage: boolean = false;
 
-
     platformApply(pipelineDescriptor: RenderPipelineDescriptor,
                   encoder: GPURenderPassEncoder): void {
         const {
