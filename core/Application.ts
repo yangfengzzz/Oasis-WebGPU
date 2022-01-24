@@ -46,5 +46,6 @@ export class Application {
     update(delta_time: number): void {
         const commandEncoder = this._device.createCommandEncoder();
         this._renderPass.draw(commandEncoder);
+        this._device.queue.submit([commandEncoder.finish()]);
     }
 }
