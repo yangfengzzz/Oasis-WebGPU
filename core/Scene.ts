@@ -1,8 +1,9 @@
 import {Vector2, Vector3} from "@oasis-engine/math";
 import {Entity} from "./Entity";
 import {ComponentsManager} from "./ComponentsManager";
-// import {Camera} from "./Camera";
-import {Logger} from "oasis-engine";
+import {Background} from "./Background";
+import {Camera} from "./Camera";
+import {Logger} from "./base";
 
 /**
  * Scene.
@@ -14,27 +15,22 @@ export class Scene {
     ComponentsManager
     _componentsManager;
 
+    /** The background of the scene. */
+    readonly background: Background = new Background();
 
-    // static sceneFeatureManager = new FeatureManager<SceneFeature>();
-
-    // private static _resolutionP roperty = Shader.getPropertyByName("u_resolution");
-
-
-    // /** The background of the scene. */
-    // readonly background: Background = new Background();
     // /** Ambient light. */
     // readonly ambientLight: AmbientLight;
     // /** Scene-related shader data. */
     // readonly shaderData: ShaderData = new ShaderData(ShaderDataGroup.Scene);
 
     /** @internal */
-    // _activeCameras: Camera[] = [];
+    _activeCameras: Camera[] = [];
     /** @internal */
     _isActiveInEngine: boolean = false;
 
     private _destroyed: boolean = false;
     private _rootEntities: Entity[] = [];
-    private _resolution: Vector2 = new Vector2();
+    private _device: GPUDevice;
 
     /**
      * Count of root entities.
@@ -59,23 +55,12 @@ export class Scene {
 
     /**
      * Create scene.
+     * @param device - WebGPU Device
      * @param name - Name
      */
-    constructor(name?: string) {
-        this.name = name || "";
-
-        // const shaderData = this.shaderData;
-        // Scene.sceneFeatureManager.addObject(this);
-        // shaderData._addRefCount(1);
-        // this.ambientLight = new AmbientLight(this);
-        //
-        // // @todo: this is device macro,should add when compile shader.
-        // if (this._engine._hardwareRenderer.canIUse(GLCapabilityType.shaderTextureLod)) {
-        //     shaderData.enableMacro("HAS_TEX_LOD");
-        // }
-        // if (this._engine._hardwareRenderer.canIUse(GLCapabilityType.standardDerivatives)) {
-        //     shaderData.enableMacro("HAS_DERIVATIVES");
-        // }
+    constructor(device: GPUDevice, name: string = "") {
+        this._device = device;
+        this.name = name;
     }
 
     /**
@@ -205,27 +190,27 @@ export class Scene {
         this._destroyed = true;
     }
 
-    // /**
-    //  * @internal
-    //  */
-    // _attachRenderCamera(camera: Camera): void {
-    //     const index = this._activeCameras.indexOf(camera);
-    //     if (index === -1) {
-    //         this._activeCameras.push(camera);
-    //     } else {
-    //         Logger.warn("Camera already attached.");
-    //     }
-    // }
-    //
-    // /**
-    //  * @internal
-    //  */
-    // _detachRenderCamera(camera: Camera): void {
-    //     const index = this._activeCameras.indexOf(camera);
-    //     if (index !== -1) {
-    //         this._activeCameras.splice(index, 1);
-    //     }
-    // }
+    /**
+     * @internal
+     */
+    _attachRenderCamera(camera: Camera): void {
+        const index = this._activeCameras.indexOf(camera);
+        if (index === -1) {
+            this._activeCameras.push(camera);
+        } else {
+            Logger.warn("Camera already attached.");
+        }
+    }
+
+    /**
+     * @internal
+     */
+    _detachRenderCamera(camera: Camera): void {
+        const index = this._activeCameras.indexOf(camera);
+        if (index !== -1) {
+            this._activeCameras.splice(index, 1);
+        }
+    }
 
     /**
      * @internal
@@ -260,22 +245,4 @@ export class Scene {
         const oldRootEntities = this._rootEntities;
         oldRootEntities.splice(oldRootEntities.indexOf(entity), 1);
     }
-
-    //-----------------------------------------@deprecated-----------------------------------
-    // static registerFeature(Feature: new () => SceneFeature) {
-    //     Scene.sceneFeatureManager.registerFeature(Feature);
-    // }
-    //
-    // findFeature<T extends SceneFeature>(Feature: { new (): T }): T {
-    //     return Scene.sceneFeatureManager.findFeature(this, Feature) as T;
-    // }
-    //
-    // features: SceneFeature[] = [];
-    //
-    // /**
-    //  * Raycast.
-    //  * @deprecated
-    //  * @param ray
-    //  */
-    // public raycast(ray: { origin: Vector3; direction: Vector3 }, outPos?: Vector3, tag?: Layer): any {}
 }

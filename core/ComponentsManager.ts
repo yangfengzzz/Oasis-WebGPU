@@ -2,8 +2,8 @@ import {DisorderedArray} from "./DisorderedArray"
 import {Component} from "./Component";
 import {Script} from "./Script";
 import {Vector3} from "@oasis-engine/math";
+import {Camera} from "./Camera";
 // import {Renderer} from "./Renderer";
-// import {Camera} from "./Camera";
 
 /**
  * The manager of the components.
@@ -171,21 +171,21 @@ export class ComponentsManager {
         }
     }
 
-    // callCameraOnBeginRender(camera: Camera) {
-    //     const camComps = camera.entity._components;
-    //     for (let i = camComps.length - 1; i >= 0; --i) {
-    //         const camComp = camComps[i];
-    //         (camComp as any).onBeginRender && (camComp as any).onBeginRender(camera);
-    //     }
-    // }
-    //
-    // callCameraOnEndRender(camera: Camera) {
-    //     const camComps = camera.entity._components;
-    //     for (let i = camComps.length - 1; i >= 0; --i) {
-    //         const camComp = camComps[i];
-    //         (camComp as any).onBeginRender && (camComp as any).onEndRender(camera);
-    //     }
-    // }
+    callCameraOnBeginRender(camera: Camera) {
+        const camComps = camera.entity._components;
+        for (let i = camComps.length - 1; i >= 0; --i) {
+            const camComp = camComps[i];
+            (camComp as any).onBeginRender && (camComp as any).onBeginRender(camera);
+        }
+    }
+
+    callCameraOnEndRender(camera: Camera) {
+        const camComps = camera.entity._components;
+        for (let i = camComps.length - 1; i >= 0; --i) {
+            const camComp = camComps[i];
+            (camComp as any).onBeginRender && (camComp as any).onEndRender(camera);
+        }
+    }
 
     getActiveChangedTempList(): Component[] {
         return this._componentsContainerPool.length ? this._componentsContainerPool.pop() : [];
