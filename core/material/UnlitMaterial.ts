@@ -2,6 +2,7 @@ import {Color, Vector4} from "@oasis-engine/math";
 import {Shader} from "../shader";
 import {BaseMaterial} from "./BaseMaterial";
 import {SamplerTexture2D} from "../texture/SamplerTexture2D";
+import {Engine} from "../Engine";
 
 /**
  * Unlit Material.
@@ -57,9 +58,10 @@ export class UnlitMaterial extends BaseMaterial {
 
     /**
      * Create a unlit material instance.
+     * @param engine - Engine to which the material belongs
      */
-    constructor() {
-        super(Shader.find("unlit"));
+    constructor(engine: Engine) {
+        super(engine, Shader.find("unlit"));
 
         const shaderData = this.shaderData;
 
@@ -74,7 +76,7 @@ export class UnlitMaterial extends BaseMaterial {
      * @override
      */
     clone(): UnlitMaterial {
-        const dest = new UnlitMaterial();
+        const dest = new UnlitMaterial(this._engine);
         this.cloneTo(dest);
         return dest;
     }

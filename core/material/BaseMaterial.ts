@@ -1,9 +1,10 @@
-import {ShaderMacro} from "../shader/ShaderMacro";
+import {Engine} from "../Engine";
 import {Shader} from "../shader";
+import {ShaderMacro} from "../shader/ShaderMacro";
 import {BlendMode} from "./enums/BlendMode";
-import {Material} from "./Material";
-import {RenderQueueType} from "./enums/RenderQueueType";
 import {RenderFace} from "./enums/RenderFace";
+import {RenderQueueType} from "./enums/RenderQueueType";
+import {Material} from "./Material";
 
 export class BaseMaterial extends Material {
     private static _alphaCutoffMacro: ShaderMacro = Shader.getMacroByName("ALPHA_CUTOFF");
@@ -43,7 +44,6 @@ export class BaseMaterial extends Material {
                 : RenderQueueType.Opaque;
         }
     }
-
 
     /**
      * Alpha cutoff value.
@@ -128,11 +128,34 @@ export class BaseMaterial extends Material {
 
     /**
      * Create a BaseMaterial instance.
+     * @param engine - Engine to which the material belongs
      * @param shader - Shader used by the material
      */
-    constructor(shader: Shader) {
-        super(shader);
+    constructor(engine: Engine, shader: Shader) {
+        super(engine, shader);
         this.blendMode = BlendMode.Normal;
         this.shaderData.setFloat(BaseMaterial._alphaCutoffProp, 0);
+    }
+
+    /**
+     * @override
+     * Clone and return the instance.
+     */
+    clone(): BaseMaterial {
+        const dest = new BaseMaterial(this._engine, this.shader);
+        this.cloneTo(dest);
+        return dest;
+    }
+
+    /**
+     * @override
+     * Clone to the target material.
+     * @param target - target material
+     */
+    cloneTo(target: BaseMaterial): void {
+        super.cloneTo(target);
+        target._renderFace = this._renderFace;
+        target._isTransparent = this._isTransparent;
+        target._blendMode = this._blendMode;
     }
 }
