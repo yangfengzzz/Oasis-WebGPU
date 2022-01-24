@@ -1,6 +1,7 @@
 import {RenderTargetBlendState} from "./RenderTargetBlendState";
 import {Color} from "@oasis-engine/math";
-import {ColorTargetState, RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
+import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
+import {ColorTargetState} from "../../webgpu/state/FragmentState";
 
 /**
  * Blend state.
