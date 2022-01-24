@@ -1,4 +1,4 @@
-import {Time} from "./base";
+import {Logger, Time} from "./base";
 import {WebCanvas} from "./WebCanvas";
 import {EngineSettings} from "./EngineSettings";
 import {ColorSpace} from "./enums/ColorSpace";
@@ -8,14 +8,26 @@ import {ComponentsManager} from "./ComponentsManager";
 import {ResourceManager} from "./asset/ResourceManager";
 import {RenderPassDescriptor} from "./webgpu/RenderPassDescriptor";
 import {RenderPass} from "./rendering/RenderPass";
+import {SceneManager} from "./SceneManager";
+import {Scene} from "./Scene";
+import {ShaderMacro} from "./shader/ShaderMacro";
+import {Shader} from "./shader";
+import {ShaderMacroCollection} from "./shader/ShaderMacroCollection";
 
 export class Engine {
+    /** @internal */
+    static _gammaMacro: ShaderMacro = Shader.getMacroByName("OASIS_COLORSPACE_GAMMA");
+
     _componentsManager: ComponentsManager = new ComponentsManager();
+
+    /** @internal */
+    _macroCollection: ShaderMacroCollection = new ShaderMacroCollection();
 
     protected _canvas: WebCanvas;
 
     private _settings: EngineSettings = {};
     private _resourceManager: ResourceManager = new ResourceManager();
+    private _sceneManager: SceneManager = new SceneManager(this);
     private _vSyncCount: number = 1;
     private _targetFrameRate: number = 60;
     private _time: Time = new Time();
@@ -63,6 +75,13 @@ export class Engine {
      */
     get resourceManager(): ResourceManager {
         return this._resourceManager;
+    }
+
+    /**
+     * Get the scene manager.
+     */
+    get sceneManager(): SceneManager {
+        return this._sceneManager;
     }
 
     /**
@@ -151,6 +170,10 @@ export class Engine {
         this._renderPass = new RenderPass(this._renderPassDescriptor);
     }
 
+    createView(adapter: GPUAdapter, device: GPUDevice): View {
+        return this._canvas.createView(adapter, device);
+    }
+
     /**
      * Execution engine loop.
      */
@@ -162,8 +185,26 @@ export class Engine {
         requestAnimationFrame(this._animate);
     }
 
-    createView(adapter: GPUAdapter, device: GPUDevice): View {
-        return this._canvas.createView(adapter, device);
+    /**
+     * Destroy engine.
+     */
+    destroy(): void {
+        if (this._sceneManager) {
+            // -- cancel animation
+            this.pause();
+
+            this._animate = null;
+
+            this._sceneManager._activeScene.destroy();
+            this._resourceManager._destroy();
+            // If engine destroy, callComponentDestroy() maybe will not call anymore.
+            this._componentsManager.callComponentDestroy();
+            this._sceneManager = null;
+            this._resourceManager = null;
+
+            this._canvas = null;
+            this._time = null;
+        }
     }
 
     /**
@@ -174,15 +215,43 @@ export class Engine {
         const deltaTime = time.deltaTime;
 
         time.tick();
-        const commandEncoder = this._device.createCommandEncoder();
-        this._renderPass.draw(commandEncoder);
-        this._device.queue.submit([commandEncoder.finish()]);
+        const scene = this._sceneManager._activeScene;
+        const componentsManager = this._componentsManager;
+        if (scene) {
+            scene._activeCameras.sort((camera1, camera2) => camera1.priority - camera2.priority);
+
+            componentsManager.callScriptOnStart();
+            componentsManager.callScriptOnUpdate(deltaTime);
+            componentsManager.callAnimationUpdate(deltaTime);
+            componentsManager.callScriptOnLateUpdate(deltaTime);
+
+            this._render(scene);
+        }
+        this._componentsManager.callComponentDestroy();
     }
 
-    /**
-     * Destroy engine.
-     */
-    destroy(): void {
+    _render(scene: Scene): void {
+        const cameras = scene._activeCameras;
+        const componentsManager = this._componentsManager;
+        const deltaTime = this.time.deltaTime;
+        componentsManager.callRendererOnUpdate(deltaTime);
 
+        scene._updateShaderData();
+
+        if (cameras.length > 0) {
+            for (let i = 0, l = cameras.length; i < l; i++) {
+                const camera = cameras[i];
+                const cameraEntity = camera.entity;
+                if (camera.enabled && cameraEntity.isActiveInHierarchy) {
+                    componentsManager.callCameraOnBeginRender(camera);
+
+
+
+                    componentsManager.callCameraOnEndRender(camera);
+                }
+            }
+        } else {
+            Logger.debug("NO active camera.");
+        }
     }
 }

@@ -1,36 +1,55 @@
-import {Vector2, Vector3} from "@oasis-engine/math";
-import {Entity} from "./Entity";
-import {ComponentsManager} from "./ComponentsManager";
-import {Background} from "./Background";
-import {Camera} from "./Camera";
-import {Logger} from "./base";
+import { Background } from "./Background";
+import { EngineObject, Logger } from "./base";
+import { Camera } from "./Camera";
+import { Engine } from "./Engine";
+import { Entity } from "./Entity";
+import { ShaderDataGroup } from "./shader/ShaderDataGroup";
+import { ShaderData } from "./shader";
+import { ShaderMacroCollection } from "./shader/ShaderMacroCollection";
 
 /**
  * Scene.
  */
-export class Scene {
+export class Scene extends EngineObject {
     /** Scene name. */
     name: string;
-
-    ComponentsManager
-    _componentsManager;
 
     /** The background of the scene. */
     readonly background: Background = new Background();
 
-    // /** Ambient light. */
-    // readonly ambientLight: AmbientLight;
-    // /** Scene-related shader data. */
-    // readonly shaderData: ShaderData = new ShaderData(ShaderDataGroup.Scene);
+    /** Scene-related shader data. */
+    readonly shaderData: ShaderData = new ShaderData(ShaderDataGroup.Scene);
 
     /** @internal */
     _activeCameras: Camera[] = [];
     /** @internal */
     _isActiveInEngine: boolean = false;
+    /** @internal */
+    _globalShaderMacro: ShaderMacroCollection = new ShaderMacroCollection();
 
-    private _destroyed: boolean = false;
     private _rootEntities: Entity[] = [];
-    private _device: GPUDevice;
+    // private _ambientLight: AmbientLight;
+    //
+    // /**
+    //  * Ambient light.
+    //  */
+    // get ambientLight(): AmbientLight {
+    //     return this._ambientLight;
+    // }
+    //
+    // set ambientLight(value: AmbientLight) {
+    //     if (!value) {
+    //         Logger.warn("The scene must have one ambient light");
+    //         return;
+    //     }
+    //
+    //     const lastAmbientLight = this._ambientLight;
+    //     if (lastAmbientLight !== value) {
+    //         lastAmbientLight && lastAmbientLight._setScene(null);
+    //         value._setScene(this);
+    //         this._ambientLight = value;
+    //     }
+    // }
 
     /**
      * Count of root entities.
@@ -47,20 +66,17 @@ export class Scene {
     }
 
     /**
-     * Whether it's destroyed.
-     */
-    get destroyed(): boolean {
-        return this._destroyed;
-    }
-
-    /**
      * Create scene.
-     * @param device - WebGPU Device
+     * @param engine - Engine
      * @param name - Name
      */
-    constructor(device: GPUDevice, name: string = "") {
-        this._device = device;
-        this.name = name;
+    constructor(engine: Engine, name?: string) {
+        super(engine);
+        this.name = name || "";
+
+        const shaderData = this.shaderData;
+        shaderData._addRefCount(1);
+        // this.ambientLight = new AmbientLight();
     }
 
     /**
@@ -69,7 +85,7 @@ export class Scene {
      * @returns Entity
      */
     createRootEntity(name?: string): Entity {
-        const entity = new Entity(name);
+        const entity = new Entity(this._engine, name);
         this.addRootEntity(entity);
         return entity;
     }
@@ -178,16 +194,13 @@ export class Scene {
         if (this._destroyed) {
             return;
         }
-        // this._isActiveInEngine && (this._engine.sceneManager.activeScene = null);
-        // Scene.sceneFeatureManager.callFeatureMethod(this, "destroy", [this]);
-        // for (let i = 0, n = this.rootEntitiesCount; i < n; i++) {
-        //     this._rootEntities[i].destroy();
-        // }
-        // this._rootEntities.length = 0;
-        // this._activeCameras.length = 0;
-        // (Scene.sceneFeatureManager as any)._objects = [];
-        // this.shaderData._addRefCount(-1);
-        this._destroyed = true;
+        this._isActiveInEngine && (this._engine.sceneManager.activeScene = null);
+        for (let i = 0, n = this.rootEntitiesCount; i < n; i++) {
+            this._rootEntities[i].destroy();
+        }
+        this._rootEntities.length = 0;
+        this._activeCameras.length = 0;
+        this.shaderData._addRefCount(-1);
     }
 
     /**
@@ -229,17 +242,14 @@ export class Scene {
     /**
      * @internal
      */
-    // _updateShaderData() {
-    //     const lightMgr = this.findFeature(LightFeature);
-    //     const shaderData = this.shaderData;
-    //     const canvas = this.engine.canvas;
-    //     const resolution = this._resolution;
-    //
-    //     lightMgr._updateShaderData(shaderData);
-    //
-    //     resolution.setValue(canvas.width, canvas.height);
-    //     shaderData.setVector2(Scene._resolutionProperty, resolution);
-    // }
+    _updateShaderData(): void {
+        // union scene and camera macro.
+        ShaderMacroCollection.unionCollection(
+            this.engine._macroCollection,
+            this.shaderData._macroCollection,
+            this._globalShaderMacro
+        );
+    }
 
     private _removeEntity(entity: Entity): void {
         const oldRootEntities = this._rootEntities;
