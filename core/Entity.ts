@@ -1,18 +1,20 @@
 import {Matrix, Quaternion, Vector3} from "@oasis-engine/math";
+import {EngineObject} from "./base";
 import {ComponentCloner} from "./clone/ComponentCloner";
 import {Component} from "./Component";
 import {Script} from "./Script";
 import {ComponentsDependencies} from "./ComponentsDependencies";
+import {Engine} from "./Engine";
 import {Layer} from "./Layer";
 import {Scene} from "./Scene";
 import {Transform} from "./Transform";
 import {UpdateFlag} from "./UpdateFlag";
-import {DisorderedArray} from "./DisorderedArray"
+import {DisorderedArray} from "./DisorderedArray";
 
 /**
  * Entity, be used as components container.
  */
-export class Entity {
+export class Entity extends EngineObject {
     /**
      * @internal
      */
@@ -149,8 +151,11 @@ export class Entity {
 
     /**
      * Create a entity.
+     * @param engine - The engine the entity belongs to.
+     * @param name - name
      */
-    constructor(name: string = "") {
+    constructor(engine: Engine, name?: string) {
+        super(engine);
         this.name = name;
         this.transform = this.addComponent(Transform);
         this._inverseWorldMatFlag = this.transform.registerWorldChangeFlag();
@@ -284,7 +289,7 @@ export class Entity {
      * @returns The child entity.
      */
     createChild(name?: string): Entity {
-        const child = new Entity(name);
+        const child = new Entity(this.engine, name);
         child.layer = this.layer;
         child.parent = this;
         return child;
@@ -309,7 +314,7 @@ export class Entity {
      * @returns Cloned entity.
      */
     clone(): Entity {
-        const cloneEntity = new Entity(this.name);
+        const cloneEntity = new Entity(this._engine, this.name);
 
         cloneEntity._isActive = this._isActive;
         cloneEntity.transform.localMatrix = this.transform.localMatrix;
@@ -336,6 +341,9 @@ export class Entity {
      * Destroy self.
      */
     destroy(): void {
+        if (this._destroyed) return;
+
+        super.destroy();
         const abilityArray = this._components;
         for (let i = abilityArray.length - 1; i >= 0; i--) {
             abilityArray[i].destroy();
@@ -401,7 +409,7 @@ export class Entity {
         if (this._activeChangedComponents) {
             throw "Note: can't set the 'main inActive entity' active in hierarchy, if the operation is in main inActive entity or it's children script's onDisable Event.";
         }
-        this._activeChangedComponents = this._scene._componentsManager.getActiveChangedTempList();
+        this._activeChangedComponents = this._engine._componentsManager.getActiveChangedTempList();
         this._setActiveInHierarchy(this._activeChangedComponents);
         this._setActiveComponents(true);
     }
@@ -413,7 +421,7 @@ export class Entity {
         if (this._activeChangedComponents) {
             throw "Note: can't set the 'main active entity' inActive in hierarchy, if the operation is in main active entity or it's children script's onEnable Event.";
         }
-        this._activeChangedComponents = this._scene._componentsManager.getActiveChangedTempList();
+        this._activeChangedComponents = this._engine._componentsManager.getActiveChangedTempList();
         this._setInActiveInHierarchy(this._activeChangedComponents);
         this._setActiveComponents(false);
     }
@@ -435,7 +443,7 @@ export class Entity {
         for (let i = 0, length = activeChangedComponents.length; i < length; ++i) {
             activeChangedComponents[i]._setActive(isActive);
         }
-        this._scene._componentsManager.putActiveChangedTempList(activeChangedComponents);
+        this._engine._componentsManager.putActiveChangedTempList(activeChangedComponents);
         this._activeChangedComponents = null;
     }
 

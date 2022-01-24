@@ -1,11 +1,13 @@
+import { EngineObject } from "./base";
 import { assignmentClone, ignoreClone } from "./clone/CloneManager";
-import {Entity} from "./Entity";
-import {Scene} from "./Scene";
+import { Engine } from "./Engine";
+import { Entity } from "./Entity";
+import { Scene } from "./Scene";
 
 /**
  * The base class of the components.
  */
-export abstract class Component {
+export abstract class Component extends EngineObject {
     /** @internal */
     @ignoreClone
     _entity: Entity;
@@ -59,6 +61,7 @@ export abstract class Component {
     }
 
     constructor(entity: Entity) {
+        super(entity.engine);
         this._entity = entity;
     }
 
