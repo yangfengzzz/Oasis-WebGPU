@@ -7,6 +7,7 @@ import { Shader } from "./Shader";
 import { ShaderMacro } from "./ShaderMacro";
 import { ShaderMacroCollection } from "./ShaderMacroCollection";
 import { ShaderProperty } from "./ShaderProperty";
+import {SamplerTexture2D} from "../texture/SamplerTexture2D";
 
 export type ShaderPropertyValueType =
   | number
@@ -15,8 +16,8 @@ export type ShaderPropertyValueType =
   | Vector4
   | Color
   | Matrix
-  | GPUTexture
-  | GPUTexture[]
+  | SamplerTexture2D
+  | SamplerTexture2D[]
   | Int32Array
   | Float32Array;
 
@@ -389,16 +390,16 @@ export class ShaderData implements IRefObject, IClone {
    * @param propertyName - Shader property name
    * @returns Texture
    */
-  getTexture(propertyName: string): GPUTexture;
+  getTexture(propertyName: string): SamplerTexture2D;
 
   /**
    * Get texture by shader property.
    * @param property - Shader property
    * @returns Texture
    */
-  getTexture(property: ShaderProperty): GPUTexture;
+  getTexture(property: ShaderProperty): SamplerTexture2D;
 
-  getTexture(property: string | ShaderProperty): GPUTexture {
+  getTexture(property: string | ShaderProperty): SamplerTexture2D {
     return this._getData(property);
   }
 
@@ -407,21 +408,21 @@ export class ShaderData implements IRefObject, IClone {
    * @param propertyName - Shader property name
    * @param value - Texture
    */
-  setTexture(propertyName: string, value: GPUTexture): void;
+  setTexture(propertyName: string, value: SamplerTexture2D): void;
 
   /**
    * Set texture by shader property.
    * @param property - Shader property
    * @param value - Texture
    */
-  setTexture(property: ShaderProperty, value: GPUTexture): void;
+  setTexture(property: ShaderProperty, value: SamplerTexture2D): void;
 
-  setTexture(property: string | ShaderProperty, value: GPUTexture): void {
-    // if (this._getRefCount() > 0) {
-    //   const lastValue = this._getData<GPUTexture>(property);
-    //   lastValue && lastValue._addRefCount(-1);
-    //   value && value._addRefCount(1);
-    // }
+  setTexture(property: string | ShaderProperty, value: SamplerTexture2D): void {
+    if (this._getRefCount() > 0) {
+      const lastValue = this._getData<SamplerTexture2D>(property);
+      lastValue && lastValue._addRefCount(-1);
+      value && value._addRefCount(1);
+    }
     this._setData(property, value);
   }
 
@@ -430,16 +431,16 @@ export class ShaderData implements IRefObject, IClone {
    * @param propertyName - Shader property name
    * @returns Texture array
    */
-  getTextureArray(propertyName: string): GPUTexture[];
+  getTextureArray(propertyName: string): SamplerTexture2D[];
 
   /**
    * Get texture array by shader property.
    * @param property - Shader property
    * @returns Texture array
    */
-  getTextureArray(property: ShaderProperty): GPUTexture[];
+  getTextureArray(property: ShaderProperty): SamplerTexture2D[];
 
-  getTextureArray(property: string | ShaderProperty): GPUTexture[] {
+  getTextureArray(property: string | ShaderProperty): SamplerTexture2D[] {
     return this._getData(property);
   }
 
@@ -448,29 +449,29 @@ export class ShaderData implements IRefObject, IClone {
    * @param propertyName - Shader property name
    * @param value - Texture array
    */
-  setTextureArray(propertyName: string, value: GPUTexture[]): void;
+  setTextureArray(propertyName: string, value: SamplerTexture2D[]): void;
 
   /**
    * Set texture array by shader property.
    * @param property - Shader property
    * @param value - Texture array
    */
-  setTextureArray(property: ShaderProperty, value: GPUTexture[]): void;
+  setTextureArray(property: ShaderProperty, value: SamplerTexture2D[]): void;
 
-  setTextureArray(property: string | ShaderProperty, value: GPUTexture[]): void {
-    // if (this._getRefCount() > 0) {
-    //   const lastValue = this._getData<GPUTexture[]>(property);
-    //   if (lastValue) {
-    //     for (let i = 0, n = lastValue.length; i < n; i++) {
-    //       lastValue[i]._addRefCount(-1);
-    //     }
-    //   }
-    //   if (value) {
-    //     for (let i = 0, n = value.length; i < n; i++) {
-    //       value[i]._addRefCount(1);
-    //     }
-    //   }
-    // }
+  setTextureArray(property: string | ShaderProperty, value: SamplerTexture2D[]): void {
+    if (this._getRefCount() > 0) {
+      const lastValue = this._getData<SamplerTexture2D[]>(property);
+      if (lastValue) {
+        for (let i = 0, n = lastValue.length; i < n; i++) {
+          lastValue[i]._addRefCount(-1);
+        }
+      }
+      if (value) {
+        for (let i = 0, n = value.length; i < n; i++) {
+          value[i]._addRefCount(1);
+        }
+      }
+    }
     this._setData(property, value);
   }
 
@@ -551,7 +552,7 @@ export class ShaderData implements IRefObject, IClone {
       if (property != null) {
         if (typeof property === "number") {
           targetProperties[k] = property;
-        } else if (property instanceof GPUTexture) {
+        } else if (property instanceof SamplerTexture2D) {
           targetProperties[k] = property;
         } else if (property instanceof Array || property instanceof Float32Array || property instanceof Int32Array) {
           targetProperties[k] = property.slice();
@@ -614,9 +615,9 @@ export class ShaderData implements IRefObject, IClone {
     for (const k in properties) {
       const property = properties[k];
       // @todo: Separate array to speed performance.
-      // if (property && property instanceof GPUTexture) {
-      //   property._addRefCount(value);
-      // }
+      if (property && property instanceof SamplerTexture2D) {
+        property._addRefCount(value);
+      }
     }
   }
 

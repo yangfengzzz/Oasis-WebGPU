@@ -1,6 +1,7 @@
 import {Color, Vector4} from "@oasis-engine/math";
 import {Shader} from "../shader";
 import {BaseMaterial} from "./BaseMaterial";
+import {SamplerTexture2D} from "../texture/SamplerTexture2D";
 
 /**
  * Unlit Material.
@@ -27,11 +28,11 @@ export class UnlitMaterial extends BaseMaterial {
     /**
      * Base texture.
      */
-    get baseTexture(): GPUTexture {
-        return <GPUTexture>this.shaderData.getTexture(UnlitMaterial._baseTextureProp);
+    get baseTexture(): SamplerTexture2D {
+        return <SamplerTexture2D>this.shaderData.getTexture(UnlitMaterial._baseTextureProp);
     }
 
-    set baseTexture(value: GPUTexture) {
+    set baseTexture(value: SamplerTexture2D) {
         this.shaderData.setTexture(UnlitMaterial._baseTextureProp, value);
         if (value) {
             this.shaderData.enableMacro("O3_BASE_TEXTURE");
