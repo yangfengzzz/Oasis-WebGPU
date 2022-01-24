@@ -116,6 +116,10 @@ export class Engine {
         clearTimeout(this._timeoutId);
     }
 
+    init() {
+        return this._activeApp.prepare(this);
+    }
+
     /**
      * Execution engine loop.
      */

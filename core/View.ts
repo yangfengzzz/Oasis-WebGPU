@@ -5,7 +5,10 @@ export class View {
     private _device:GPUDevice;
     private _canvas:Canvas;
 
-    private _descriptor: GPUTextureDescriptor;
+    private _descriptor: TextureDescriptor;
+
+    colorAttachmentView:GPUTextureView;
+    depthStencilAttachmentView:GPUTextureView;
 
     constructor(format:GPUTextureFormat, device: GPUDevice, canvas:Canvas) {
         this._format = format;
@@ -14,28 +17,18 @@ export class View {
 
         const width = this._canvas.width;
         const height = this._canvas.height;
-        let colorTexture = device.createTexture({
-            size: {
-                width,
-                height,
-                depthOrArrayLayers: 1
-            },
-            sampleCount: 4,
-            format: format,
-            usage: GPUTextureUsage.RENDER_ATTACHMENT
-        });
-        let colorAttachmentView = colorTexture.createView();
+        this._descriptor = new TextureDescriptor();
+        this._descriptor.size = {
+            width,
+            height,
+            depthOrArrayLayers: 1
+        };
+        this._descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
 
-        let depthStencilTexture = device.createTexture({
-            size: {
-                width,
-                height,
-                depthOrArrayLayers: 1
-            },
-            sampleCount: 4,
-            format: 'depth24plus-stencil8',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT
-        });
-        let depthStencilAttachmentView = depthStencilTexture.createView();
+        this._descriptor.format = format;
+        this.colorAttachmentView = device.createTexture(this._descriptor).createView();
+
+        this._descriptor.format = 'depth24plus-stencil8';
+        this.depthStencilAttachmentView = device.createTexture(this._descriptor).createView();
     }
 }
