@@ -5,12 +5,17 @@ import {ColorSpace} from "./enums/ColorSpace";
 import {Entity} from "./Entity";
 import {Application} from "./Application";
 import {View} from "./View";
+import {ComponentsManager} from "./ComponentsManager";
+import {ResourceManager} from "./asset/ResourceManager";
 
 export class Engine {
+    _componentsManager: ComponentsManager = new ComponentsManager();
+
     protected _canvas: WebCanvas;
     protected _activeApp: Application;
 
     private _settings: EngineSettings = {};
+    private _resourceManager: ResourceManager = new ResourceManager();
     private _vSyncCount: number = 1;
     private _targetFrameRate: number = 60;
     private _time: Time = new Time();
@@ -45,6 +50,13 @@ export class Engine {
      */
     get canvas(): WebCanvas {
         return this._canvas;
+    }
+
+    /**
+     * Get the resource manager.
+     */
+    get resourceManager(): ResourceManager {
+        return this._resourceManager;
     }
 
     /**

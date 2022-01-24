@@ -3,6 +3,7 @@ export interface IRefObject {
      * @internal
      */
     _getRefCount(): number;
+
     /**
      * @internal
      */

@@ -1,28 +1,45 @@
-import { ignoreClone } from "../clone/CloneManager";
-import { Engine } from "../Engine";
+import {ignoreClone} from "../clone/CloneManager";
+import {Engine} from "../Engine";
 
 /**
  * EngineObject.
  */
 export abstract class EngineObject {
-  private static _instanceIdCounter: number = 0;
+    private static _instanceIdCounter: number = 0;
 
-  /** Engine unique id. */
-  @ignoreClone
-  readonly instanceId: number = ++EngineObject._instanceIdCounter;
+    /** Engine unique id. */
+    @ignoreClone
+    readonly instanceId: number = ++EngineObject._instanceIdCounter;
 
-  /** Engine to which the object belongs. */
-  @ignoreClone
-  protected _engine: Engine;
+    @ignoreClone
+    protected _engine: Engine;
+    protected _destroyed: boolean = false;
 
-  /**
-   * Get the engine which the object belongs.
-   */
-  get engine(): Engine {
-    return this._engine;
-  }
+    /**
+     * Get the engine which the object belongs.
+     */
+    get engine(): Engine {
+        return this._engine;
+    }
 
-  constructor(engine: Engine) {
-    this._engine = engine;
-  }
+    /**
+     * Whether it has been destroyed.
+     */
+    get destroyed(): boolean {
+        return this._destroyed;
+    }
+
+    constructor(engine: Engine) {
+        this._engine = engine;
+    }
+
+    /**
+     * Destroy self.
+     */
+    destroy(): void {
+        if (this._destroyed) return;
+
+        this._engine.resourceManager?._deleteAsset(this);
+        this._destroyed = true;
+    }
 }
