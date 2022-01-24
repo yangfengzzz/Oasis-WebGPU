@@ -1,12 +1,13 @@
 import {Time} from "./base";
-import {Canvas} from "./Canvas";
+import {WebCanvas} from "./WebCanvas";
 import {EngineSettings} from "./EngineSettings";
 import {ColorSpace} from "./enums/ColorSpace";
 import {Entity} from "./Entity";
 import {Application} from "./Application";
+import {View} from "./View";
 
 export class Engine {
-    protected _canvas: Canvas;
+    protected _canvas: WebCanvas;
     protected _activeApp: Application;
 
     private _settings: EngineSettings = {};
@@ -42,7 +43,7 @@ export class Engine {
     /**
      * The canvas to use for rendering.
      */
-    get canvas(): Canvas {
+    get canvas(): WebCanvas {
         return this._canvas;
     }
 
@@ -88,7 +89,7 @@ export class Engine {
         this._targetFrameInterval = 1000 / value;
     }
 
-    constructor(canvas: Canvas, app:Application, settings?: EngineSettings) {
+    constructor(canvas: WebCanvas, app:Application, settings?: EngineSettings) {
         this._canvas = canvas;
         this._activeApp = app;
 
@@ -123,8 +124,11 @@ export class Engine {
         this._isPaused = false;
         this.time.reset();
 
-        this._activeApp.prepare(this);
         requestAnimationFrame(this._animate);
+    }
+
+    createView(adapter: GPUAdapter, device: GPUDevice):View {
+        return this._canvas.createView(adapter, device);
     }
 
     /**

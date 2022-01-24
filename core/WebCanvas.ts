@@ -1,5 +1,6 @@
 import { Canvas } from "./Canvas";
 import { Vector2 } from "@oasis-engine/math";
+import {View} from "./View";
 
 type OffscreenCanvas = any;
 
@@ -8,6 +9,7 @@ type OffscreenCanvas = any;
  */
 export class WebCanvas implements Canvas {
   _webCanvas: HTMLCanvasElement | OffscreenCanvas;
+  _context: GPUCanvasContext;
 
   private _width: number;
   private _height: number;
@@ -76,6 +78,21 @@ export class WebCanvas implements Canvas {
     }
   }
 
+  createView(adapter: GPUAdapter, device: GPUDevice):View {
+    const width = this.width;
+    const height = this.height;
+
+    const format = this._context.getPreferredFormat(adapter);
+
+    this._context.configure({
+      device: device,
+      format: format,
+      usage: GPUTextureUsage.RENDER_ATTACHMENT
+    });
+
+    return new View(format, device, this);
+  }
+
   /**
    * Create a web canvas.
    * @param webCanvas - Web native canvas
@@ -84,6 +101,7 @@ export class WebCanvas implements Canvas {
     const width = webCanvas.width;
     const height = webCanvas.height;
     this._webCanvas = webCanvas;
+    this._context = webCanvas.getContext('webgpu') as GPUCanvasContext;
     this._width = width;
     this._height = height;
   }
