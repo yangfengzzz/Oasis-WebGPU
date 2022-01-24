@@ -1,9 +1,9 @@
 class TextureDescriptor implements GPUTextureDescriptor {
-    dimension: GPUTextureDimension;
-    format: GPUTextureFormat;
-    label: string;
-    mipLevelCount: GPUIntegerCoordinate;
-    sampleCount: GPUSize32;
+    label?: string;
     size: GPUExtent3DStrict;
+    mipLevelCount?: GPUIntegerCoordinate;
+    sampleCount?: GPUSize32;
+    dimension?: GPUTextureDimension;
+    format: GPUTextureFormat;
     usage: GPUTextureUsageFlags;
 }
