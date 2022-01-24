@@ -29,8 +29,13 @@ export class ForwardSubpass extends Subpass {
     }
 
     draw(commandEncoder: GPURenderPassEncoder): void {
+        commandEncoder.pushDebugGroup("Draw Element");
+        this._drawMeshes(commandEncoder);
+        commandEncoder.popDebugGroup();
+    }
+
+    _drawMeshes(commandEncoder: GPURenderPassEncoder): void {
         let renderPipeline = this._view.device.createRenderPipeline(this._forwardPipelineDescriptor);
         commandEncoder.setPipeline(renderPipeline);
-
     }
 }
