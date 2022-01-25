@@ -1,4 +1,9 @@
 export class PipelineLayoutDescriptor implements GPUPipelineLayoutDescriptor {
-    bindGroupLayouts: Iterable<GPUBindGroupLayout>;
-    label: string;
+    label?: string;
+    bindGroupLayouts: BindGroupLayout[];
+}
+
+export class BindGroupLayout implements GPUBindGroupLayout {
+    readonly __brand: "GPUBindGroupLayout";
+    label: string | null;
 }
