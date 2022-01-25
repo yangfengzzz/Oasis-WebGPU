@@ -136,6 +136,8 @@ export class Engine {
     constructor(canvas: WebCanvas, settings?: EngineSettings) {
         this._canvas = canvas;
 
+        this._sceneManager.activeScene = new Scene(this, "DefaultScene");
+
         const colorSpace = settings?.colorSpace || ColorSpace.Linear;
         // colorSpace === ColorSpace.Gamma && this._macroCollection.enable(Engine._gammaMacro);
         this._settings.colorSpace = colorSpace;
@@ -173,7 +175,9 @@ export class Engine {
         this._renderPassColorAttachment.loadValue = {r: 0.4, g: 0.4, b: 0.4, a: 1.0};
         this._renderPassColorAttachment.view = this._renderContext.currentDrawableTexture();
         this._renderPassDepthStencilAttachment.depthLoadValue = 'load';
+        this._renderPassDepthStencilAttachment.depthStoreOp = 'store';
         this._renderPassDepthStencilAttachment.stencilLoadValue = 'load';
+        this._renderPassDepthStencilAttachment.stencilStoreOp = 'store';
         this._renderPassDepthStencilAttachment.view = this._renderContext.depthStencilTexture();
         this._renderPass = new RenderPass(this._renderPassDescriptor);
         this._renderPass.addSubpass(new ForwardSubpass(this._renderContext));
@@ -250,6 +254,7 @@ export class Engine {
                 if (camera.enabled && cameraEntity.isActiveInHierarchy) {
                     componentsManager.callCameraOnBeginRender(camera);
 
+                    this._renderPassColorAttachment.view = this._renderContext.currentDrawableTexture();
                     const commandEncoder = this._device.createCommandEncoder();
                     this._renderPass.draw(scene, camera, commandEncoder);
                     this._device.queue.submit([commandEncoder.finish()]);

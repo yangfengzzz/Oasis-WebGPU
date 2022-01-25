@@ -10,8 +10,8 @@ import {PrimitiveMesh} from "../../mesh/PrimitiveMesh";
 import {ShaderProgram} from "../../shader/ShaderProgram";
 import vxCode from "../../../shader/vertex.wgsl";
 import fxCode from "../../../shader/fragment.wgsl";
-import {Buffer} from "../../../webgpu/graphic/Buffer";
-import {SubMesh} from "../../../webgpu/graphic/SubMesh";
+import {Buffer} from "../../graphic/Buffer";
+import {SubMesh} from "../../graphic/SubMesh";
 import {
     BindGroupLayoutDescriptor,
     BindGroupLayoutEntry,
@@ -51,7 +51,7 @@ export class ForwardSubpass extends Subpass {
     private _bindGroupDescriptor = new BindGroupDescriptor();
     private _uniformBindGroup: GPUBindGroup;
 
-    private _pipelineLayoutDescriptor: PipelineLayoutDescriptor;
+    private _pipelineLayoutDescriptor = new PipelineLayoutDescriptor();
     private _pipelineLayout: GPUPipelineLayout;
     private _renderPipeline: GPURenderPipeline;
 
@@ -80,17 +80,11 @@ export class ForwardSubpass extends Subpass {
         uniform2.buffer.type = 'uniform';
         this._bindGroupLayoutDescriptor.entries[1] = uniform2;
         this._uniformGroupLayout = this._renderContext.device.createBindGroupLayout(this._bindGroupLayoutDescriptor);
+
+        this._shaderProgram = new ShaderProgram(this._renderContext.device, vxCode, fxCode);
     }
 
     prepare(): void {
-        this._pipelineLayoutDescriptor = new PipelineLayoutDescriptor();
-        this._forwardPipelineDescriptor.layout = this._renderContext.device.createPipelineLayout(this._pipelineLayoutDescriptor);
-        this._primitive.topology = 'triangle-list';
-        this._depthStencilState.format = 'depth24plus-stencil8';
-        this._depthStencilState.depthWriteEnabled = true;
-        this._depthStencilState.depthCompare = 'less';
-
-        this._shaderProgram = new ShaderProgram(this._renderContext.device, vxCode, fxCode);
     }
 
     draw(scene: Scene, camera: Camera, commandEncoder: GPURenderPassEncoder): void {
@@ -100,9 +94,6 @@ export class ForwardSubpass extends Subpass {
     }
 
     _drawMeshes(commandEncoder: GPURenderPassEncoder): void {
-        let renderPipeline = this._renderContext.device.createRenderPipeline(this._forwardPipelineDescriptor);
-        commandEncoder.setPipeline(renderPipeline);
-
         animate();
         triangleMVMatrix.identity().translate(new Vector3(-1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(0, 1, 0), rTri));
         squareMVMatrix.identity().translate(new Vector3(1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(1, 0, 0), rSquare));
@@ -136,7 +127,7 @@ export class ForwardSubpass extends Subpass {
         uniform1.resource = uniformBuffer1;
         this._bindGroupDescriptor.entries[0] = uniform1;
         const uniform2 = new BindGroupEntry();
-        uniform2.binding = 0;
+        uniform2.binding = 1;
         const uniformBuffer2 = new BufferBinding();
         uniformBuffer2.buffer = mvBuffer._nativeBuffer;
         uniform2.resource = uniformBuffer2;
@@ -196,5 +187,6 @@ export class ForwardSubpass extends Subpass {
         vertexBufferLayout.arrayStride = primitive._vertexBufferBindings[0].stride;
         vertexBufferLayout.attributes = attrs;
         vertexBufferLayout.stepMode = 'vertex';
+        this._vertex.buffers[0] = vertexBufferLayout;
     }
 }
