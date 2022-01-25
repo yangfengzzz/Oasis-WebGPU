@@ -50,6 +50,14 @@ export class Engine {
     private _renderPassDepthStencilAttachment = new RenderPassDepthStencilAttachment();
     private _renderPass: RenderPass;
 
+    get device(): GPUDevice {
+        return this._device;
+    }
+
+    get renderContext(): RenderContext {
+        return this._renderContext;
+    }
+
     private _animate = () => {
         if (this._vSyncCount) {
             this._requestId = requestAnimationFrame(this._animate);
@@ -180,7 +188,7 @@ export class Engine {
         this._renderPassDepthStencilAttachment.stencilStoreOp = 'store';
         this._renderPassDepthStencilAttachment.view = this._renderContext.depthStencilTexture();
         this._renderPass = new RenderPass(this._renderPassDescriptor);
-        this._renderPass.addSubpass(new ForwardSubpass(this._renderContext));
+        this._renderPass.addSubpass(new ForwardSubpass(this));
     }
 
     /**

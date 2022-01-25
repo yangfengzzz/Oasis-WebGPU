@@ -21,6 +21,7 @@ import {BindGroupDescriptor, BindGroupEntry, BufferBinding} from "../../webgpu/B
 import {ColorTargetState} from "../../webgpu/state/FragmentState";
 import {VertexAttribute, VertexBufferLayout} from "../../webgpu/state/VertexState";
 import {ModelMesh} from "../../mesh/ModelMesh";
+import {Engine} from "../../Engine";
 
 const triangleMVMatrix = new Matrix;
 const squareMVMatrix = new Matrix();
@@ -57,8 +58,8 @@ export class ForwardSubpass extends Subpass {
 
     private _shaderProgram: ShaderProgram;
 
-    constructor(renderContext: RenderContext) {
-        super(renderContext);
+    constructor(engine: Engine) {
+        super(engine);
         this._forwardPipelineDescriptor.depthStencil = this._depthStencilState;
         this._forwardPipelineDescriptor.fragment = this._fragment;
         this._forwardPipelineDescriptor.primitive = this._primitive;
@@ -79,9 +80,9 @@ export class ForwardSubpass extends Subpass {
         uniform2.buffer = new BufferBindingLayout();
         uniform2.buffer.type = 'uniform';
         this._bindGroupLayoutDescriptor.entries[1] = uniform2;
-        this._uniformGroupLayout = this._renderContext.device.createBindGroupLayout(this._bindGroupLayoutDescriptor);
+        this._uniformGroupLayout = this._engine.device.createBindGroupLayout(this._bindGroupLayoutDescriptor);
 
-        this._shaderProgram = new ShaderProgram(this._renderContext.device, vxCode, fxCode);
+        this._shaderProgram = new ShaderProgram(this._engine.device, vxCode, fxCode);
     }
 
     prepare(): void {
@@ -99,7 +100,7 @@ export class ForwardSubpass extends Subpass {
         squareMVMatrix.identity().translate(new Vector3(1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(1, 0, 0), rSquare));
 
         this._createUniformBuffer(pMatrix.elements, triangleMVMatrix.elements, commandEncoder);
-        const box = PrimitiveMesh.createCuboid(this._renderContext.device, 1);
+        const box = PrimitiveMesh.createCuboid(this._engine, 1);
         this._drawElement(commandEncoder, box, box.subMesh);
     }
 
@@ -113,9 +114,9 @@ export class ForwardSubpass extends Subpass {
     }
 
     private _createUniformBuffer(pArray: Float32Array, mvArray: Float32Array, commandEncoder: GPURenderPassEncoder) {
-        let pBuffer = new Buffer(this._renderContext.device, pArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
+        let pBuffer = new Buffer(this._engine, pArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
         pBuffer.setData(pArray);
-        let mvBuffer = new Buffer(this._renderContext.device, mvArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
+        let mvBuffer = new Buffer(this._engine, mvArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
         mvBuffer.setData(mvArray);
 
         this._bindGroupDescriptor.layout = this._uniformGroupLayout;
@@ -133,13 +134,13 @@ export class ForwardSubpass extends Subpass {
         uniform2.resource = uniformBuffer2;
         this._bindGroupDescriptor.entries[1] = uniform2;
 
-        this._uniformBindGroup = this._renderContext.device.createBindGroup(this._bindGroupDescriptor);
+        this._uniformBindGroup = this._engine.device.createBindGroup(this._bindGroupDescriptor);
 
         commandEncoder.setBindGroup(0, this._uniformBindGroup);
     }
 
     private _createRenderPipeline(primitive: ModelMesh) {
-        const device = this._renderContext.device;
+        const device = this._engine.device;
 
         this._pipelineLayoutDescriptor.bindGroupLayouts.length = 1;
         this._pipelineLayoutDescriptor.bindGroupLayouts[0] = this._uniformGroupLayout;
@@ -154,14 +155,14 @@ export class ForwardSubpass extends Subpass {
         this._fragment.entryPoint = 'main';
         this._fragment.targets.length = 1;
         const colorTargetState = new ColorTargetState();
-        colorTargetState.format = this._renderContext.drawableTextureFormat();
+        colorTargetState.format = this._engine.renderContext.drawableTextureFormat();
         this._fragment.targets[0] = colorTargetState;
 
         this._primitive.topology = 'triangle-list';
 
         this._depthStencilState.depthWriteEnabled = true;
         this._depthStencilState.depthCompare = 'less';
-        this._depthStencilState.format = this._renderContext.depthStencilTextureFormat();
+        this._depthStencilState.format = this._engine.renderContext.depthStencilTextureFormat();
 
         this._multisample.count = 1;
 

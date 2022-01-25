@@ -52,11 +52,11 @@ export class ModelMesh extends Mesh {
 
     /**
      * Create a model mesh.
-     * @param device - Device to which the mesh belongs
+     * @param engine - Engine to which the mesh belongs
      * @param name - Mesh name
      */
-    constructor(device: GPUDevice, name?: string) {
-        super(device);
+    constructor(engine: Engine, name?: string) {
+        super(engine);
         this.name = name;
     }
 
@@ -338,7 +338,7 @@ export class ModelMesh extends Mesh {
             this._vertexChangeFlag = ValueChanged.All;
             this._updateVertices(vertices);
 
-            const newVertexBuffer = new Buffer(this._device, vertices, GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST);
+            const newVertexBuffer = new Buffer(this.engine, vertices, GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST);
             newVertexBuffer.setData(vertices);
             this._setVertexBufferBinding(0, new VertexBufferBinding(newVertexBuffer, elementCount * 4));
         }
@@ -347,7 +347,7 @@ export class ModelMesh extends Mesh {
         if (_indices) {
             if (!indexBuffer || _indices.byteLength != indexBuffer.byteLength) {
                 // indexBuffer?.destroy();
-                let newIndexBuffer = new Buffer(this._device, <Uint32Array>this._indices, GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST);
+                let newIndexBuffer = new Buffer(this.engine, <Uint32Array>this._indices, GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST);
                 newIndexBuffer.setData(<Uint32Array>this._indices);
                 this._setIndexBufferBinding(new IndexBufferBinding(newIndexBuffer, this._indicesFormat));
             }
@@ -364,7 +364,7 @@ export class ModelMesh extends Mesh {
      * @internal
      */
     _onDestroy(): void {
-        // super.destroy();
+        super.destroy();
         // this.clearBlendShapes();
     }
 

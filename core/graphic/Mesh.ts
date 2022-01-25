@@ -1,4 +1,6 @@
 import {BoundingBox} from "@oasis-engine/math";
+import {RefObject} from "../asset/RefObject";
+import {Engine} from "../Engine";
 import {MeshTopology} from "./enums/MeshTopology";
 import {IndexBufferBinding} from "./IndexBufferBinding";
 import {SubMesh} from "./SubMesh";
@@ -10,7 +12,7 @@ import {UpdateFlagManager} from "../UpdateFlagManager";
 /**
  * Mesh.
  */
-export abstract class Mesh {
+export abstract class Mesh extends RefObject {
     /** Name. */
     name: string;
     /** The bounding volume of the mesh. */
@@ -30,8 +32,6 @@ export abstract class Mesh {
     private _subMeshes: SubMesh[] = [];
     private _updateFlagManager: UpdateFlagManager = new UpdateFlagManager();
 
-    protected _device: GPUDevice;
-
     /**
      * First sub-mesh. Rendered using the first material.
      */
@@ -48,12 +48,12 @@ export abstract class Mesh {
 
     /**
      * Create mesh.
-     * @param device - Device
+     * @param engine - Engine
      * @param name - Mesh name
      */
-    protected constructor(device: GPUDevice, name?: string) {
+    protected constructor(engine: Engine, name?: string) {
+        super(engine);
         this.name = name;
-        this._device = device;
     }
 
     /**
@@ -115,11 +115,11 @@ export abstract class Mesh {
      * @override
      */
     _addRefCount(value: number): void {
-        // super._addRefCount(value);
-        // const vertexBufferBindings = this._vertexBufferBindings;
-        // for (let i = 0, n = vertexBufferBindings.length; i < n; i++) {
-        //     vertexBufferBindings[i]._buffer._addRefCount(value);
-        // }
+        super._addRefCount(value);
+        const vertexBufferBindings = this._vertexBufferBindings;
+        for (let i = 0, n = vertexBufferBindings.length; i < n; i++) {
+            vertexBufferBindings[i]._buffer._addRefCount(value);
+        }
     }
 
     /**
@@ -141,11 +141,11 @@ export abstract class Mesh {
     }
 
     protected _setVertexBufferBinding(index: number, binding: VertexBufferBinding): void {
-        // if (this._getRefCount() > 0) {
-        //     const lastBinding = this._vertexBufferBindings[index];
-        //     lastBinding && lastBinding._buffer._addRefCount(-1);
-        //     binding._buffer._addRefCount(1);
-        // }
+        if (this._getRefCount() > 0) {
+            const lastBinding = this._vertexBufferBindings[index];
+            lastBinding && lastBinding._buffer._addRefCount(-1);
+            binding._buffer._addRefCount(1);
+        }
         this._vertexBufferBindings[index] = binding;
     }
 

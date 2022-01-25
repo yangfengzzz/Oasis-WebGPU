@@ -1,9 +1,11 @@
+import {RefObject} from "../asset/RefObject";
+import {Engine} from "../Engine";
 import {TypedArray} from "../base/Constant";
 
 /**
  * Buffer.
  */
-export class Buffer {
+export class Buffer extends RefObject {
     _nativeBuffer: GPUBuffer;
 
     private _byteLength: number;
@@ -21,29 +23,30 @@ export class Buffer {
      * @param byteLength - Byte length
      * @param bufferUsage - Buffer usage
      */
-    constructor(engine: GPUDevice, byteLength: number, bufferUsage: GPUBufferUsageFlags);
+    constructor(engine: Engine, byteLength: number, bufferUsage: GPUBufferUsageFlags);
 
     /**
      * Create Buffer.
-     * @param device - Device
+     * @param engine - Engine
      * @param data - Byte
      * @param bufferUsage - Buffer usage
      */
-    constructor(device: GPUDevice, data: ArrayBuffer | ArrayBufferView, bufferUsage: GPUBufferUsageFlags);
+    constructor(engine: Engine, data: ArrayBuffer | ArrayBufferView, bufferUsage: GPUBufferUsageFlags);
 
-    constructor(device: GPUDevice,
+    constructor(engine: Engine,
                 byteLengthOrData: number | ArrayBuffer | ArrayBufferView,
                 bufferUsage: GPUBufferUsageFlags) {
+        super(engine);
         if (typeof byteLengthOrData === "number") {
             this._byteLength = byteLengthOrData;
-            this._nativeBuffer = device.createBuffer({
+            this._nativeBuffer = engine.device.createBuffer({
                 size: this._byteLength,
                 usage: bufferUsage,
                 mappedAtCreation: true
             });
         } else {
             this._byteLength = byteLengthOrData.byteLength;
-            this._nativeBuffer = device.createBuffer({
+            this._nativeBuffer = engine.device.createBuffer({
                 size: this._byteLength,
                 usage: bufferUsage,
                 mappedAtCreation: true

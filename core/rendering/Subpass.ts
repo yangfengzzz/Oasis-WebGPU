@@ -1,14 +1,14 @@
-import {RenderContext} from "./RenderContext";
 import {Scene} from "../Scene";
 import {Camera} from "../Camera";
 import {RenderPass} from "./RenderPass";
+import {EngineObject} from "../base";
+import {Engine} from "../Engine";
 
-export abstract class Subpass {
+export abstract class Subpass extends EngineObject {
     protected _pass: RenderPass;
-    protected _renderContext: RenderContext;
 
-    protected constructor(renderContext: RenderContext) {
-        this._renderContext = renderContext;
+    protected constructor(engine: Engine) {
+        super(engine);
     }
 
     /**
