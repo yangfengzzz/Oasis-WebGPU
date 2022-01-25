@@ -21,14 +21,12 @@ export class RenderState {
     /**
      * @internal
      */
-    _apply(fragment: FragmentState,
-           depthStencil: DepthStencilState,
-           pipelineDescriptor: RenderPipelineDescriptor,
+    _apply(pipelineDescriptor: RenderPipelineDescriptor,
            encoder: GPURenderPassEncoder,
            frontFaceInvert: boolean): void {
-        this.blendState.platformApply(fragment, pipelineDescriptor.multisample, encoder);
-        this.depthState.platformApply(depthStencil);
-        this.stencilState.platformApply(depthStencil, encoder);
-        this.rasterState.platformApply(pipelineDescriptor.primitive, depthStencil, frontFaceInvert);
+        this.blendState.platformApply(pipelineDescriptor, encoder);
+        this.depthState.platformApply(pipelineDescriptor);
+        this.stencilState.platformApply(pipelineDescriptor, encoder);
+        this.rasterState.platformApply(pipelineDescriptor, frontFaceInvert);
     }
 }

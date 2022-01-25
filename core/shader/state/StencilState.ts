@@ -1,4 +1,5 @@
 import {DepthStencilState} from "../../webgpu/state";
+import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
 
 /**
  * Stencil state.
@@ -29,7 +30,7 @@ export class StencilState {
     /** specifying the function to use for back face when the stencil test passes, but the depth test fails. */
     zFailOperationBack: GPUStencilOperation = 'keep';
 
-    platformApply(depthStencil: DepthStencilState,
+    platformApply(pipelineDescriptor: RenderPipelineDescriptor,
                   encoder: GPURenderPassEncoder): void {
         const {
             enabled,
@@ -45,6 +46,7 @@ export class StencilState {
             passOperationBack,
             writeMask
         } = this;
+        const depthStencil = pipelineDescriptor.depthStencil;
 
         if (enabled) {
             encoder.setStencilReference(referenceValue);

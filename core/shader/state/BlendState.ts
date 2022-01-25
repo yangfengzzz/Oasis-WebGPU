@@ -3,9 +3,8 @@ import {Color} from "@oasis-engine/math";
 import {
     ColorTargetState as WGPUColorTargetState,
     BlendState as WGPUBlendState,
-    FragmentState as WGPUFragmentState
 } from "../../webgpu/state/FragmentState";
-import {MultisampleState as WGPUMultisampleState} from "../../webgpu/state";
+import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
 
 /**
  * Blend state.
@@ -25,8 +24,7 @@ export class BlendState {
         this._colorTargetState.blend = this._blendState;
     }
 
-    platformApply(fragment: WGPUFragmentState,
-                  multisample: WGPUMultisampleState,
+    platformApply(pipelineDescriptor: RenderPipelineDescriptor,
                   encoder: GPURenderPassEncoder): void {
         const {
             enabled,
@@ -38,6 +36,7 @@ export class BlendState {
             destinationAlphaBlendFactor,
             colorWriteMask
         } = this.targetBlendState;
+        const {fragment, multisample} = pipelineDescriptor;
 
         if (enabled) {
             fragment.targets.length = 1;

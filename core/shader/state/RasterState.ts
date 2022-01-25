@@ -1,4 +1,4 @@
-import {DepthStencilState, PrimitiveState} from "../../webgpu/state";
+import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
 
 export class RasterState {
     /** Specifies whether or not front- and/or back-facing polygons can be culled. */
@@ -8,10 +8,10 @@ export class RasterState {
     /** The scale factor for the variable depth offset for each polygon. */
     slopeScaledDepthBias: number = 0;
 
-    platformApply(primitive: PrimitiveState,
-                  depthStencil: DepthStencilState,
+    platformApply(pipelineDescriptor: RenderPipelineDescriptor,
                   frontFaceInvert: boolean): void {
         const {cullMode, depthBias, slopeScaledDepthBias} = this;
+        const {primitive, depthStencil} = pipelineDescriptor;
 
         primitive.cullMode = cullMode;
         if (frontFaceInvert) {
