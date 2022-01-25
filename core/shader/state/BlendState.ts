@@ -1,14 +1,16 @@
 import {RenderTargetBlendState} from "./RenderTargetBlendState";
 import {Color} from "@oasis-engine/math";
-import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
-import {ColorTargetState} from "../../webgpu/state/FragmentState";
+import {
+    ColorTargetState as WGPUColorTargetState,
+    BlendState as WGPUBlendState,
+    FragmentState as WGPUFragmentState
+} from "../../webgpu/state/FragmentState";
+import {MultisampleState as WGPUMultisampleState} from "../../webgpu/state";
 
 /**
  * Blend state.
  */
 export class BlendState {
-    private static _colorTargetState: ColorTargetState = new ColorTargetState();
-
     /** The blend state of the render target. */
     readonly targetBlendState: RenderTargetBlendState = new RenderTargetBlendState();
     /** Constant blend color. */
@@ -16,7 +18,15 @@ export class BlendState {
     /** Whether to use (Alpha-to-Coverage) technology. */
     alphaToCoverage: boolean = false;
 
-    platformApply(pipelineDescriptor: RenderPipelineDescriptor,
+    private _colorTargetState: WGPUColorTargetState = new WGPUColorTargetState();
+    private _blendState: WGPUBlendState = new WGPUBlendState();
+
+    constructor() {
+        this._colorTargetState.blend = this._blendState;
+    }
+
+    platformApply(fragment: WGPUFragmentState,
+                  multisample: WGPUMultisampleState,
                   encoder: GPURenderPassEncoder): void {
         const {
             enabled,
@@ -30,30 +40,31 @@ export class BlendState {
         } = this.targetBlendState;
 
         if (enabled) {
-            pipelineDescriptor.fragment.targets[0] = BlendState._colorTargetState;
+            fragment.targets.length = 1;
+            fragment.targets[0] = this._colorTargetState;
         } else {
-            pipelineDescriptor.fragment.targets[0] = null;
+            fragment.targets.length = 0;
         }
 
         if (enabled) {
             // apply blend factor.
-            BlendState._colorTargetState.blend.color.srcFactor = sourceColorBlendFactor;
-            BlendState._colorTargetState.blend.color.dstFactor = destinationColorBlendFactor;
-            BlendState._colorTargetState.blend.alpha.srcFactor = sourceAlphaBlendFactor;
-            BlendState._colorTargetState.blend.alpha.dstFactor = destinationAlphaBlendFactor;
+            this._blendState.color.srcFactor = sourceColorBlendFactor;
+            this._blendState.color.dstFactor = destinationColorBlendFactor;
+            this._blendState.alpha.srcFactor = sourceAlphaBlendFactor;
+            this._blendState.alpha.dstFactor = destinationAlphaBlendFactor;
 
             // apply blend operation.
-            BlendState._colorTargetState.blend.color.operation = colorBlendOperation;
-            BlendState._colorTargetState.blend.alpha.operation = alphaBlendOperation;
+            this._blendState.color.operation = colorBlendOperation;
+            this._blendState.alpha.operation = alphaBlendOperation;
 
             // apply blend color.
             encoder.setBlendConstant([this.blendColor.r, this.blendColor.g, this.blendColor.b, this.blendColor.a]);
 
             // apply color mask.
-            BlendState._colorTargetState.writeMask = colorWriteMask;
+            this._colorTargetState.writeMask = colorWriteMask;
         }
 
         // apply alpha to coverage.
-        pipelineDescriptor.multisample.alphaToCoverageEnabled = this.alphaToCoverage;
+        multisample.alphaToCoverageEnabled = this.alphaToCoverage;
     }
 }

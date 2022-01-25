@@ -1,4 +1,4 @@
-import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
+import {DepthStencilState} from "../../webgpu/state";
 
 /**
  * Stencil state.
@@ -29,7 +29,7 @@ export class StencilState {
     /** specifying the function to use for back face when the stencil test passes, but the depth test fails. */
     zFailOperationBack: GPUStencilOperation = 'keep';
 
-    platformApply(pipelineDescriptor: RenderPipelineDescriptor,
+    platformApply(depthStencil: DepthStencilState,
                   encoder: GPURenderPassEncoder): void {
         const {
             enabled,
@@ -48,21 +48,21 @@ export class StencilState {
 
         if (enabled) {
             encoder.setStencilReference(referenceValue);
-            pipelineDescriptor.depthStencil.stencilReadMask = mask;
-            pipelineDescriptor.depthStencil.stencilFront.compare = compareFunctionFront;
-            pipelineDescriptor.depthStencil.stencilBack.compare = compareFunctionBack;
+            depthStencil.stencilReadMask = mask;
+            depthStencil.stencilFront.compare = compareFunctionFront;
+            depthStencil.stencilBack.compare = compareFunctionBack;
         }
 
         // apply stencil operation.
-        pipelineDescriptor.depthStencil.stencilFront.failOp = failOperationFront;
-        pipelineDescriptor.depthStencil.stencilFront.depthFailOp = zFailOperationFront;
-        pipelineDescriptor.depthStencil.stencilFront.passOp = passOperationFront;
+        depthStencil.stencilFront.failOp = failOperationFront;
+        depthStencil.stencilFront.depthFailOp = zFailOperationFront;
+        depthStencil.stencilFront.passOp = passOperationFront;
 
-        pipelineDescriptor.depthStencil.stencilBack.failOp = failOperationBack;
-        pipelineDescriptor.depthStencil.stencilBack.depthFailOp = zFailOperationBack;
-        pipelineDescriptor.depthStencil.stencilBack.passOp = passOperationBack;
+        depthStencil.stencilBack.failOp = failOperationBack;
+        depthStencil.stencilBack.depthFailOp = zFailOperationBack;
+        depthStencil.stencilBack.passOp = passOperationBack;
 
         // apply write mask.
-        pipelineDescriptor.depthStencil.stencilWriteMask = writeMask;
+        depthStencil.stencilWriteMask = writeMask;
     }
 }

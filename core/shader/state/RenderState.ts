@@ -3,6 +3,7 @@ import {DepthState} from "./DepthState";
 import {RasterState} from "./RasterState";
 import {StencilState} from "./StencilState";
 import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
+import {DepthStencilState, FragmentState} from "../../webgpu/state";
 
 /**
  * Render state.
@@ -20,12 +21,14 @@ export class RenderState {
     /**
      * @internal
      */
-    _apply(pipelineDescriptor: RenderPipelineDescriptor,
+    _apply(fragment: FragmentState,
+           depthStencil: DepthStencilState,
+           pipelineDescriptor: RenderPipelineDescriptor,
            encoder: GPURenderPassEncoder,
            frontFaceInvert: boolean): void {
-        this.blendState.platformApply(pipelineDescriptor, encoder);
-        this.depthState.platformApply(pipelineDescriptor, encoder);
-        this.stencilState.platformApply(pipelineDescriptor, encoder);
-        this.rasterState.platformApply(pipelineDescriptor, encoder, frontFaceInvert);
+        this.blendState.platformApply(fragment, pipelineDescriptor.multisample, encoder);
+        this.depthState.platformApply(depthStencil);
+        this.stencilState.platformApply(depthStencil, encoder);
+        this.rasterState.platformApply(pipelineDescriptor.primitive, depthStencil, frontFaceInvert);
     }
 }

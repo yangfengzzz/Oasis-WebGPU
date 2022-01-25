@@ -1,4 +1,4 @@
-import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
+import {DepthStencilState} from "../../webgpu/state";
 
 /**
  * Depth state.
@@ -11,15 +11,14 @@ export class DepthState {
     /** Depth comparison function. */
     compareFunction: GPUCompareFunction = 'less';
 
-    platformApply(pipelineDescriptor: RenderPipelineDescriptor,
-                  encoder: GPURenderPassEncoder): void {
+    platformApply(depthStencil: DepthStencilState): void {
         const { enabled, compareFunction, writeEnabled } = this;
 
         if (enabled) {
             // apply compare func.
-            pipelineDescriptor.depthStencil.depthCompare = compareFunction;
+            depthStencil.depthCompare = compareFunction;
             // apply write enabled.
-            pipelineDescriptor.depthStencil.depthWriteEnabled = writeEnabled;
+            depthStencil.depthWriteEnabled = writeEnabled;
         }
     }
 }
