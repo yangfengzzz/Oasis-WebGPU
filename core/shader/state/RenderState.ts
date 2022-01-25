@@ -3,7 +3,6 @@ import {DepthState} from "./DepthState";
 import {RasterState} from "./RasterState";
 import {StencilState} from "./StencilState";
 import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
-import {DepthStencilState, FragmentState} from "../../webgpu/state";
 
 /**
  * Render state.

@@ -1,5 +1,6 @@
 import {RefObject} from "../asset/RefObject";
 import {SamplerDescriptor} from "../webgpu/SamplerDescriptor";
+import {TextureDescriptor} from "../webgpu/TextureDescriptor";
 
 /**
  * The base class of texture, contains some common functions of texture-related classes.

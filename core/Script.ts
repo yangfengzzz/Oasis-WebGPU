@@ -1,6 +1,6 @@
+import {Camera} from "./Camera";
 import {ignoreClone} from "./clone/CloneManager";
 import {Component} from "./Component";
-import {Camera} from "./Camera";
 
 /**
  * Script class, used for logic writing.
@@ -63,22 +63,24 @@ export class Script extends Component {
      * Called before camera rendering, called per camera.
      * @param camera - Current camera.
      */
-    onBeginRender(camera: Camera): void {}
+    onBeginRender(camera: Camera): void {
+    }
 
     /**
      * Called after camera rendering, called per camera.
      * @param camera - Current camera.
      */
-    onEndRender(camera: Camera): void {}
+    onEndRender(camera: Camera): void {
+    }
 
     /**
-     * Called when the pointer is down while over the Collider.
+     * Called when the pointer is down while over the ColliderShape.
      */
     onPointerDown(): void {
     }
 
     /**
-     * Called when the pointer is up while over the Collider.
+     * Called when the pointer is up while over the ColliderShape.
      */
     onPointerUp(): void {
     }
@@ -90,19 +92,19 @@ export class Script extends Component {
     }
 
     /**
-     * Called when the pointer is enters the Collider.
+     * Called when the pointer is enters the ColliderShape.
      */
     onPointerEnter(): void {
     }
 
     /**
-     * Called when the pointer is no longer over the Collider.
+     * Called when the pointer is no longer over the ColliderShape.
      */
     onPointerExit(): void {
     }
 
     /**
-     * Called when the pointer is down while over the Collider and is still holding down.
+     * Called when the pointer is down while over the ColliderShape and is still holding down.
      * @remarks onPointerDrag is called every frame while the pointer is down.
      */
     onPointerDrag(): void {
@@ -135,7 +137,7 @@ export class Script extends Component {
      * @override
      */
     _onEnable(): void {
-        const componentsManager = this.scene._componentsManager;
+        const componentsManager = this.engine._componentsManager;
         const prototype = Script.prototype;
         if (!this._started) {
             componentsManager.addOnStartScript(this);
@@ -156,7 +158,7 @@ export class Script extends Component {
      * @override
      */
     _onDisable(): void {
-        const componentsManager = this.scene._componentsManager;
+        const componentsManager = this.engine._componentsManager;
         // Use "xxIndex" is more safe.
         // When call onDisable it maybe it still not in script queue,for example write "entity.isActive = false" in onWake().
         if (this._onStartIndex !== -1) {
@@ -180,6 +182,6 @@ export class Script extends Component {
      * @override
      */
     _onDestroy(): void {
-        this.scene._componentsManager.addDestroyComponent(this);
+        this.engine._componentsManager.addDestroyComponent(this);
     }
 }
