@@ -88,20 +88,25 @@ export class ForwardSubpass extends Subpass {
     prepare(): void {
     }
 
-    draw(scene: Scene, camera: Camera, commandEncoder: GPURenderPassEncoder): void {
-        commandEncoder.pushDebugGroup("Draw Element");
-        this._drawMeshes(commandEncoder);
-        commandEncoder.popDebugGroup();
+    draw(scene: Scene, camera: Camera, renderPassEncoder: GPURenderPassEncoder): void {
+        renderPassEncoder.pushDebugGroup("Draw Element");
+        renderPassEncoder.setViewport(0, 0, this._engine.canvas.width, this._engine.canvas.height, 0, 1);
+        this._drawMeshes(renderPassEncoder);
+        renderPassEncoder.popDebugGroup();
     }
 
-    _drawMeshes(commandEncoder: GPURenderPassEncoder): void {
+    _drawMeshes(renderPassEncoder: GPURenderPassEncoder): void {
         animate();
         triangleMVMatrix.identity().translate(new Vector3(-1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(0, 1, 0), rTri));
         squareMVMatrix.identity().translate(new Vector3(1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(1, 0, 0), rSquare));
 
-        this._createUniformBuffer(pMatrix.elements, triangleMVMatrix.elements, commandEncoder);
+        this._createUniformBuffer(pMatrix.elements, triangleMVMatrix.elements, renderPassEncoder);
         const box = PrimitiveMesh.createCuboid(this._engine, 1);
-        this._drawElement(commandEncoder, box, box.subMesh);
+        this._drawElement(renderPassEncoder, box, box.subMesh);
+
+        this._createUniformBuffer(pMatrix.elements, squareMVMatrix.elements, renderPassEncoder);
+        const sphere = PrimitiveMesh.createSphere(this.engine, 1, 50);
+        this._drawElement(renderPassEncoder, sphere, sphere.subMesh);
     }
 
     private _drawElement(renderPassEncoder: GPURenderPassEncoder, primitive: ModelMesh, subMesh: SubMesh) {
