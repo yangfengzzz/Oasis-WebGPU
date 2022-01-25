@@ -1,14 +1,14 @@
-import {View} from "../View";
+import {RenderContext} from "./RenderContext";
 import {Scene} from "../Scene";
 import {Camera} from "../Camera";
 import {RenderPass} from "./RenderPass";
 
 export abstract class Subpass {
     protected _pass: RenderPass;
-    protected _view: View;
+    protected _renderContext: RenderContext;
 
-    protected constructor(view: View) {
-        this._view = view;
+    protected constructor(renderContext: RenderContext) {
+        this._renderContext = renderContext;
     }
 
     /**

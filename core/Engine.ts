@@ -3,7 +3,7 @@ import {WebCanvas} from "./WebCanvas";
 import {EngineSettings} from "./EngineSettings";
 import {ColorSpace} from "./enums/ColorSpace";
 import {Entity} from "./Entity";
-import {View} from "./View";
+import {RenderContext} from "./rendering/RenderContext";
 import {ComponentsManager} from "./ComponentsManager";
 import {ResourceManager} from "./asset/ResourceManager";
 import {RenderPassDescriptor} from "./webgpu/RenderPassDescriptor";
@@ -40,7 +40,7 @@ export class Engine {
 
     private _adapter: GPUAdapter;
     private _device: GPUDevice;
-    private _view: View;
+    private _renderContext: RenderContext;
     private _renderPassDescriptor: RenderPassDescriptor;
     private _renderPass: RenderPass;
 
@@ -159,21 +159,17 @@ export class Engine {
         });
 
         this._device = await this._adapter.requestDevice();
-        this._view = this.createView(this._adapter, this._device);
+        this._renderContext = this._canvas.createRenderContext(this._adapter, this._device);
 
         this._renderPassDescriptor = new RenderPassDescriptor();
         this._renderPassDescriptor.colorAttachments[0].storeOp = 'store';
         this._renderPassDescriptor.colorAttachments[0].loadValue = {r: 0.4, g: 0.4, b: 0.4, a: 1.0};
-        this._renderPassDescriptor.colorAttachments[0].view = this._view.colorAttachmentView;
+        this._renderPassDescriptor.colorAttachments[0].view = this._renderContext.currentDrawableTexture();
         this._renderPassDescriptor.depthStencilAttachment.depthLoadValue = 'load';
         this._renderPassDescriptor.depthStencilAttachment.stencilLoadValue = 'load';
-        this._renderPassDescriptor.depthStencilAttachment.view = this._view.depthStencilAttachmentView;
+        this._renderPassDescriptor.depthStencilAttachment.view = this._renderContext.depthStencilTexture();
         this._renderPass = new RenderPass(this._renderPassDescriptor);
-        this._renderPass.addSubpass(new ForwardSubpass(this._view));
-    }
-
-    createView(adapter: GPUAdapter, device: GPUDevice): View {
-        return this._canvas.createView(adapter, device);
+        this._renderPass.addSubpass(new ForwardSubpass(this._renderContext));
     }
 
     /**

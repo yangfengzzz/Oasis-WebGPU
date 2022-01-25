@@ -1,5 +1,5 @@
 import {Subpass} from "../Subpass";
-import {View} from "../../View";
+import {RenderContext} from "../RenderContext";
 import {Scene} from "../../Scene";
 import {Camera} from "../../Camera";
 import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
@@ -16,8 +16,8 @@ export class ForwardSubpass extends Subpass {
 
     private _pipelineLayoutDescriptor: PipelineLayoutDescriptor;
 
-    constructor(view: View) {
-        super(view);
+    constructor(renderContext: RenderContext) {
+        super(renderContext);
         this._forwardPipelineDescriptor.depthStencil = this._depthStencilState;
         this._forwardPipelineDescriptor.fragment = this._fragment;
         this._forwardPipelineDescriptor.primitive = this._primitive;
@@ -28,7 +28,7 @@ export class ForwardSubpass extends Subpass {
 
     prepare(): void {
         this._pipelineLayoutDescriptor = new PipelineLayoutDescriptor();
-        this._forwardPipelineDescriptor.layout = this._view.device.createPipelineLayout(this._pipelineLayoutDescriptor);
+        this._forwardPipelineDescriptor.layout = this._renderContext.device.createPipelineLayout(this._pipelineLayoutDescriptor);
         this._primitive.topology = 'triangle-list';
         this._depthStencilState.format = 'depth24plus-stencil8';
         this._depthStencilState.depthWriteEnabled = true;
@@ -42,7 +42,7 @@ export class ForwardSubpass extends Subpass {
     }
 
     _drawMeshes(commandEncoder: GPURenderPassEncoder): void {
-        let renderPipeline = this._view.device.createRenderPipeline(this._forwardPipelineDescriptor);
+        let renderPipeline = this._renderContext.device.createRenderPipeline(this._forwardPipelineDescriptor);
         commandEncoder.setPipeline(renderPipeline);
     }
 }
