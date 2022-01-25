@@ -8,25 +8,25 @@ import {Engine} from "../Engine";
 export class PrimitiveMesh {
     /**
      * Create a sphere mesh.
-     * @param engine - Engine
+     * @param device - GPUDevice
      * @param radius - Sphere radius
      * @param segments - Number of segments
      * @param noLongerAccessible - No longer access the vertices of the mesh after creation
      * @returns Sphere model mesh
      */
     static createSphere(
-        engine: Engine,
+        device: GPUDevice,
         radius: number = 0.5,
         segments: number = 18,
         noLongerAccessible: boolean = true
     ): ModelMesh {
-        const mesh = new ModelMesh(engine);
+        const mesh = new ModelMesh(device);
         segments = Math.max(2, Math.floor(segments));
 
         const count = segments + 1;
         const vertexCount = count * count;
         const rectangleCount = segments * segments;
-        const indices = PrimitiveMesh._generateIndices(engine, vertexCount, rectangleCount * 6);
+        const indices = PrimitiveMesh._generateIndices(device, vertexCount, rectangleCount * 6);
         const thetaRange = Math.PI;
         const alphaRange = thetaRange * 2;
         const countReciprocal = 1.0 / count;
@@ -85,7 +85,7 @@ export class PrimitiveMesh {
 
     /**
      * Create a cuboid mesh.
-     * @param engine - Engine
+     * @param device - Device
      * @param width - Cuboid width
      * @param height - Cuboid height
      * @param depth - Cuboid depth
@@ -93,13 +93,13 @@ export class PrimitiveMesh {
      * @returns Cuboid model mesh
      */
     static createCuboid(
-        engine: Engine,
+        device: GPUDevice,
         width: number = 1,
         height: number = 1,
         depth: number = 1,
         noLongerAccessible: boolean = true
     ): ModelMesh {
-        const mesh = new ModelMesh(engine);
+        const mesh = new ModelMesh(device);
 
         const halfWidth: number = width / 2;
         const halfHeight: number = height / 2;
@@ -214,7 +214,7 @@ export class PrimitiveMesh {
 
     /**
      * Create a plane mesh.
-     * @param engine - Engine
+     * @param device - Device
      * @param width - Plane width
      * @param height - Plane height
      * @param horizontalSegments - Plane horizontal segments
@@ -223,14 +223,14 @@ export class PrimitiveMesh {
      * @returns Plane model mesh
      */
     static createPlane(
-        engine: Engine,
+        device: GPUDevice,
         width: number = 1,
         height: number = 1,
         horizontalSegments: number = 1,
         verticalSegments: number = 1,
         noLongerAccessible: boolean = true
     ): ModelMesh {
-        const mesh = new ModelMesh(engine);
+        const mesh = new ModelMesh(device);
         horizontalSegments = Math.max(1, Math.floor(horizontalSegments));
         verticalSegments = Math.max(1, Math.floor(verticalSegments));
 
@@ -242,7 +242,7 @@ export class PrimitiveMesh {
         const gridHeight = height / verticalSegments;
         const vertexCount = horizontalCount * verticalCount;
         const rectangleCount = verticalSegments * horizontalSegments;
-        const indices = PrimitiveMesh._generateIndices(engine, vertexCount, rectangleCount * 6);
+        const indices = PrimitiveMesh._generateIndices(device, vertexCount, rectangleCount * 6);
         const horizontalCountReciprocal = 1.0 / horizontalCount;
         const horizontalSegmentsReciprocal = 1.0 / horizontalSegments;
         const verticalSegmentsReciprocal = 1.0 / verticalSegments;
@@ -291,7 +291,7 @@ export class PrimitiveMesh {
 
     /**
      * Create a cylinder mesh.
-     * @param engine - Engine
+     * @param device - Device
      * @param radiusTop - The radius of top cap
      * @param radiusBottom - The radius of bottom cap
      * @param height - The height of torso
@@ -301,7 +301,7 @@ export class PrimitiveMesh {
      * @returns Cylinder model mesh
      */
     static createCylinder(
-        engine: Engine,
+        device: GPUDevice,
         radiusTop: number = 0.5,
         radiusBottom: number = 0.5,
         height: number = 2,
@@ -309,7 +309,7 @@ export class PrimitiveMesh {
         heightSegments: number = 1,
         noLongerAccessible: boolean = true
     ): ModelMesh {
-        const mesh = new ModelMesh(engine);
+        const mesh = new ModelMesh(device);
         radialSegments = Math.floor(radialSegments);
         heightSegments = Math.floor(heightSegments);
 
@@ -322,7 +322,7 @@ export class PrimitiveMesh {
         const capTriangleCount = radialSegments * 2;
         const totalVertexCount = torsoVertexCount + 2 + capTriangleCount;
         const indices = PrimitiveMesh._generateIndices(
-            engine,
+            device,
             totalVertexCount,
             torsoRectangleCount * 6 + capTriangleCount * 3
         );
@@ -454,7 +454,7 @@ export class PrimitiveMesh {
 
     /**
      * Create a torus mesh.
-     * @param engine - Engine
+     * @param device - Device
      * @param radius - Torus radius
      * @param tubeRadius - Torus tube
      * @param radialSegments - Torus radial segments
@@ -464,7 +464,7 @@ export class PrimitiveMesh {
      * @returns Torus model mesh
      */
     static createTorus(
-        engine: Engine,
+        device: GPUDevice,
         radius: number = 0.5,
         tubeRadius: number = 0.1,
         radialSegments: number = 30,
@@ -472,13 +472,13 @@ export class PrimitiveMesh {
         arc: number = 360,
         noLongerAccessible: boolean = true
     ): ModelMesh {
-        const mesh = new ModelMesh(engine);
+        const mesh = new ModelMesh(device);
         radialSegments = Math.floor(radialSegments);
         tubularSegments = Math.floor(tubularSegments);
 
         const vertexCount = (radialSegments + 1) * (tubularSegments + 1);
         const rectangleCount = radialSegments * tubularSegments;
-        const indices = PrimitiveMesh._generateIndices(engine, vertexCount, rectangleCount * 6);
+        const indices = PrimitiveMesh._generateIndices(device, vertexCount, rectangleCount * 6);
 
         const positions: Vector3[] = new Array(vertexCount);
         const normals: Vector3[] = new Array(vertexCount);
@@ -541,7 +541,7 @@ export class PrimitiveMesh {
 
     /**
      * Create a cone mesh.
-     * @param engine - Engine
+     * @param device - Device
      * @param radius - The radius of cap
      * @param height - The height of torso
      * @param radialSegments - Cylinder radial segments
@@ -550,14 +550,14 @@ export class PrimitiveMesh {
      * @returns Cone model mesh
      */
     static createCone(
-        engine: Engine,
+        device: GPUDevice,
         radius: number = 0.5,
         height: number = 2,
         radialSegments: number = 20,
         heightSegments: number = 1,
         noLongerAccessible: boolean = true
     ): ModelMesh {
-        const mesh = new ModelMesh(engine);
+        const mesh = new ModelMesh(device);
         radialSegments = Math.floor(radialSegments);
         heightSegments = Math.floor(heightSegments);
 
@@ -569,7 +569,7 @@ export class PrimitiveMesh {
         const torsoRectangleCount = radialSegments * heightSegments;
         const totalVertexCount = torsoVertexCount + 1 + radialSegments;
         const indices = PrimitiveMesh._generateIndices(
-            engine,
+            device,
             totalVertexCount,
             torsoRectangleCount * 6 + radialSegments * 3
         );
@@ -686,7 +686,7 @@ export class PrimitiveMesh {
         mesh.addSubMesh(0, indices.length);
     }
 
-    private static _generateIndices(engine: Engine, vertexCount: number, indexCount: number): Uint32Array {
+    private static _generateIndices(device: GPUDevice, vertexCount: number, indexCount: number): Uint32Array {
         let indices: Uint32Array = null;
         indices = new Uint32Array(indexCount);
 

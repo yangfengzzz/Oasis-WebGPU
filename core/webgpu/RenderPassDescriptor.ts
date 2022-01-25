@@ -3,7 +3,7 @@ export class RenderPassDescriptor implements GPURenderPassDescriptor {
     occlusionQuerySet?: GPUQuerySet;
     timestampWrites?: GPURenderPassTimestampWrites;
     depthStencilAttachment?: RenderPassDepthStencilAttachment;
-    colorAttachments: RenderPassColorAttachment[];
+    colorAttachments: RenderPassColorAttachment[] = [];
 }
 
 export class RenderPassColorAttachment implements GPURenderPassColorAttachment {

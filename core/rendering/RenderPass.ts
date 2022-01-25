@@ -6,7 +6,7 @@ import {Camera} from "../Camera";
 export class RenderPass {
     private _desc: RenderPassDescriptor;
 
-    private _subpasses: Subpass[];
+    private _subpasses: Subpass[] = [];
     private _activeSubpassIndex: number = 0;
 
     get renderPassDescriptor(): RenderPassDescriptor {

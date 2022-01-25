@@ -6,7 +6,11 @@ import {Entity} from "./Entity";
 import {RenderContext} from "./rendering/RenderContext";
 import {ComponentsManager} from "./ComponentsManager";
 import {ResourceManager} from "./asset/ResourceManager";
-import {RenderPassDescriptor} from "./webgpu/RenderPassDescriptor";
+import {
+    RenderPassColorAttachment,
+    RenderPassDepthStencilAttachment,
+    RenderPassDescriptor
+} from "./webgpu/RenderPassDescriptor";
 import {RenderPass} from "./rendering/RenderPass";
 import {SceneManager} from "./SceneManager";
 import {Scene} from "./Scene";
@@ -41,7 +45,9 @@ export class Engine {
     private _adapter: GPUAdapter;
     private _device: GPUDevice;
     private _renderContext: RenderContext;
-    private _renderPassDescriptor: RenderPassDescriptor;
+    private _renderPassDescriptor = new RenderPassDescriptor();
+    private _renderPassColorAttachment = new RenderPassColorAttachment();
+    private _renderPassDepthStencilAttachment = new RenderPassDepthStencilAttachment();
     private _renderPass: RenderPass;
 
     private _animate = () => {
@@ -161,13 +167,14 @@ export class Engine {
         this._device = await this._adapter.requestDevice();
         this._renderContext = this._canvas.createRenderContext(this._adapter, this._device);
 
-        this._renderPassDescriptor = new RenderPassDescriptor();
-        this._renderPassDescriptor.colorAttachments[0].storeOp = 'store';
-        this._renderPassDescriptor.colorAttachments[0].loadValue = {r: 0.4, g: 0.4, b: 0.4, a: 1.0};
-        this._renderPassDescriptor.colorAttachments[0].view = this._renderContext.currentDrawableTexture();
-        this._renderPassDescriptor.depthStencilAttachment.depthLoadValue = 'load';
-        this._renderPassDescriptor.depthStencilAttachment.stencilLoadValue = 'load';
-        this._renderPassDescriptor.depthStencilAttachment.view = this._renderContext.depthStencilTexture();
+        this._renderPassDescriptor.colorAttachments.push(this._renderPassColorAttachment);
+        this._renderPassDescriptor.depthStencilAttachment = this._renderPassDepthStencilAttachment;
+        this._renderPassColorAttachment.storeOp = 'store';
+        this._renderPassColorAttachment.loadValue = {r: 0.4, g: 0.4, b: 0.4, a: 1.0};
+        this._renderPassColorAttachment.view = this._renderContext.currentDrawableTexture();
+        this._renderPassDepthStencilAttachment.depthLoadValue = 'load';
+        this._renderPassDepthStencilAttachment.stencilLoadValue = 'load';
+        this._renderPassDepthStencilAttachment.view = this._renderContext.depthStencilTexture();
         this._renderPass = new RenderPass(this._renderPassDescriptor);
         this._renderPass.addSubpass(new ForwardSubpass(this._renderContext));
     }

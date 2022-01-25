@@ -6,28 +6,6 @@ import {Entity} from "../Entity";
 import {Mesh} from "../graphic/Mesh";
 import {Renderer} from "../Renderer";
 import {UpdateFlag} from "../UpdateFlag";
-import {ShaderProgram} from "../shader/ShaderProgram";
-import vxCode from "../../shader/vertex.wgsl";
-import fxCode from "../../shader/fragment.wgsl";
-import {PrimitiveMesh} from "./PrimitiveMesh";
-
-const triangleMVMatrix = new Matrix;
-const squareMVMatrix = new Matrix();
-const pMatrix = new Matrix();
-Matrix.perspective(45, document.body.clientWidth / document.body.clientHeight, 0.1, 100, pMatrix);
-
-const backgroundColor = {r: 0.4, g: 0.4, b: 0.4, a: 1.0};
-
-let lastTime = 0, rTri = 0, rSquare = 0;
-const animate = () => {
-    let timeNow = performance.now();
-    if (lastTime != 0) {
-        let elapsed = timeNow - lastTime;
-        rTri += (Math.PI / 180 * 90 * elapsed) / 1000.0;
-        rSquare += (Math.PI / 180 * 75 * elapsed) / 1000.0;
-    }
-    lastTime = timeNow;
-}
 
 /**
  * MeshRenderer Component.
@@ -38,16 +16,11 @@ export class MeshRenderer extends Renderer implements ICustomClone {
     @ignoreClone
     private _meshUpdateFlag: UpdateFlag;
 
-    // todo delete
-    shaderProgram: ShaderProgram;
-
     /**
      * @internal
      */
     constructor(entity: Entity) {
         super(entity);
-        // todo delete
-        this.shaderProgram = new ShaderProgram(this.engine, vxCode, fxCode);
     }
 
     /**
@@ -76,24 +49,7 @@ export class MeshRenderer extends Renderer implements ICustomClone {
      * @internal
      */
     _render(camera: Camera): void {
-        animate();
-        triangleMVMatrix.identity().translate(new Vector3(-1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(0, 1, 0), rTri));
-        squareMVMatrix.identity().translate(new Vector3(1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(1, 0, 0), rSquare));
 
-        //--------------------------------------------------------------------------------------------------------------
-        this.engine._hardwareRenderer.InitRenderPass(backgroundColor);
-
-        this.engine._hardwareRenderer.createBindGroupLayout();
-
-        this.engine._hardwareRenderer.createUniformBuffer(this.engine, pMatrix.elements, triangleMVMatrix.elements);
-        const box = PrimitiveMesh.createCuboid(this.engine, 1);
-        this.engine._hardwareRenderer.drawPrimitive(box, box.subMesh, this.shaderProgram);
-
-        this.engine._hardwareRenderer.createUniformBuffer(this.engine,  pMatrix.elements, squareMVMatrix.elements);
-        const sphere = PrimitiveMesh.createSphere(this.engine, 1, 50);
-        this.engine._hardwareRenderer.drawPrimitive(sphere, sphere.subMesh, this.shaderProgram);
-
-        this.engine._hardwareRenderer.Present();
     }
 
     /**

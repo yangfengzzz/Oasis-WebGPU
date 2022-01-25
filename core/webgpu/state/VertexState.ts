@@ -1,7 +1,7 @@
 export class VertexState implements GPUVertexState {
     entryPoint: string;
     module: GPUShaderModule;
-    buffers?: (VertexBufferLayout | null)[];
+    buffers?: (VertexBufferLayout | null)[] = [];
     constants?: Record<string, GPUPipelineConstantValue>;
 }
 

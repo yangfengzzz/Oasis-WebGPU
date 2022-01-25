@@ -1,7 +1,7 @@
 export class FragmentState implements GPUFragmentState {
     entryPoint: string;
     module: GPUShaderModule;
-    targets: ColorTargetState[];
+    targets: ColorTargetState[] = [];
     constants?: Record<string, GPUPipelineConstantValue>;
 }
 

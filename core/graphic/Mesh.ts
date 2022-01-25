@@ -1,6 +1,4 @@
 import {BoundingBox} from "@oasis-engine/math";
-import {RefObject} from "../asset/RefObject";
-import {Engine} from "../Engine";
 import {MeshTopology} from "./enums/MeshTopology";
 import {IndexBufferBinding} from "./IndexBufferBinding";
 import {SubMesh} from "./SubMesh";
@@ -8,19 +6,17 @@ import {VertexBufferBinding} from "./VertexBufferBinding";
 import {VertexElement} from "./VertexElement";
 import {UpdateFlag} from "../UpdateFlag";
 import {UpdateFlagManager} from "../UpdateFlagManager";
-import {IPlatformPrimitive} from "../rhi-webgpu/IPlatformPrimitive";
 
 /**
  * Mesh.
  */
-export abstract class Mesh extends RefObject {
+export abstract class Mesh {
     /** Name. */
     name: string;
     /** The bounding volume of the mesh. */
     readonly bounds: BoundingBox = new BoundingBox();
 
     _vertexElementMap: Record<string, VertexElement> = {};
-    _platformPrimitive: IPlatformPrimitive;
 
     /** @internal */
     _instanceCount: number = 0;
@@ -33,6 +29,8 @@ export abstract class Mesh extends RefObject {
 
     private _subMeshes: SubMesh[] = [];
     private _updateFlagManager: UpdateFlagManager = new UpdateFlagManager();
+
+    protected _device: GPUDevice;
 
     /**
      * First sub-mesh. Rendered using the first material.
@@ -50,13 +48,12 @@ export abstract class Mesh extends RefObject {
 
     /**
      * Create mesh.
-     * @param engine - Engine
+     * @param device - Device
      * @param name - Mesh name
      */
-    protected constructor(engine: Engine, name?: string) {
-        super(engine);
+    protected constructor(device: GPUDevice, name?: string) {
         this.name = name;
-        this._platformPrimitive = this._engine._hardwareRenderer.createPlatformPrimitive(this);
+        this._device = device;
     }
 
     /**
@@ -115,21 +112,14 @@ export abstract class Mesh extends RefObject {
     }
 
     /**
-     * @internal
-     */
-    _draw(renderPassEncoder: GPURenderPassEncoder, shaderProgram: any, subMesh: SubMesh): void {
-        this._platformPrimitive.draw(renderPassEncoder, shaderProgram, subMesh);
-    }
-
-    /**
      * @override
      */
     _addRefCount(value: number): void {
-        super._addRefCount(value);
-        const vertexBufferBindings = this._vertexBufferBindings;
-        for (let i = 0, n = vertexBufferBindings.length; i < n; i++) {
-            vertexBufferBindings[i]._buffer._addRefCount(value);
-        }
+        // super._addRefCount(value);
+        // const vertexBufferBindings = this._vertexBufferBindings;
+        // for (let i = 0, n = vertexBufferBindings.length; i < n; i++) {
+        //     vertexBufferBindings[i]._buffer._addRefCount(value);
+        // }
     }
 
     /**
@@ -141,7 +131,6 @@ export abstract class Mesh extends RefObject {
         this._indexBufferBinding = null;
         this._vertexElements = null;
         this._vertexElementMap = null;
-        this._platformPrimitive.destroy();
     }
 
     protected _setVertexElements(elements: VertexElement[]): void {
@@ -152,11 +141,11 @@ export abstract class Mesh extends RefObject {
     }
 
     protected _setVertexBufferBinding(index: number, binding: VertexBufferBinding): void {
-        if (this._getRefCount() > 0) {
-            const lastBinding = this._vertexBufferBindings[index];
-            lastBinding && lastBinding._buffer._addRefCount(-1);
-            binding._buffer._addRefCount(1);
-        }
+        // if (this._getRefCount() > 0) {
+        //     const lastBinding = this._vertexBufferBindings[index];
+        //     lastBinding && lastBinding._buffer._addRefCount(-1);
+        //     binding._buffer._addRefCount(1);
+        // }
         this._vertexBufferBindings[index] = binding;
     }
 
