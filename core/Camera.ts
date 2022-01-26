@@ -30,7 +30,7 @@ export class Camera extends Component {
     private static _cameraPositionProperty = Shader.getPropertyByName("u_cameraPos");
 
     /** Shader data. */
-    readonly shaderData: ShaderData = new ShaderData(ShaderDataGroup.Camera);
+    readonly shaderData: ShaderData;
 
     /** Rendering priority - A Camera with higher priority will be rendered on top of a camera with lower priority. */
     priority: number = 0;
@@ -249,6 +249,7 @@ export class Camera extends Component {
      */
     constructor(entity: Entity) {
         super(entity);
+        this.shaderData = new ShaderData(ShaderDataGroup.Camera, this._engine.device);
 
         const transform = this.entity.transform;
         this._transform = transform;

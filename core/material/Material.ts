@@ -19,7 +19,7 @@ export class Material extends RefObject implements IClone {
     /** Render queue type. */
     renderQueueType: RenderQueueType = RenderQueueType.Opaque;
     /** Shader data. */
-    readonly shaderData: ShaderData = new ShaderData(ShaderDataGroup.Material);
+    readonly shaderData: ShaderData;
     /** Render state. */
     readonly renderState: RenderState = new RenderState(); // todo: later will as a part of shaderData when shader effect frame is OK, that is more powerful and flexible.
 
@@ -30,6 +30,7 @@ export class Material extends RefObject implements IClone {
      */
     constructor(engine: Engine, shader: Shader) {
         super(engine);
+        this.shaderData = new ShaderData(ShaderDataGroup.Material, this._engine.device);
         this.shader = shader;
     }
 

@@ -23,7 +23,7 @@ export abstract class Renderer extends Component {
 
     /** ShaderData related to renderer. */
     @deepClone
-    readonly shaderData: ShaderData = new ShaderData(ShaderDataGroup.Renderer);
+    readonly shaderData: ShaderData;
     /** Whether it is clipped by the frustum, needs to be turned on camera.enableFrustumCulling. */
     @ignoreClone
     isCulled: boolean = false;
@@ -97,6 +97,8 @@ export abstract class Renderer extends Component {
      */
     constructor(entity: Entity) {
         super(entity);
+        this.shaderData = new ShaderData(ShaderDataGroup.Renderer, this._engine.device);
+
         const prototype = Renderer.prototype;
         this._overrideUpdate = this.update !== prototype.update;
         this._transformChangeFlag = this.entity.transform.registerWorldChangeFlag();

@@ -12,28 +12,34 @@ export class UnlitMaterial extends BaseMaterial {
     private static _baseTextureProp = Shader.getPropertyByName("u_baseTexture");
     private static _tilingOffsetProp = Shader.getPropertyByName("u_tilingOffset");
 
+    private _baseColor = new Color(1, 1, 1, 1);
+    private _baseTexture: SamplerTexture2D;
+    private _tilingOffset = new Vector4(1, 1, 0, 0);
+
     /**
      * Base color.
      */
     get baseColor(): Color {
-        return this.shaderData.getColor(UnlitMaterial._baseColorProp);
+        return this._baseColor;
     }
 
     set baseColor(value: Color) {
-        const baseColor = this.shaderData.getColor(UnlitMaterial._baseColorProp);
+        const baseColor = this._baseColor;
         if (value !== baseColor) {
             value.cloneTo(baseColor);
         }
+        this.shaderData.setColor(UnlitMaterial._baseColorProp, baseColor);
     }
 
     /**
      * Base texture.
      */
     get baseTexture(): SamplerTexture2D {
-        return <SamplerTexture2D>this.shaderData.getTexture(UnlitMaterial._baseTextureProp);
+        return this._baseTexture;
     }
 
     set baseTexture(value: SamplerTexture2D) {
+        this._baseTexture = value;
         this.shaderData.setTexture(UnlitMaterial._baseTextureProp, value);
         if (value) {
             this.shaderData.enableMacro("O3_BASE_TEXTURE");
@@ -46,14 +52,15 @@ export class UnlitMaterial extends BaseMaterial {
      * Tiling and offset of main textures.
      */
     get tilingOffset(): Vector4 {
-        return this.shaderData.getVector4(UnlitMaterial._tilingOffsetProp);
+        return this._tilingOffset;
     }
 
     set tilingOffset(value: Vector4) {
-        const tilingOffset = this.shaderData.getVector4(UnlitMaterial._tilingOffsetProp);
+        const tilingOffset = this._tilingOffset;
         if (value !== tilingOffset) {
             value.cloneTo(tilingOffset);
         }
+        this.shaderData.setVector4(UnlitMaterial._tilingOffsetProp, tilingOffset);
     }
 
     /**

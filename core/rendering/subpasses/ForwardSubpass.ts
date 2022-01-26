@@ -1,19 +1,23 @@
 import {Subpass} from "../Subpass";
 import {Scene} from "../../Scene";
 import {Camera} from "../../Camera";
-import {Matrix, Vector3} from "@oasis-engine/math";
 import {ShaderProgram} from "../../shader/ShaderProgram";
 import vxCode from "../../../shader/vertex.wgsl";
 import fxCode from "../../../shader/fragment.wgsl";
-import {Buffer} from "../../graphic/Buffer";
 import {
+    BindGroupDescriptor,
+    BindGroupEntry,
     BindGroupLayoutDescriptor,
     BindGroupLayoutEntry,
+    BufferBinding,
     BufferBindingLayout,
+    DepthStencilState,
+    FragmentState,
+    MultisampleState,
     PipelineLayoutDescriptor,
+    PrimitiveState,
     RenderPipelineDescriptor,
-    DepthStencilState, FragmentState, MultisampleState, PrimitiveState, VertexState,
-    BindGroupDescriptor, BindGroupEntry, BufferBinding
+    VertexState
 } from "../../webgpu";
 import {ColorTargetState} from "../../webgpu/state/FragmentState";
 import {VertexAttribute, VertexBufferLayout} from "../../webgpu/state/VertexState";
@@ -38,14 +42,11 @@ export class ForwardSubpass extends Subpass {
     private _bindGroupLayoutDescriptor = new BindGroupLayoutDescriptor();
     private _uniformGroupLayout: GPUBindGroupLayout;
     private _bindGroupDescriptor = new BindGroupDescriptor();
-    private _uniformBindGroup: GPUBindGroup;
 
     private _pipelineLayoutDescriptor = new PipelineLayoutDescriptor();
     private _pipelineLayout: GPUPipelineLayout;
 
     private _shaderProgram: ShaderProgram;
-    private _pBuffer: Buffer;
-    private _mvBuffer: Buffer;
 
     constructor(engine: Engine) {
         super(engine);
@@ -68,25 +69,16 @@ export class ForwardSubpass extends Subpass {
             this._uniformGroupLayout = device.createBindGroupLayout(this._bindGroupLayoutDescriptor);
         }
         {
-            this._pBuffer = new Buffer(this._engine, 64, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
-            this._pBuffer._nativeBuffer.unmap();
-            this._mvBuffer = new Buffer(this._engine, 64, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
-            this._mvBuffer._nativeBuffer.unmap();
             this._bindGroupDescriptor.layout = this._uniformGroupLayout;
             this._bindGroupDescriptor.entries.length = 2;
             const uniform1 = new BindGroupEntry();
             uniform1.binding = 0;
-            const uniformBuffer1 = new BufferBinding();
-            uniformBuffer1.buffer = this._pBuffer._nativeBuffer;
-            uniform1.resource = uniformBuffer1;
+            uniform1.resource = new BufferBinding();
             this._bindGroupDescriptor.entries[0] = uniform1;
             const uniform2 = new BindGroupEntry();
             uniform2.binding = 1;
-            const uniformBuffer2 = new BufferBinding();
-            uniformBuffer2.buffer = this._mvBuffer._nativeBuffer;
-            uniform2.resource = uniformBuffer2;
+            uniform2.resource = new BufferBinding();
             this._bindGroupDescriptor.entries[1] = uniform2;
-            this._uniformBindGroup = device.createBindGroup(this._bindGroupDescriptor);
         }
         this._forwardPipelineDescriptor.depthStencil = this._depthStencilState;
         this._forwardPipelineDescriptor.fragment = this._fragment;
@@ -150,15 +142,15 @@ export class ForwardSubpass extends Subpass {
     private _drawElement(renderPassEncoder: GPURenderPassEncoder, items: RenderElement[]) {
         for (let i = 0, n = items.length; i < n; i++) {
             const {mesh, subMesh, material, component} = items[i];
+            const device = this._engine.device;
 
-            const mvMatrix = component.shaderData.getMatrix("u_MVMat");
-            this._engine.device.queue.writeBuffer(this._mvBuffer._nativeBuffer, 0, mvMatrix.elements);
-            const pMatrix = this._camera.shaderData.getMatrix("u_projMat");
-            this._engine.device.queue.writeBuffer(this._pBuffer._nativeBuffer, 0, pMatrix.elements);
-            renderPassEncoder.setBindGroup(0, this._uniformBindGroup);
+            (<BufferBinding>this._bindGroupDescriptor.entries[0].resource).buffer = this._camera.shaderData.getMatrix("u_projMat");
+            (<BufferBinding>this._bindGroupDescriptor.entries[1].resource).buffer = component.shaderData.getMatrix("u_MVMat");
+            const uniformBindGroup = device.createBindGroup(this._bindGroupDescriptor);
+            renderPassEncoder.setBindGroup(0, uniformBindGroup);
 
             this._bindVertexAttrib(mesh);
-            const renderPipeline = this._engine.device.createRenderPipeline(this._forwardPipelineDescriptor);
+            const renderPipeline = device.createRenderPipeline(this._forwardPipelineDescriptor);
             renderPassEncoder.setPipeline(renderPipeline);
             renderPassEncoder.setVertexBuffer(0, mesh._vertexBufferBindings[0]._buffer._nativeBuffer);
             renderPassEncoder.setIndexBuffer(mesh._indexBufferBinding.buffer._nativeBuffer, "uint32");

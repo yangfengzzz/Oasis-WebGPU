@@ -13,7 +13,7 @@ export class BaseMaterial extends Material {
     private _renderFace: RenderFace = RenderFace.Front;
     private _isTransparent: boolean = false;
     private _blendMode: BlendMode;
-
+    private _alphaCutoff: number;
     /**
      * Is this material transparent.
      * @remarks
@@ -52,10 +52,11 @@ export class BaseMaterial extends Material {
      * `0` means no fragment will be discarded.
      */
     get alphaCutoff(): number {
-        return this.shaderData.getFloat(BaseMaterial._alphaCutoffProp);
+        return this._alphaCutoff;
     }
 
     set alphaCutoff(value: number) {
+        this._alphaCutoff = value;
         this.shaderData.setFloat(BaseMaterial._alphaCutoffProp, value);
 
         if (value > 0) {

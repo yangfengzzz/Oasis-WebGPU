@@ -35,5 +35,12 @@ engine.init().then(() => {
     renderer.mesh = PrimitiveMesh.createCuboid(engine, 1);
     renderer.setMaterial(new BlinnPhongMaterial(engine));
 
+    const sphereEntity = rootEntity.createChild();
+    sphereEntity.transform.setPosition(0, 5, 0);
+    sphereEntity.addComponent(MoveScript);
+    const sphereRenderer = sphereEntity.addComponent(MeshRenderer);
+    sphereRenderer.mesh = PrimitiveMesh.createSphere(engine, 1);
+    sphereRenderer.setMaterial(new BlinnPhongMaterial(engine));
+
     engine.run();
 });

@@ -18,7 +18,7 @@ export class Scene extends EngineObject {
     readonly background: Background = new Background();
 
     /** Scene-related shader data. */
-    readonly shaderData: ShaderData = new ShaderData(ShaderDataGroup.Scene);
+    readonly shaderData: ShaderData;
 
     /** @internal */
     _activeCameras: Camera[] = [];
@@ -73,6 +73,7 @@ export class Scene extends EngineObject {
     constructor(engine: Engine, name?: string) {
         super(engine);
         this.name = name || "";
+        this.shaderData = new ShaderData(ShaderDataGroup.Scene, this._engine.device);
 
         const shaderData = this.shaderData;
         shaderData._addRefCount(1);
