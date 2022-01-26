@@ -2,12 +2,10 @@ import {Subpass} from "../Subpass";
 import {Scene} from "../../Scene";
 import {Camera} from "../../Camera";
 import {Matrix, Vector3} from "@oasis-engine/math";
-import {PrimitiveMesh} from "../../mesh/PrimitiveMesh";
 import {ShaderProgram} from "../../shader/ShaderProgram";
 import vxCode from "../../../shader/vertex.wgsl";
 import fxCode from "../../../shader/fragment.wgsl";
 import {Buffer} from "../../graphic/Buffer";
-import {SubMesh} from "../../graphic/SubMesh";
 import {
     BindGroupLayoutDescriptor,
     BindGroupLayoutEntry,
@@ -19,11 +17,11 @@ import {
 } from "../../webgpu";
 import {ColorTargetState} from "../../webgpu/state/FragmentState";
 import {VertexAttribute, VertexBufferLayout} from "../../webgpu/state/VertexState";
-import {ModelMesh} from "../../mesh/ModelMesh";
+import {Mesh} from "../../graphic/Mesh";
 import {Engine} from "../../Engine";
+import {RenderElement} from "../RenderElement";
 
 const triangleMVMatrix = new Matrix;
-const squareMVMatrix = new Matrix();
 let lastTime = 0, rTri = 0, rSquare = 0;
 const animate = () => {
     let timeNow = performance.now();
@@ -36,8 +34,11 @@ const animate = () => {
 }
 
 export class ForwardSubpass extends Subpass {
-    private _scene:Scene;
-    private _camera:Camera;
+    private _scene: Scene;
+    private _camera: Camera;
+    private _opaqueQueue: RenderElement[] = [];
+    private _alphaTestQueue: RenderElement[] = [];
+    private _transparentQueue: RenderElement[] = [];
 
     private _forwardPipelineDescriptor: RenderPipelineDescriptor = new RenderPipelineDescriptor();
     private _depthStencilState = new DepthStencilState();
@@ -53,18 +54,15 @@ export class ForwardSubpass extends Subpass {
 
     private _pipelineLayoutDescriptor = new PipelineLayoutDescriptor();
     private _pipelineLayout: GPUPipelineLayout;
-    private _renderPipeline: GPURenderPipeline;
 
     private _shaderProgram: ShaderProgram;
     private _pBuffer: Buffer;
     private _mvBuffer: Buffer;
-    private _box: ModelMesh;
 
     constructor(engine: Engine) {
         super(engine);
         const device = this._engine.device;
         this._shaderProgram = new ShaderProgram(device, vxCode, fxCode);
-        this._box = PrimitiveMesh.createCuboid(this._engine, 1);
         {
             this._bindGroupLayoutDescriptor.entries.length = 2;
             const uniform1 = new BindGroupLayoutEntry();
@@ -131,9 +129,6 @@ export class ForwardSubpass extends Subpass {
             this._depthStencilState.format = this._engine.renderContext.depthStencilTextureFormat();
 
             this._multisample.count = 1;
-
-            this._bindVertexAttrib(this._box);
-            this._renderPipeline = device.createRenderPipeline(this._forwardPipelineDescriptor);
         }
     }
 
@@ -151,30 +146,40 @@ export class ForwardSubpass extends Subpass {
     }
 
     _drawMeshes(renderPassEncoder: GPURenderPassEncoder): void {
-        animate();
-        triangleMVMatrix.identity().translate(new Vector3(-1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(0, 1, 0), rTri));
-        squareMVMatrix.identity().translate(new Vector3(1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(1, 0, 0), rSquare));
+        this._opaqueQueue = [];
+        this._alphaTestQueue = [];
+        this._transparentQueue = [];
+        this._engine._componentsManager.callRender(this._camera, this._opaqueQueue, this._alphaTestQueue, this._transparentQueue);
+        this._opaqueQueue.sort(Subpass._compareFromNearToFar);
+        this._alphaTestQueue.sort(Subpass._compareFromNearToFar);
+        this._transparentQueue.sort(Subpass._compareFromFarToNear);
 
-        const pMatrix = this._camera.shaderData.getMatrix("u_projMat");
-        this._updateUniformBuffer(pMatrix.elements, triangleMVMatrix.elements, renderPassEncoder);
-
-        this._drawElement(renderPassEncoder, this._box, this._box.subMesh);
+        this._drawElement(renderPassEncoder, this._opaqueQueue);
+        this._drawElement(renderPassEncoder, this._alphaTestQueue);
+        this._drawElement(renderPassEncoder, this._transparentQueue);
     }
 
-    private _drawElement(renderPassEncoder: GPURenderPassEncoder, primitive: ModelMesh, subMesh: SubMesh) {
-        renderPassEncoder.setPipeline(this._renderPipeline);
-        renderPassEncoder.setVertexBuffer(0, primitive._vertexBufferBindings[0]._buffer._nativeBuffer);
-        renderPassEncoder.setIndexBuffer(primitive._indexBufferBinding.buffer._nativeBuffer, "uint32");
-        renderPassEncoder.drawIndexed(subMesh.count, 1, subMesh.start, 0, 0);
+    private _drawElement(renderPassEncoder: GPURenderPassEncoder, items: RenderElement[]) {
+        for (let i = 0, n = items.length; i < n; i++) {
+            const {mesh, subMesh, material, component} = items[i];
+
+            animate();
+            triangleMVMatrix.identity().translate(new Vector3(-1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(0, 1, 0), rTri));
+            this._engine.device.queue.writeBuffer(this._mvBuffer._nativeBuffer, 0, triangleMVMatrix.elements);
+            const pMatrix = this._camera.shaderData.getMatrix("u_projMat");
+            this._engine.device.queue.writeBuffer(this._pBuffer._nativeBuffer, 0, pMatrix.elements);
+            renderPassEncoder.setBindGroup(0, this._uniformBindGroup);
+
+            this._bindVertexAttrib(mesh);
+            const renderPipeline = this._engine.device.createRenderPipeline(this._forwardPipelineDescriptor);
+            renderPassEncoder.setPipeline(renderPipeline);
+            renderPassEncoder.setVertexBuffer(0, mesh._vertexBufferBindings[0]._buffer._nativeBuffer);
+            renderPassEncoder.setIndexBuffer(mesh._indexBufferBinding.buffer._nativeBuffer, "uint32");
+            renderPassEncoder.drawIndexed(subMesh.count, 1, subMesh.start, 0, 0);
+        }
     }
 
-    private _updateUniformBuffer(pArray: Float32Array, mvArray: Float32Array, commandEncoder: GPURenderPassEncoder) {
-        this._engine.device.queue.writeBuffer(this._pBuffer._nativeBuffer, 0, pArray);
-        this._engine.device.queue.writeBuffer(this._mvBuffer._nativeBuffer, 0, mvArray);
-        commandEncoder.setBindGroup(0, this._uniformBindGroup);
-    }
-
-    private _bindVertexAttrib(primitive: ModelMesh) {
+    private _bindVertexAttrib(primitive: Mesh) {
         const attributes = primitive._vertexElements;
 
         const attrs: VertexAttribute[] = [];

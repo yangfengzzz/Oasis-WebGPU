@@ -3,6 +3,7 @@ import {Camera} from "../Camera";
 import {RenderPass} from "./RenderPass";
 import {EngineObject} from "../base";
 import {Engine} from "../Engine";
+import {RenderElement} from "./RenderElement";
 
 export abstract class Subpass extends EngineObject {
     protected _pass: RenderPass;
@@ -28,4 +29,25 @@ export abstract class Subpass extends EngineObject {
         this._pass = pass;
     }
 
+    /**
+     * @internal
+     */
+    static _compareFromNearToFar(a: RenderElement, b: RenderElement): number {
+        return (
+            a.material.renderQueueType - b.material.renderQueueType ||
+            a.component._distanceForSort - b.component._distanceForSort ||
+            b.component._renderSortId - a.component._renderSortId
+        );
+    }
+
+    /**
+     * @internal
+     */
+    static _compareFromFarToNear(a: RenderElement, b: RenderElement): number {
+        return (
+            a.material.renderQueueType - b.material.renderQueueType ||
+            b.component._distanceForSort - a.component._distanceForSort ||
+            b.component._renderSortId - a.component._renderSortId
+        );
+    }
 }
