@@ -24,9 +24,6 @@ import {Engine} from "../../Engine";
 
 const triangleMVMatrix = new Matrix;
 const squareMVMatrix = new Matrix();
-const pMatrix = new Matrix();
-Matrix.perspective(45, document.body.clientWidth / document.body.clientHeight, 0.1, 100, pMatrix);
-
 let lastTime = 0, rTri = 0, rSquare = 0;
 const animate = () => {
     let timeNow = performance.now();
@@ -39,6 +36,9 @@ const animate = () => {
 }
 
 export class ForwardSubpass extends Subpass {
+    private _scene:Scene;
+    private _camera:Camera;
+
     private _forwardPipelineDescriptor: RenderPipelineDescriptor = new RenderPipelineDescriptor();
     private _depthStencilState = new DepthStencilState();
     private _fragment = new FragmentState();
@@ -141,6 +141,9 @@ export class ForwardSubpass extends Subpass {
     }
 
     draw(scene: Scene, camera: Camera, renderPassEncoder: GPURenderPassEncoder): void {
+        this._scene = scene;
+        this._camera = camera;
+
         renderPassEncoder.pushDebugGroup("Draw Element");
         renderPassEncoder.setViewport(0, 0, this._engine.canvas.width, this._engine.canvas.height, 0, 1);
         this._drawMeshes(renderPassEncoder);
@@ -151,6 +154,8 @@ export class ForwardSubpass extends Subpass {
         animate();
         triangleMVMatrix.identity().translate(new Vector3(-1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(0, 1, 0), rTri));
         squareMVMatrix.identity().translate(new Vector3(1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(1, 0, 0), rSquare));
+
+        const pMatrix = this._camera.shaderData.getMatrix("u_projMat");
         this._updateUniformBuffer(pMatrix.elements, triangleMVMatrix.elements, renderPassEncoder);
 
         this._drawElement(renderPassEncoder, this._box, this._box.subMesh);

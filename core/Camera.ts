@@ -80,6 +80,8 @@ export class Camera extends Component {
     @deepClone
     private _viewMatrix: Matrix = new Matrix();
     @deepClone
+    private _viewProjMatrix: Matrix = new Matrix();
+    @deepClone
     private _viewport: Vector4 = new Vector4(0, 0, 1, 1);
     @deepClone
     private _inverseProjectionMatrix: Matrix = new Matrix();
@@ -398,6 +400,33 @@ export class Camera extends Component {
     }
 
     /**
+     * @internal
+     */
+    _updateShaderData(): void {
+        Matrix.multiply(this.projectionMatrix, this.viewMatrix, this._viewProjMatrix);
+        if (this.enableFrustumCulling && (this._frustumViewChangeFlag.flag || this._isFrustumProjectDirty)) {
+            this._frustum.calculateFromMatrix(this._viewProjMatrix);
+            this._frustumViewChangeFlag.flag = false;
+            this._isFrustumProjectDirty = false;
+        }
+
+        // union scene and camera macro.
+        ShaderMacroCollection.unionCollection(
+            this.scene._globalShaderMacro,
+            this.shaderData._macroCollection,
+            this._globalShaderMacro
+        );
+
+        const shaderData = this.shaderData;
+        shaderData.setMatrix(Camera._viewMatrixProperty, this.viewMatrix);
+        shaderData.setMatrix(Camera._projectionMatrixProperty, this.projectionMatrix);
+        shaderData.setMatrix(Camera._vpMatrixProperty, this._viewProjMatrix);
+        shaderData.setMatrix(Camera._inverseViewMatrixProperty, this._transform.worldMatrix);
+        shaderData.setMatrix(Camera._inverseProjectionMatrixProperty, this._getInverseProjectionMatrix());
+        shaderData.setVector3(Camera._cameraPositionProperty, this._transform.worldPosition);
+    }
+
+    /**
      * @override
      * @inheritdoc
      */
@@ -437,16 +466,6 @@ export class Camera extends Component {
         clipPoint.setValue(x * 2 - 1, 1 - y * 2, z * 2 - 1);
         Vector3.transformCoordinate(clipPoint, invViewProjMat, out);
         return out;
-    }
-
-    private _updateShaderData(): void {
-        const shaderData = this.shaderData;
-        shaderData.setMatrix(Camera._viewMatrixProperty, this.viewMatrix);
-        shaderData.setMatrix(Camera._projectionMatrixProperty, this.projectionMatrix);
-        shaderData.setMatrix(Camera._vpMatrixProperty, this.projectionMatrix.multiply(this.viewMatrix));
-        shaderData.setMatrix(Camera._inverseViewMatrixProperty, this._transform.worldMatrix);
-        shaderData.setMatrix(Camera._inverseProjectionMatrixProperty, this._getInverseProjectionMatrix());
-        shaderData.setVector3(Camera._cameraPositionProperty, this._transform.worldPosition);
     }
 
     /**

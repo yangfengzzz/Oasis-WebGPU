@@ -268,6 +268,7 @@ export class Engine {
 
                     this._renderPassColorAttachment.view = this._renderContext.currentDrawableTexture();
                     const commandEncoder = this._device.createCommandEncoder();
+                    camera._updateShaderData();
                     this._renderPass.draw(scene, camera, commandEncoder);
                     this._device.queue.submit([commandEncoder.finish()]);
 
