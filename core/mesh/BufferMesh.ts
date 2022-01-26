@@ -1,9 +1,7 @@
 import {Mesh} from "../graphic/Mesh";
-import {VertexBufferBinding} from "../graphic/VertexBufferBinding";
 import {IndexBufferBinding} from "../graphic/IndexBufferBinding";
-import {VertexElement} from "../graphic/VertexElement";
 import {Buffer} from "../graphic/Buffer";
-import {IndexFormat} from "../graphic/enums/IndexFormat";
+import {VertexBufferLayout} from "../webgpu/state/VertexState";
 
 /**
  * BufferMesh.
@@ -23,7 +21,7 @@ export class BufferMesh extends Mesh {
     /**
      * Vertex buffer binding collection.
      */
-    get vertexBufferBindings(): Readonly<VertexBufferBinding[]> {
+    get vertexBufferBindings(): Readonly<Buffer[]> {
         return this._vertexBufferBindings;
     }
 
@@ -35,47 +33,29 @@ export class BufferMesh extends Mesh {
     }
 
     /**
-     * Vertex element collection.
+     * Vertex layout collection.
      */
-    get vertexElements(): Readonly<VertexElement[]> {
-        return this._vertexElements;
+    get vertexBufferLayouts(): Readonly<VertexBufferLayout[]> {
+        return this._vertexBufferLayouts;
     }
 
     /**
-     * Set vertex elements.
-     * @param elements - Vertex element collection
+     * Set vertex layouts.
+     * @param layouts - Vertex layouts collection
      */
-    setVertexElements(elements: VertexElement[]): void {
-        this._setVertexElements(elements);
+    setVertexLayouts(layouts: VertexBufferLayout[]): void {
+        this._setVertexLayouts(layouts);
     }
 
     /**
      * Set vertex buffer binding.
-     * @param vertexBufferBindings - Vertex buffer binding
+     * @param buffer - Vertex buffer binding
      * @param index - Vertex buffer index, the default value is 0
      */
-    setVertexBufferBinding(vertexBufferBindings: VertexBufferBinding, index?: number): void;
-
-    /**
-     * Set vertex buffer binding.
-     * @param vertexBuffer - Vertex buffer
-     * @param stride - Vertex buffer data stride
-     * @param index - Vertex buffer index, the default value is 0
-     */
-    setVertexBufferBinding(vertexBuffer: Buffer, stride: number, index?: number): void;
-
-    setVertexBufferBinding(
-        bufferOrBinding: Buffer | VertexBufferBinding,
-        strideOrFirstIndex: number = 0,
-        index: number = 0
-    ): void {
-        let binding = <VertexBufferBinding>bufferOrBinding;
-        const isBinding = binding.buffer !== undefined;
-        isBinding || (binding = new VertexBufferBinding(<Buffer>bufferOrBinding, strideOrFirstIndex));
-
+    setVertexBufferBinding(buffer: Buffer, index: number = 0) {
         const bindings = this._vertexBufferBindings;
         bindings.length <= index && (bindings.length = index + 1);
-        this._setVertexBufferBinding(isBinding ? strideOrFirstIndex : index, binding);
+        this._setVertexBufferBinding(index, buffer);
     }
 
     /**
@@ -83,7 +63,7 @@ export class BufferMesh extends Mesh {
      * @param vertexBufferBindings - Vertex buffer binding
      * @param firstIndex - First vertex buffer index, the default value is 0
      */
-    setVertexBufferBindings(vertexBufferBindings: VertexBufferBinding[], firstIndex: number = 0): void {
+    setVertexBufferBindings(vertexBufferBindings: Buffer[], firstIndex: number = 0): void {
         const bindings = this._vertexBufferBindings;
         const count = vertexBufferBindings.length;
         const needLength = firstIndex + count;
@@ -98,7 +78,7 @@ export class BufferMesh extends Mesh {
      * @param buffer - Index buffer
      * @param format - Index buffer format
      */
-    setIndexBufferBinding(buffer: Buffer, format: IndexFormat): void;
+    setIndexBufferBinding(buffer: Buffer, format: GPUIndexFormat): void;
 
     /**
      * Set index buffer binding.
@@ -107,7 +87,7 @@ export class BufferMesh extends Mesh {
      */
     setIndexBufferBinding(bufferBinding: IndexBufferBinding | null): void;
 
-    setIndexBufferBinding(bufferOrBinding: Buffer | IndexBufferBinding | null, format?: IndexFormat): void {
+    setIndexBufferBinding(bufferOrBinding: Buffer | IndexBufferBinding | null, format?: GPUIndexFormat): void {
         let binding = <IndexBufferBinding>bufferOrBinding;
         if (binding) {
             const isBinding = binding.buffer !== undefined;

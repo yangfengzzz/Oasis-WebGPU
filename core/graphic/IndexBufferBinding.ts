@@ -1,4 +1,3 @@
-import { IndexFormat } from "./enums/IndexFormat";
 import { Buffer } from "./Buffer";
 
 /**
@@ -8,7 +7,7 @@ export class IndexBufferBinding {
     /** @internal */
     _buffer: Buffer;
     /** @internal */
-    _format: IndexFormat;
+    _format: GPUIndexFormat;
 
     /**
      * Index buffer.
@@ -20,7 +19,7 @@ export class IndexBufferBinding {
     /**
      * Index buffer format.
      */
-    get format(): IndexFormat {
+    get format(): GPUIndexFormat {
         return this._format;
     }
 
@@ -29,7 +28,7 @@ export class IndexBufferBinding {
      * @param buffer - Index buffer
      * @param format - Index buffer format
      */
-    constructor(buffer: Buffer, format: IndexFormat) {
+    constructor(buffer: Buffer, format: GPUIndexFormat) {
         this._buffer = buffer;
         this._format = format;
     }

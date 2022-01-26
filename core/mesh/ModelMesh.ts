@@ -2,10 +2,8 @@ import {Color, Vector2, Vector3, Vector4} from "@oasis-engine/math";
 import {Mesh} from "../graphic/Mesh";
 import {Buffer} from "../graphic/Buffer";
 import {Engine} from "../Engine";
-import {IndexFormat} from "../graphic/enums/IndexFormat";
-import {VertexElement} from "../graphic/VertexElement";
-import {VertexBufferBinding} from "../graphic/VertexBufferBinding";
 import {IndexBufferBinding} from "../graphic/IndexBufferBinding";
+import {VertexAttribute, VertexBufferLayout} from "../webgpu/state/VertexState";
 
 /**
  * Mesh containing common vertex elements of the model.
@@ -16,12 +14,11 @@ export class ModelMesh extends Mesh {
     private _verticesFloat32: Float32Array | null = null;
     private _verticesUint8: Uint8Array | null = null;
     private _indices: Uint8Array | Uint16Array | Uint32Array | null = null;
-    private _indicesFormat: IndexFormat = null;
+    private _indicesFormat: GPUIndexFormat = null;
     private _vertexSlotChanged: boolean = true;
     private _vertexChangeFlag: number = 0;
     private _indicesChangeFlag: boolean = false;
     private _elementCount: number = 0;
-    private _vertexElementsCache: VertexElement[] = [];
 
     private _positions: Vector3[] = [];
     private _normals: Vector3[] | null = null;
@@ -292,7 +289,7 @@ export class ModelMesh extends Mesh {
 
         if (this._indices !== indices) {
             this._indices = indices;
-            this._indicesFormat = IndexFormat.UInt32;
+            this._indicesFormat = 'uint32';
         }
 
         this._indicesChangeFlag = true;
@@ -316,10 +313,10 @@ export class ModelMesh extends Mesh {
 
         const {_indices} = this;
 
-        // Vertex element change.
+        // Vertex layout change.
         if (this._vertexSlotChanged) {
-            const vertexElements = this._updateVertexElements();
-            this._setVertexElements(vertexElements);
+            const vertexLayouts = this._updateVertexLayouts();
+            this._setVertexLayouts([vertexLayouts]);
             this._vertexChangeFlag = ValueChanged.All;
             this._vertexSlotChanged = false;
         }
@@ -327,7 +324,7 @@ export class ModelMesh extends Mesh {
         // Vertex value change.
         const vertexBufferBindings = this._vertexBufferBindings;
         const elementCount = this._elementCount;
-        const vertexBuffer = vertexBufferBindings[0]?._buffer;
+        const vertexBuffer = vertexBufferBindings[0];
         const vertexFloatCount = elementCount * this._vertexCount;
         if (!vertexBuffer || this._verticesFloat32.length !== vertexFloatCount) {
             // vertexBuffer?.destroy();
@@ -340,7 +337,7 @@ export class ModelMesh extends Mesh {
 
             const newVertexBuffer = new Buffer(this.engine, vertices, GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST);
             newVertexBuffer.setData(vertices);
-            this._setVertexBufferBinding(0, new VertexBufferBinding(newVertexBuffer, elementCount * 4));
+            this._setVertexBufferBinding(0, newVertexBuffer);
         }
 
         const indexBuffer = this._indexBufferBinding?._buffer;
@@ -368,71 +365,76 @@ export class ModelMesh extends Mesh {
         // this.clearBlendShapes();
     }
 
-    private _updateVertexElements(): VertexElement[] {
-        const vertexElements = this._vertexElementsCache;
-        vertexElements.length = 1;
-        vertexElements[0] = POSITION_VERTEX_ELEMENT;
+    private _updateVertexLayouts(): VertexBufferLayout {
+        const attrs: VertexAttribute[] = [];
+        attrs.length = 1;
+        attrs[0] = POSITION_VERTEX_ELEMENT;
 
         let offset = 12;
         let elementCount = 3;
         if (this._normals) {
-            vertexElements.push(new VertexElement("NORMAL", offset, 'float32x3', 0));
+            attrs.push(new VertexAttribute("NORMAL", offset, 'float32x3', 1));
             offset += 12;
             elementCount += 3;
         }
         if (this._colors) {
-            vertexElements.push(new VertexElement("COLOR_0", offset, 'float32x4', 0));
+            attrs.push(new VertexAttribute("COLOR_0", offset, 'float32x4', 2));
             offset += 16;
             elementCount += 4;
         }
         if (this._tangents) {
-            vertexElements.push(new VertexElement("TANGENT", offset, 'float32x4', 0));
+            attrs.push(new VertexAttribute("TANGENT", offset, 'float32x4', 3));
             offset += 16;
             elementCount += 4;
         }
         if (this._uv) {
-            vertexElements.push(new VertexElement("TEXCOORD_0", offset, 'float32x2', 0));
+            attrs.push(new VertexAttribute("TEXCOORD_0", offset, 'float32x2', 4));
             offset += 8;
             elementCount += 2;
         }
         if (this._uv1) {
-            vertexElements.push(new VertexElement("TEXCOORD_1", offset,'float32x2', 0));
+            attrs.push(new VertexAttribute("TEXCOORD_1", offset,'float32x2', 5));
             offset += 8;
             elementCount += 2;
         }
         if (this._uv2) {
-            vertexElements.push(new VertexElement("TEXCOORD_2", offset, 'float32x2', 0));
+            attrs.push(new VertexAttribute("TEXCOORD_2", offset, 'float32x2', 6));
             offset += 8;
             elementCount += 2;
         }
         if (this._uv3) {
-            vertexElements.push(new VertexElement("TEXCOORD_3", offset, 'float32x2', 0));
+            attrs.push(new VertexAttribute("TEXCOORD_3", offset, 'float32x2', 7));
             offset += 8;
             elementCount += 2;
         }
         if (this._uv4) {
-            vertexElements.push(new VertexElement("TEXCOORD_4", offset, 'float32x2', 0));
+            attrs.push(new VertexAttribute("TEXCOORD_4", offset, 'float32x2', 8));
             offset += 8;
             elementCount += 2;
         }
         if (this._uv5) {
-            vertexElements.push(new VertexElement("TEXCOORD_5", offset, 'float32x2', 0));
+            attrs.push(new VertexAttribute("TEXCOORD_5", offset, 'float32x2', 9));
             offset += 8;
             elementCount += 2;
         }
         if (this._uv6) {
-            vertexElements.push(new VertexElement("TEXCOORD_6", offset, 'float32x2', 0));
+            attrs.push(new VertexAttribute("TEXCOORD_6", offset, 'float32x2', 10));
             offset += 8;
             elementCount += 2;
         }
         if (this._uv7) {
-            vertexElements.push(new VertexElement("TEXCOORD_7", offset, 'float32x2', 0));
+            attrs.push(new VertexAttribute("TEXCOORD_7", offset, 'float32x2', 11));
             offset += 8;
             elementCount += 2;
         }
 
+        const vertexBufferLayout = new VertexBufferLayout();
+        vertexBufferLayout.arrayStride = elementCount * 4;
+        vertexBufferLayout.attributes = attrs;
+        vertexBufferLayout.stepMode = 'vertex';
+
         this._elementCount = elementCount;
-        return vertexElements;
+        return vertexBufferLayout;
     }
 
     private _updateVertices(vertices: Float32Array): void {
@@ -626,7 +628,7 @@ export class ModelMesh extends Mesh {
     }
 }
 
-const POSITION_VERTEX_ELEMENT = new VertexElement("POSITION", 0, 'float32x3', 0);
+const POSITION_VERTEX_ELEMENT = new VertexAttribute("POSITION", 0, 'float32x3', 0);
 
 enum ValueChanged {
     Position = 0x1,

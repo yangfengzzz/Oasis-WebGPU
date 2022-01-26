@@ -1,5 +1,3 @@
-import {MeshTopology} from "./enums/MeshTopology";
-
 /**
  * Sub-mesh, mainly contains drawing information.
  */
@@ -9,7 +7,7 @@ export class SubMesh {
     /** Drawing count. */
     count: number;
     /** Drawing topology. */
-    topology: MeshTopology;
+    topology: GPUPrimitiveTopology;
 
     /**
      * Create a sub-mesh.
@@ -17,7 +15,7 @@ export class SubMesh {
      * @param count - Drawing count
      * @param topology - Drawing topology
      */
-    constructor(start: number = 0, count: number = 0, topology: MeshTopology = MeshTopology.Triangles) {
+    constructor(start: number = 0, count: number = 0, topology: GPUPrimitiveTopology = 'triangle-list') {
         this.start = start;
         this.count = count;
         this.topology = topology;

@@ -1,13 +1,12 @@
 import {BoundingBox} from "@oasis-engine/math";
 import {RefObject} from "../asset/RefObject";
 import {Engine} from "../Engine";
-import {MeshTopology} from "./enums/MeshTopology";
 import {IndexBufferBinding} from "./IndexBufferBinding";
 import {SubMesh} from "./SubMesh";
-import {VertexBufferBinding} from "./VertexBufferBinding";
-import {VertexElement} from "./VertexElement";
 import {UpdateFlag} from "../UpdateFlag";
 import {UpdateFlagManager} from "../UpdateFlagManager";
+import {Buffer} from "./Buffer";
+import {VertexBufferLayout} from "../webgpu/state/VertexState";
 
 /**
  * Mesh.
@@ -18,16 +17,14 @@ export abstract class Mesh extends RefObject {
     /** The bounding volume of the mesh. */
     readonly bounds: BoundingBox = new BoundingBox();
 
-    _vertexElementMap: Record<string, VertexElement> = {};
-
     /** @internal */
     _instanceCount: number = 0;
     /** @internal */
-    _vertexBufferBindings: VertexBufferBinding[] = [];
+    _vertexBufferBindings: Buffer[] = [];
     /** @internal */
     _indexBufferBinding: IndexBufferBinding = null;
     /** @internal */
-    _vertexElements: VertexElement[] = [];
+    _vertexBufferLayouts: VertexBufferLayout[] = [];
 
     private _subMeshes: SubMesh[] = [];
     private _updateFlagManager: UpdateFlagManager = new UpdateFlagManager();
@@ -58,24 +55,29 @@ export abstract class Mesh extends RefObject {
 
     /**
      * Add sub-mesh, each sub-mesh can correspond to an independent material.
-     * @param subMesh - Start drawing offset, if the index buffer is set, it means the offset in the index buffer, if not set, it means the offset in the vertex buffer
+     * @param subMesh - Start drawing offset, if the index buffer is set,
+     * it means the offset in the index buffer, if not set, it means the offset in the vertex buffer
      * @returns Sub-mesh
      */
     addSubMesh(subMesh: SubMesh): SubMesh;
 
     /**
      * Add sub-mesh, each sub-mesh can correspond to an independent material.
-     * @param start - Start drawing offset, if the index buffer is set, it means the offset in the index buffer, if not set, it means the offset in the vertex buffer
-     * @param count - Drawing count, if the index buffer is set, it means the count in the index buffer, if not set, it means the count in the vertex buffer
+     * @param start - Start drawing offset, if the index buffer is set,
+     * it means the offset in the index buffer, if not set,
+     * it means the offset in the vertex buffer
+     * @param count - Drawing count, if the index buffer is set,
+     * it means the count in the index buffer, if not set,
+     * it means the count in the vertex buffer
      * @param topology - Drawing topology, default is MeshTopology.Triangles
      * @returns Sub-mesh
      */
-    addSubMesh(start: number, count: number, topology?: MeshTopology): SubMesh;
+    addSubMesh(start: number, count: number, topology?: GPUPrimitiveTopology): SubMesh;
 
     addSubMesh(
         startOrSubMesh: number | SubMesh,
         count?: number,
-        topology: MeshTopology = MeshTopology.Triangles
+        topology: GPUPrimitiveTopology = 'triangle-list'
     ): SubMesh {
         if (typeof startOrSubMesh === "number") {
             startOrSubMesh = new SubMesh(startOrSubMesh, count, topology);
@@ -104,7 +106,7 @@ export abstract class Mesh extends RefObject {
     }
 
     /**
-     * Register update flag, update flag will be true if the vertex element changes.
+     * Register update flag, update flag will be true if the vertex layout changes.
      * @returns Update flag
      */
     registerUpdateFlag(): UpdateFlag {
@@ -118,7 +120,7 @@ export abstract class Mesh extends RefObject {
         super._addRefCount(value);
         const vertexBufferBindings = this._vertexBufferBindings;
         for (let i = 0, n = vertexBufferBindings.length; i < n; i++) {
-            vertexBufferBindings[i]._buffer._addRefCount(value);
+            vertexBufferBindings[i]._addRefCount(value);
         }
     }
 
@@ -129,22 +131,21 @@ export abstract class Mesh extends RefObject {
     _onDestroy(): void {
         this._vertexBufferBindings = null;
         this._indexBufferBinding = null;
-        this._vertexElements = null;
-        this._vertexElementMap = null;
+        this._vertexBufferLayouts = null;
     }
 
-    protected _setVertexElements(elements: VertexElement[]): void {
-        this._clearVertexElements();
-        for (let i = 0, n = elements.length; i < n; i++) {
-            this._addVertexElement(elements[i]);
+    protected _setVertexLayouts(layouts: VertexBufferLayout[]): void {
+        this._clearVertexLayouts();
+        for (let i = 0, n = layouts.length; i < n; i++) {
+            this._addVertexLayout(layouts[i]);
         }
     }
 
-    protected _setVertexBufferBinding(index: number, binding: VertexBufferBinding): void {
+    protected _setVertexBufferBinding(index: number, binding: Buffer): void {
         if (this._getRefCount() > 0) {
             const lastBinding = this._vertexBufferBindings[index];
-            lastBinding && lastBinding._buffer._addRefCount(-1);
-            binding._buffer._addRefCount(1);
+            lastBinding && lastBinding._addRefCount(-1);
+            binding._addRefCount(1);
         }
         this._vertexBufferBindings[index] = binding;
     }
@@ -157,18 +158,12 @@ export abstract class Mesh extends RefObject {
         }
     }
 
-    private _clearVertexElements(): void {
-        this._vertexElements.length = 0;
-        const vertexElementMap = this._vertexElementMap;
-        for (const k in vertexElementMap) {
-            delete vertexElementMap[k];
-        }
+    private _clearVertexLayouts(): void {
+        this._vertexBufferLayouts.length = 0;
     }
 
-    private _addVertexElement(element: VertexElement): void {
-        const {semantic} = element;
-        this._vertexElementMap[semantic] = element;
-        this._vertexElements.push(element);
+    private _addVertexLayout(layout: VertexBufferLayout): void {
+        this._vertexBufferLayouts.push(layout);
         this._updateFlagManager.distribute();
     }
 }

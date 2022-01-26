@@ -62,28 +62,30 @@ export class MeshRenderer extends Renderer implements ICustomClone {
         if (mesh) {
             if (this._meshUpdateFlag.flag) {
                 const shaderData = this.shaderData;
-                const vertexElements = mesh._vertexElements;
+                const vertexLayouts = mesh._vertexBufferLayouts;
 
                 shaderData.disableMacro(MeshRenderer._uvMacro);
                 shaderData.disableMacro(MeshRenderer._normalMacro);
                 shaderData.disableMacro(MeshRenderer._tangentMacro);
                 shaderData.disableMacro(MeshRenderer._vertexColorMacro);
 
-                for (let i = 0, n = vertexElements.length; i < n; i++) {
-                    const {semantic} = vertexElements[i];
-                    switch (semantic) {
-                        case "TEXCOORD_0":
-                            shaderData.enableMacro(MeshRenderer._uvMacro);
-                            break;
-                        case "NORMAL":
-                            shaderData.enableMacro(MeshRenderer._normalMacro);
-                            break;
-                        case "TANGENT":
-                            shaderData.enableMacro(MeshRenderer._tangentMacro);
-                            break;
-                        case "COLOR_0":
-                            shaderData.enableMacro(MeshRenderer._vertexColorMacro);
-                            break;
+                for (let i = 0, n = vertexLayouts.length; i < n; i++) {
+                    for (let j = 0, m = vertexLayouts[i].attributes.length; j < m; j++) {
+                        const {semantic} = vertexLayouts[i].attributes[j];
+                        switch (semantic) {
+                            case "TEXCOORD_0":
+                                shaderData.enableMacro(MeshRenderer._uvMacro);
+                                break;
+                            case "NORMAL":
+                                shaderData.enableMacro(MeshRenderer._normalMacro);
+                                break;
+                            case "TANGENT":
+                                shaderData.enableMacro(MeshRenderer._tangentMacro);
+                                break;
+                            case "COLOR_0":
+                                shaderData.enableMacro(MeshRenderer._vertexColorMacro);
+                                break;
+                        }
                     }
                 }
                 this._meshUpdateFlag.flag = false;

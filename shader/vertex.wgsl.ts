@@ -15,7 +15,7 @@ var<uniform> uMVMatrix: uMVMatrixUniforms;
 struct VertexInput {
     [[location(0)]] aVertexPosition: vec3<f32>;
     [[location(1)]] aVertexColor: vec3<f32>;
-    [[location(2)]] aVertexUV: vec2<f32>;
+    [[location(4)]] aVertexUV: vec2<f32>;
 };
 
 struct Output {

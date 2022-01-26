@@ -20,8 +20,6 @@ import {
     VertexState
 } from "../../webgpu";
 import {ColorTargetState} from "../../webgpu/state/FragmentState";
-import {VertexAttribute, VertexBufferLayout} from "../../webgpu/state/VertexState";
-import {Mesh} from "../../graphic/Mesh";
 import {Engine} from "../../Engine";
 import {RenderElement} from "../RenderElement";
 
@@ -97,8 +95,8 @@ export class ForwardSubpass extends Subpass {
 
             this._fragment.module = this._shaderProgram.fragmentShader;
             this._fragment.entryPoint = 'main';
-            this._fragment.targets.length = 1;
 
+            this._fragment.targets.length = 1;
             const colorTargetState = new ColorTargetState();
             colorTargetState.format = this._engine.renderContext.drawableTextureFormat();
             this._fragment.targets[0] = colorTargetState;
@@ -143,34 +141,17 @@ export class ForwardSubpass extends Subpass {
             const uniformBindGroup = device.createBindGroup(this._bindGroupDescriptor);
             renderPassEncoder.setBindGroup(0, uniformBindGroup);
 
-            this._bindVertexAttrib(mesh);
+            this._vertex.buffers.length = mesh._vertexBufferLayouts.length;
+            for (let j = 0, m = mesh._vertexBufferLayouts.length; j < m; j++) {
+                this._vertex.buffers[j] = mesh._vertexBufferLayouts[j];
+            }
+
             material.renderState._apply(this._forwardPipelineDescriptor, renderPassEncoder, false);
             const renderPipeline = device.createRenderPipeline(this._forwardPipelineDescriptor);
             renderPassEncoder.setPipeline(renderPipeline);
-            renderPassEncoder.setVertexBuffer(0, mesh._vertexBufferBindings[0]._buffer._nativeBuffer);
+            renderPassEncoder.setVertexBuffer(0, mesh._vertexBufferBindings[0]._nativeBuffer);
             renderPassEncoder.setIndexBuffer(mesh._indexBufferBinding.buffer._nativeBuffer, "uint32");
             renderPassEncoder.drawIndexed(subMesh.count, 1, subMesh.start, 0, 0);
         }
-    }
-
-    private _bindVertexAttrib(primitive: Mesh) {
-        const attributes = primitive._vertexElements;
-
-        const attrs: VertexAttribute[] = [];
-        attrs.length = attributes.length;
-        for (let i = 0; i < attributes.length; i++) {
-            const attr = new VertexAttribute();
-            attr.shaderLocation = i;
-            attr.offset = attributes[i].offset;
-            attr.format = attributes[i].format;
-            attrs[i] = attr;
-        }
-
-        this._vertex.buffers.length = 1;
-        const vertexBufferLayout = new VertexBufferLayout();
-        vertexBufferLayout.arrayStride = primitive._vertexBufferBindings[0].stride;
-        vertexBufferLayout.attributes = attrs;
-        vertexBufferLayout.stepMode = 'vertex';
-        this._vertex.buffers[0] = vertexBufferLayout;
     }
 }
