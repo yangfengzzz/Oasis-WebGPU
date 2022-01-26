@@ -253,7 +253,7 @@ export abstract class Renderer extends Component {
         const normalMatrix = this._normalMatrix;
 
         Matrix.multiply(viewMatrix, worldMatrix, mvMatrix);
-        Matrix.multiply(projectionMatrix.multiply(viewMatrix), worldMatrix, mvpMatrix);
+        Matrix.multiply(projectionMatrix, mvMatrix, mvpMatrix);
         Matrix.invert(mvMatrix, mvInvMatrix);
         Matrix.invert(worldMatrix, normalMatrix);
         normalMatrix.transpose();
