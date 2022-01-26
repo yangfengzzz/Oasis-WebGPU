@@ -22,6 +22,7 @@ import {
 } from "../../webgpu";
 import {Engine} from "../../Engine";
 import {RenderElement} from "../RenderElement";
+import {WgslReflect} from "../../webgpu/wgsl_reflect.module.js";
 
 export class ForwardSubpass extends Subpass {
     private _scene: Scene;
@@ -50,6 +51,17 @@ export class ForwardSubpass extends Subpass {
         super(engine);
         const device = this._engine.device;
         this._shaderProgram = new ShaderProgram(device, vxCode, fxCode);
+        {
+            const reflect = new WgslReflect(vxCode);
+            // Vertex shader inputs
+            console.log(reflect.entry.vertex[0].inputs.length); // 4, inputs to "main"
+            console.log(reflect.entry.vertex[0].inputs[0].name); // "a_position"
+            console.log(reflect.entry.vertex[0].inputs[0].location); // 0
+            console.log(reflect.entry.vertex[0].inputs[0].locationType); // "location" (can be "builtin")
+            console.log(reflect.entry.vertex[0].inputs[0].type.name); // "vec3"
+            console.log(reflect.entry.vertex[0].inputs[0].type.format.name); // "f32"
+        }
+
         {
             this._bindGroupLayoutDescriptor.entries.length = 2;
             const uniform1 = new BindGroupLayoutEntry();
