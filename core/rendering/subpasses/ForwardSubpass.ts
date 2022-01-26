@@ -117,7 +117,7 @@ export class ForwardSubpass extends Subpass {
         renderPassEncoder.popDebugGroup();
     }
 
-    _drawMeshes(renderPassEncoder: GPURenderPassEncoder): void {
+    private _drawMeshes(renderPassEncoder: GPURenderPassEncoder): void {
         this._opaqueQueue = [];
         this._alphaTestQueue = [];
         this._transparentQueue = [];
@@ -145,6 +145,7 @@ export class ForwardSubpass extends Subpass {
             for (let j = 0, m = mesh._vertexBufferLayouts.length; j < m; j++) {
                 this._vertex.buffers[j] = mesh._vertexBufferLayouts[j];
             }
+            this._primitive.topology = subMesh.topology;
             material.renderState._apply(this._forwardPipelineDescriptor, renderPassEncoder, false);
             const renderPipeline = device.createRenderPipeline(this._forwardPipelineDescriptor);
             renderPassEncoder.setPipeline(renderPipeline);
@@ -152,7 +153,7 @@ export class ForwardSubpass extends Subpass {
             for (let j = 0, m = mesh._vertexBufferBindings.length; j < m; j++) {
                 renderPassEncoder.setVertexBuffer(j, mesh._vertexBufferBindings[j]._nativeBuffer);
             }
-            renderPassEncoder.setIndexBuffer(mesh._indexBufferBinding.buffer._nativeBuffer, "uint32");
+            renderPassEncoder.setIndexBuffer(mesh._indexBufferBinding.buffer._nativeBuffer, mesh._indexBufferBinding.format);
             renderPassEncoder.drawIndexed(subMesh.count, 1, subMesh.start, 0, 0);
         }
     }
