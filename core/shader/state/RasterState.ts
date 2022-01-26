@@ -1,4 +1,4 @@
-import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
+import {RenderPipelineDescriptor} from "../../webgpu";
 
 export class RasterState {
     /** Specifies whether or not front- and/or back-facing polygons can be culled. */

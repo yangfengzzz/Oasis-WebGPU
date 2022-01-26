@@ -1,9 +1,6 @@
 import {Subpass} from "../Subpass";
 import {Scene} from "../../Scene";
 import {Camera} from "../../Camera";
-import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
-import {PipelineLayoutDescriptor} from "../../webgpu/PipelineLayoutDescriptor";
-import {DepthStencilState, FragmentState, MultisampleState, PrimitiveState, VertexState} from "../../webgpu/state";
 import {Matrix, Vector3} from "@oasis-engine/math";
 import {PrimitiveMesh} from "../../mesh/PrimitiveMesh";
 import {ShaderProgram} from "../../shader/ShaderProgram";
@@ -14,9 +11,12 @@ import {SubMesh} from "../../graphic/SubMesh";
 import {
     BindGroupLayoutDescriptor,
     BindGroupLayoutEntry,
-    BufferBindingLayout
-} from "../../webgpu/BindGroupLayoutDescriptor";
-import {BindGroupDescriptor, BindGroupEntry, BufferBinding} from "../../webgpu/BindGroupDescriptor";
+    BufferBindingLayout,
+    PipelineLayoutDescriptor,
+    RenderPipelineDescriptor,
+    DepthStencilState, FragmentState, MultisampleState, PrimitiveState, VertexState,
+    BindGroupDescriptor, BindGroupEntry, BufferBinding
+} from "../../webgpu";
 import {ColorTargetState} from "../../webgpu/state/FragmentState";
 import {VertexAttribute, VertexBufferLayout} from "../../webgpu/state/VertexState";
 import {ModelMesh} from "../../mesh/ModelMesh";

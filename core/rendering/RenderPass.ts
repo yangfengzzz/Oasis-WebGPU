@@ -1,4 +1,4 @@
-import {RenderPassDescriptor} from "../webgpu/RenderPassDescriptor";
+import {RenderPassDescriptor} from "../webgpu";
 import {Subpass} from "./Subpass";
 import {Scene} from "../Scene";
 import {Camera} from "../Camera";

@@ -1,5 +1,4 @@
-import {Extent3DDict, TextureDescriptor} from "../webgpu/TextureDescriptor";
-import {CanvasConfiguration} from "../webgpu/CanvasConfiguration";
+import {Extent3DDict, TextureDescriptor, CanvasConfiguration} from "../webgpu";
 
 export class RenderContext {
     private _adapter: GPUAdapter;

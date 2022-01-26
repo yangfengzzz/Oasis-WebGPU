@@ -2,7 +2,7 @@ import {BlendState} from "./BlendState";
 import {DepthState} from "./DepthState";
 import {RasterState} from "./RasterState";
 import {StencilState} from "./StencilState";
-import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
+import {RenderPipelineDescriptor} from "../../webgpu";
 
 /**
  * Render state.

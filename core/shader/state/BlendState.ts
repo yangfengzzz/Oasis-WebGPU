@@ -4,7 +4,7 @@ import {
     ColorTargetState as WGPUColorTargetState,
     BlendState as WGPUBlendState,
 } from "../../webgpu/state/FragmentState";
-import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
+import {RenderPipelineDescriptor} from "../../webgpu";
 
 /**
  * Blend state.

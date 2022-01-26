@@ -1,5 +1,4 @@
-import {DepthStencilState} from "../../webgpu/state";
-import {RenderPipelineDescriptor} from "../../webgpu/RenderPipelineDescriptor";
+import {RenderPipelineDescriptor} from "../../webgpu";
 
 /**
  * Stencil state.
