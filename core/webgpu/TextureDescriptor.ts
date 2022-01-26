@@ -24,3 +24,9 @@ export class TextureViewDescriptor implements GPUTextureViewDescriptor {
     baseArrayLayer?: GPUIntegerCoordinate;
     arrayLayerCount?: GPUIntegerCoordinate;
 }
+
+export class ExternalTextureDescriptor implements GPUExternalTextureDescriptor {
+    colorSpace?: GPUPredefinedColorSpace;
+    label?: string;
+    source: HTMLVideoElement;
+}
