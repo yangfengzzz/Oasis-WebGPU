@@ -40,7 +40,7 @@ export class ForwardSubpass extends Subpass {
     private _vertex = new VertexState();
 
     private _bindGroupLayoutDescriptor = new BindGroupLayoutDescriptor();
-    private _uniformGroupLayout: GPUBindGroupLayout;
+    private _bindGroupLayout: GPUBindGroupLayout;
     private _bindGroupDescriptor = new BindGroupDescriptor();
 
     private _pipelineLayoutDescriptor = new PipelineLayoutDescriptor();
@@ -66,10 +66,10 @@ export class ForwardSubpass extends Subpass {
             uniform2.buffer = new BufferBindingLayout();
             uniform2.buffer.type = 'uniform';
             this._bindGroupLayoutDescriptor.entries[1] = uniform2;
-            this._uniformGroupLayout = device.createBindGroupLayout(this._bindGroupLayoutDescriptor);
+            this._bindGroupLayout = device.createBindGroupLayout(this._bindGroupLayoutDescriptor);
         }
         {
-            this._bindGroupDescriptor.layout = this._uniformGroupLayout;
+            this._bindGroupDescriptor.layout = this._bindGroupLayout;
             this._bindGroupDescriptor.entries.length = 2;
             const uniform1 = new BindGroupEntry();
             uniform1.binding = 0;
@@ -88,7 +88,7 @@ export class ForwardSubpass extends Subpass {
         this._forwardPipelineDescriptor.label = "Forward Pipeline";
         {
             this._pipelineLayoutDescriptor.bindGroupLayouts.length = 1;
-            this._pipelineLayoutDescriptor.bindGroupLayouts[0] = this._uniformGroupLayout;
+            this._pipelineLayoutDescriptor.bindGroupLayouts[0] = this._bindGroupLayout;
             this._pipelineLayout = device.createPipelineLayout(this._pipelineLayoutDescriptor);
             this._forwardPipelineDescriptor.layout = this._pipelineLayout;
 
@@ -98,17 +98,11 @@ export class ForwardSubpass extends Subpass {
             this._fragment.module = this._shaderProgram.fragmentShader;
             this._fragment.entryPoint = 'main';
             this._fragment.targets.length = 1;
+
             const colorTargetState = new ColorTargetState();
             colorTargetState.format = this._engine.renderContext.drawableTextureFormat();
             this._fragment.targets[0] = colorTargetState;
-
-            this._primitive.topology = 'triangle-list';
-
-            this._depthStencilState.depthWriteEnabled = true;
-            this._depthStencilState.depthCompare = 'less';
             this._depthStencilState.format = this._engine.renderContext.depthStencilTextureFormat();
-
-            this._multisample.count = 1;
         }
     }
 
@@ -150,6 +144,7 @@ export class ForwardSubpass extends Subpass {
             renderPassEncoder.setBindGroup(0, uniformBindGroup);
 
             this._bindVertexAttrib(mesh);
+            material.renderState._apply(this._forwardPipelineDescriptor, renderPassEncoder, false);
             const renderPipeline = device.createRenderPipeline(this._forwardPipelineDescriptor);
             renderPassEncoder.setPipeline(renderPipeline);
             renderPassEncoder.setVertexBuffer(0, mesh._vertexBufferBindings[0]._buffer._nativeBuffer);

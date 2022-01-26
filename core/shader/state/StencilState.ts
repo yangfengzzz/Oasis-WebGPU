@@ -1,4 +1,5 @@
 import {RenderPipelineDescriptor} from "../../webgpu";
+import {StencilFaceState} from "../../webgpu/state/DepthStencilState";
 
 /**
  * Stencil state.
@@ -29,6 +30,9 @@ export class StencilState {
     /** specifying the function to use for back face when the stencil test passes, but the depth test fails. */
     zFailOperationBack: GPUStencilOperation = 'keep';
 
+    private _stencilFront = new StencilFaceState();
+    private _stencilBack = new StencilFaceState();
+
     platformApply(pipelineDescriptor: RenderPipelineDescriptor,
                   encoder: GPURenderPassEncoder): void {
         const {
@@ -48,22 +52,25 @@ export class StencilState {
         const depthStencil = pipelineDescriptor.depthStencil;
 
         if (enabled) {
+            depthStencil.stencilFront = this._stencilFront;
+            depthStencil.stencilBack = this._stencilBack;
+
             encoder.setStencilReference(referenceValue);
             depthStencil.stencilReadMask = mask;
-            depthStencil.stencilFront.compare = compareFunctionFront;
-            depthStencil.stencilBack.compare = compareFunctionBack;
+            this._stencilFront.compare = compareFunctionFront;
+            this._stencilBack.compare = compareFunctionBack;
+
+            // apply stencil operation.
+            this._stencilFront.failOp = failOperationFront;
+            this._stencilFront.depthFailOp = zFailOperationFront;
+            this._stencilFront.passOp = passOperationFront;
+
+            this._stencilBack.failOp = failOperationBack;
+            this._stencilBack.depthFailOp = zFailOperationBack;
+            this._stencilBack.passOp = passOperationBack;
+
+            // apply write mask.
+            depthStencil.stencilWriteMask = writeMask;
         }
-
-        // apply stencil operation.
-        depthStencil.stencilFront.failOp = failOperationFront;
-        depthStencil.stencilFront.depthFailOp = zFailOperationFront;
-        depthStencil.stencilFront.passOp = passOperationFront;
-
-        depthStencil.stencilBack.failOp = failOperationBack;
-        depthStencil.stencilBack.depthFailOp = zFailOperationBack;
-        depthStencil.stencilBack.passOp = passOperationBack;
-
-        // apply write mask.
-        depthStencil.stencilWriteMask = writeMask;
     }
 }

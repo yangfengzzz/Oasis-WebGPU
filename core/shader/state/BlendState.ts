@@ -17,12 +17,7 @@ export class BlendState {
     /** Whether to use (Alpha-to-Coverage) technology. */
     alphaToCoverage: boolean = false;
 
-    private _colorTargetState: WGPUColorTargetState = new WGPUColorTargetState();
     private _blendState: WGPUBlendState = new WGPUBlendState();
-
-    constructor() {
-        this._colorTargetState.blend = this._blendState;
-    }
 
     platformApply(pipelineDescriptor: RenderPipelineDescriptor,
                   encoder: GPURenderPassEncoder): void {
@@ -39,10 +34,7 @@ export class BlendState {
         const {fragment, multisample} = pipelineDescriptor;
 
         if (enabled) {
-            fragment.targets.length = 1;
-            fragment.targets[0] = this._colorTargetState;
-        } else {
-            fragment.targets.length = 0;
+            fragment.targets[0].blend = this._blendState;
         }
 
         if (enabled) {
@@ -60,7 +52,7 @@ export class BlendState {
             encoder.setBlendConstant([this.blendColor.r, this.blendColor.g, this.blendColor.b, this.blendColor.a]);
 
             // apply color mask.
-            this._colorTargetState.writeMask = colorWriteMask;
+            fragment.targets[0].writeMask = colorWriteMask;
         }
 
         // apply alpha to coverage.
