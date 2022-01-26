@@ -23,6 +23,7 @@ import {
 import {Engine} from "../../Engine";
 import {RenderElement} from "../RenderElement";
 import {WgslReflect} from "../../webgpu/wgsl_reflect.module.js";
+import {pp} from "../../webgpu/Preprocessor";
 
 export class ForwardSubpass extends Subpass {
     private _scene: Scene;
@@ -60,6 +61,19 @@ export class ForwardSubpass extends Subpass {
             console.log(reflect.entry.vertex[0].inputs[0].locationType); // "location" (can be "builtin")
             console.log(reflect.entry.vertex[0].inputs[0].type.name); // "vec3"
             console.log(reflect.entry.vertex[0].inputs[0].type.format.name); // "f32"
+
+            const useBindGroup0 = false;
+            const useBindGroup1 = false;
+            const wgslFragment = pp`
+              ${pp._if(useBindGroup0)}
+              @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, read>;
+              ${pp._endif}
+              ${pp._if(useBindGroup1)}
+              @group(1) @binding(0) var image1 : texture_storage_2d<rgba8unorm, read>;
+              ${pp._endif}
+              @stage(fragment) fn main() {}
+            `;
+            console.log(wgslFragment);
         }
 
         {
