@@ -1,7 +1,7 @@
 import {Mesh} from "../graphic/Mesh";
 import {IndexBufferBinding} from "../graphic/IndexBufferBinding";
 import {Buffer} from "../graphic/Buffer";
-import {VertexBufferLayout} from "../webgpu/state/VertexState";
+import {VertexBufferLayout} from "../webgpu";
 
 /**
  * BufferMesh.

@@ -17,9 +17,9 @@ import {
     PipelineLayoutDescriptor,
     PrimitiveState,
     RenderPipelineDescriptor,
-    VertexState
+    VertexState,
+    ColorTargetState
 } from "../../webgpu";
-import {ColorTargetState} from "../../webgpu/state/FragmentState";
 import {Engine} from "../../Engine";
 import {RenderElement} from "../RenderElement";
 

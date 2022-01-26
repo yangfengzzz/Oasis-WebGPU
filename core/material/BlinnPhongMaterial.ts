@@ -1,6 +1,6 @@
 import {Color, Vector4} from "@oasis-engine/math";
 import {Engine} from "../Engine";
-import {Shader} from "../shader/Shader";
+import {Shader} from "../shader";
 import {BaseMaterial} from "./BaseMaterial";
 import {SamplerTexture2D} from "../texture/SamplerTexture2D";
 

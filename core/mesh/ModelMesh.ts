@@ -3,7 +3,7 @@ import {Mesh} from "../graphic/Mesh";
 import {Buffer} from "../graphic/Buffer";
 import {Engine} from "../Engine";
 import {IndexBufferBinding} from "../graphic/IndexBufferBinding";
-import {VertexAttribute, VertexBufferLayout} from "../webgpu/state/VertexState";
+import {VertexAttribute, VertexBufferLayout} from "../webgpu";
 
 /**
  * Mesh containing common vertex elements of the model.
