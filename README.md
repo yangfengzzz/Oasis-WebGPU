@@ -11,3 +11,7 @@ npm run install
 npm run dev
 ```
 
+## Progress
+
+The project is managed by using issues, they are all gather
+into [milestone](https://github.com/yangfengzzz/Oasis-WebGPU/milestones).
