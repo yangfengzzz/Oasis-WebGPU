@@ -5,6 +5,7 @@ import {Renderer} from "./Renderer";
 import {Script} from "./Script";
 import {ShaderMacroCollection} from "./shader/ShaderMacroCollection";
 import {Vector3} from "@oasis-engine/math";
+import {RenderElement} from "./rendering/RenderElement";
 
 /**
  * The manager of the components.
@@ -153,48 +154,50 @@ export class ComponentsManager {
         }
     }
 
-    // callRender(context: RenderContext): void {
-    //     const camera = context._camera;
-    //     const elements = this._renderers._elements;
-    //     for (let i = this._renderers.length - 1; i >= 0; --i) {
-    //         const element = elements[i];
-    //
-    //         // filter by camera culling mask.
-    //         if (!(camera.cullingMask & element._entity.layer)) {
-    //             continue;
-    //         }
-    //
-    //         // filter by camera frustum.
-    //         if (camera.enableFrustumCulling) {
-    //             element.isCulled = !camera._frustum.intersectsBox(element.bounds);
-    //             if (element.isCulled) {
-    //                 continue;
-    //             }
-    //         }
-    //
-    //         const transform = camera.entity.transform;
-    //         const position = transform.worldPosition;
-    //         const center = element.bounds.getCenter(ComponentsManager._tempVector0);
-    //         if (camera.isOrthographic) {
-    //             const forward = transform.getWorldForward(ComponentsManager._tempVector1);
-    //             Vector3.subtract(center, position, center);
-    //             element._distanceForSort = Vector3.dot(center, forward);
-    //         } else {
-    //             element._distanceForSort = Vector3.distanceSquared(center, position);
-    //         }
-    //
-    //         element._updateShaderData(context);
-    //
-    //         element._render(camera);
-    //
-    //         // union camera global macro and renderer macro.
-    //         ShaderMacroCollection.unionCollection(
-    //             camera._globalShaderMacro,
-    //             element.shaderData._macroCollection,
-    //             element._globalShaderMacro
-    //         );
-    //     }
-    // }
+    callRender(camera: Camera,
+               opaqueQueue: RenderElement[],
+               alphaTestQueue: RenderElement[],
+               transparentQueue: RenderElement[]): void {
+        const elements = this._renderers._elements;
+        for (let i = this._renderers.length - 1; i >= 0; --i) {
+            const element = elements[i];
+
+            // filter by camera culling mask.
+            if (!(camera.cullingMask & element._entity.layer)) {
+                continue;
+            }
+
+            // filter by camera frustum.
+            if (camera.enableFrustumCulling) {
+                element.isCulled = !camera._frustum.intersectsBox(element.bounds);
+                if (element.isCulled) {
+                    continue;
+                }
+            }
+
+            const transform = camera.entity.transform;
+            const position = transform.worldPosition;
+            const center = element.bounds.getCenter(ComponentsManager._tempVector0);
+            if (camera.isOrthographic) {
+                const forward = transform.getWorldForward(ComponentsManager._tempVector1);
+                Vector3.subtract(center, position, center);
+                element._distanceForSort = Vector3.dot(center, forward);
+            } else {
+                element._distanceForSort = Vector3.distanceSquared(center, position);
+            }
+
+            element._updateShaderData(camera.viewMatrix, camera.projectionMatrix);
+
+            element._render(opaqueQueue, alphaTestQueue, transparentQueue);
+
+            // union camera global macro and renderer macro.
+            ShaderMacroCollection.unionCollection(
+                camera._globalShaderMacro,
+                element.shaderData._macroCollection,
+                element._globalShaderMacro
+            );
+        }
+    }
 
     callComponentDestroy(): void {
         const destroyComponents = this._destroyComponents;

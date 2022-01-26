@@ -1,16 +1,23 @@
-import {BoundingBox, Matrix, Vector3} from "@oasis-engine/math";
-import {Camera} from "../Camera";
+import {BoundingBox} from "@oasis-engine/math";
+import {Logger} from "../base";
 import {ignoreClone} from "../clone/CloneManager";
 import {ICustomClone} from "../clone/ComponentCloner";
 import {Entity} from "../Entity";
 import {Mesh} from "../graphic/Mesh";
 import {Renderer} from "../Renderer";
+import {Shader} from "../shader";
 import {UpdateFlag} from "../UpdateFlag";
+import {RenderElement} from "../rendering/RenderElement";
 
 /**
  * MeshRenderer Component.
  */
 export class MeshRenderer extends Renderer implements ICustomClone {
+    private static _uvMacro = Shader.getMacroByName("O3_HAS_UV");
+    private static _normalMacro = Shader.getMacroByName("O3_HAS_NORMAL");
+    private static _tangentMacro = Shader.getMacroByName("O3_HAS_TANGENT");
+    private static _vertexColorMacro = Shader.getMacroByName("O3_HAS_VERTEXCOLOR");
+
     @ignoreClone
     private _mesh: Mesh;
     @ignoreClone
@@ -48,8 +55,53 @@ export class MeshRenderer extends Renderer implements ICustomClone {
     /**
      * @internal
      */
-    _render(camera: Camera): void {
+    _render(opaqueQueue: RenderElement[],
+            alphaTestQueue: RenderElement[],
+            transparentQueue: RenderElement[]): void {
+        const mesh = this._mesh;
+        if (mesh) {
+            if (this._meshUpdateFlag.flag) {
+                const shaderData = this.shaderData;
+                const vertexElements = mesh._vertexElements;
 
+                shaderData.disableMacro(MeshRenderer._uvMacro);
+                shaderData.disableMacro(MeshRenderer._normalMacro);
+                shaderData.disableMacro(MeshRenderer._tangentMacro);
+                shaderData.disableMacro(MeshRenderer._vertexColorMacro);
+
+                for (let i = 0, n = vertexElements.length; i < n; i++) {
+                    const {semantic} = vertexElements[i];
+                    switch (semantic) {
+                        case "TEXCOORD_0":
+                            shaderData.enableMacro(MeshRenderer._uvMacro);
+                            break;
+                        case "NORMAL":
+                            shaderData.enableMacro(MeshRenderer._normalMacro);
+                            break;
+                        case "TANGENT":
+                            shaderData.enableMacro(MeshRenderer._tangentMacro);
+                            break;
+                        case "COLOR_0":
+                            shaderData.enableMacro(MeshRenderer._vertexColorMacro);
+                            break;
+                    }
+                }
+                this._meshUpdateFlag.flag = false;
+            }
+
+            const subMeshes = mesh.subMeshes;
+            const renderElementPool = this._engine._renderElementPool;
+            for (let i = 0, n = subMeshes.length; i < n; i++) {
+                const material = this._materials[i];
+                if (material) {
+                    const element = renderElementPool.getFromPool();
+                    element.setValue(this, mesh, subMeshes[i], material);
+                    this._pushPrimitive(element, opaqueQueue, alphaTestQueue, transparentQueue);
+                }
+            }
+        } else {
+            Logger.error("mesh is null.");
+        }
     }
 
     /**

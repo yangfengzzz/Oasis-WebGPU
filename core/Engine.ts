@@ -10,7 +10,7 @@ import {
     RenderPassColorAttachment,
     RenderPassDepthStencilAttachment,
     RenderPassDescriptor
-} from "./webgpu/RenderPassDescriptor";
+} from "./webgpu";
 import {RenderPass} from "./rendering/RenderPass";
 import {SceneManager} from "./SceneManager";
 import {Scene} from "./Scene";
@@ -18,12 +18,15 @@ import {ShaderMacro} from "./shader/ShaderMacro";
 import {Shader} from "./shader";
 import {ShaderMacroCollection} from "./shader/ShaderMacroCollection";
 import {ForwardSubpass} from "./rendering/subpasses/ForwardSubpass";
+import {RenderElement} from "./rendering/RenderElement";
+import {ClassPool} from "./rendering/ClassPool";
 
 export class Engine {
     /** @internal */
     static _gammaMacro: ShaderMacro = Shader.getMacroByName("OASIS_COLORSPACE_GAMMA");
 
     _componentsManager: ComponentsManager = new ComponentsManager();
+    _renderElementPool: ClassPool<RenderElement> = new ClassPool(RenderElement);
 
     /** @internal */
     _macroCollection: ShaderMacroCollection = new ShaderMacroCollection();
@@ -231,6 +234,8 @@ export class Engine {
         const deltaTime = time.deltaTime;
 
         time.tick();
+        this._renderElementPool.resetPool();
+
         const scene = this._sceneManager._activeScene;
         const componentsManager = this._componentsManager;
         if (scene) {
