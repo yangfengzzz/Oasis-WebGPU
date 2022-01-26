@@ -21,18 +21,6 @@ import {Mesh} from "../../graphic/Mesh";
 import {Engine} from "../../Engine";
 import {RenderElement} from "../RenderElement";
 
-const triangleMVMatrix = new Matrix;
-let lastTime = 0, rTri = 0, rSquare = 0;
-const animate = () => {
-    let timeNow = performance.now();
-    if (lastTime != 0) {
-        let elapsed = timeNow - lastTime;
-        rTri += (Math.PI / 180 * 90 * elapsed) / 1000.0;
-        rSquare += (Math.PI / 180 * 75 * elapsed) / 1000.0;
-    }
-    lastTime = timeNow;
-}
-
 export class ForwardSubpass extends Subpass {
     private _scene: Scene;
     private _camera: Camera;
@@ -163,9 +151,8 @@ export class ForwardSubpass extends Subpass {
         for (let i = 0, n = items.length; i < n; i++) {
             const {mesh, subMesh, material, component} = items[i];
 
-            animate();
-            triangleMVMatrix.identity().translate(new Vector3(-1.5, 0.0, -7.0)).multiply(new Matrix().rotateAxisAngle(new Vector3(0, 1, 0), rTri));
-            this._engine.device.queue.writeBuffer(this._mvBuffer._nativeBuffer, 0, triangleMVMatrix.elements);
+            const mvMatrix = component.shaderData.getMatrix("u_MVMat");
+            this._engine.device.queue.writeBuffer(this._mvBuffer._nativeBuffer, 0, mvMatrix.elements);
             const pMatrix = this._camera.shaderData.getMatrix("u_projMat");
             this._engine.device.queue.writeBuffer(this._pBuffer._nativeBuffer, 0, pMatrix.elements);
             renderPassEncoder.setBindGroup(0, this._uniformBindGroup);
