@@ -145,11 +145,13 @@ export class ForwardSubpass extends Subpass {
             for (let j = 0, m = mesh._vertexBufferLayouts.length; j < m; j++) {
                 this._vertex.buffers[j] = mesh._vertexBufferLayouts[j];
             }
-
             material.renderState._apply(this._forwardPipelineDescriptor, renderPassEncoder, false);
             const renderPipeline = device.createRenderPipeline(this._forwardPipelineDescriptor);
             renderPassEncoder.setPipeline(renderPipeline);
-            renderPassEncoder.setVertexBuffer(0, mesh._vertexBufferBindings[0]._nativeBuffer);
+
+            for (let j = 0, m = mesh._vertexBufferBindings.length; j < m; j++) {
+                renderPassEncoder.setVertexBuffer(j, mesh._vertexBufferBindings[j]._nativeBuffer);
+            }
             renderPassEncoder.setIndexBuffer(mesh._indexBufferBinding.buffer._nativeBuffer, "uint32");
             renderPassEncoder.drawIndexed(subMesh.count, 1, subMesh.start, 0, 0);
         }
