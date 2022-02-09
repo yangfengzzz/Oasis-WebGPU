@@ -22,12 +22,8 @@ class MathTemp {
  */
 @dependencies(Transform)
 export class Camera extends Component {
-    private static _viewMatrixProperty = Shader.getPropertyByName("u_viewMat");
-    private static _projectionMatrixProperty = Shader.getPropertyByName("u_projMat");
-    private static _vpMatrixProperty = Shader.getPropertyByName("u_VPMat");
-    private static _inverseViewMatrixProperty = Shader.getPropertyByName("u_viewInvMat");
-    private static _inverseProjectionMatrixProperty = Shader.getPropertyByName("u_projInvMat");
-    private static _cameraPositionProperty = Shader.getPropertyByName("u_cameraPos");
+    private static _cameraProperty = Shader.getPropertyByName("u_cameraData");
+
 
     /** Shader data. */
     readonly shaderData: ShaderData;
@@ -89,6 +85,9 @@ export class Camera extends Component {
     private _lastAspectSize: Vector2 = new Vector2(0, 0);
     @deepClone
     private _invViewProjMat: Matrix = new Matrix();
+    // viewMat, projMat, VPMat, viewInvMat, projInvMat, cameraPos, _pad
+    @deepClone
+    private _cameraData: Float32Array = new Float32Array(84);
 
     /**
      * Near clip plane - the closest point to the camera when rendering occurs.
@@ -249,7 +248,7 @@ export class Camera extends Component {
      */
     constructor(entity: Entity) {
         super(entity);
-        this.shaderData = new ShaderData(ShaderDataGroup.Camera, this._engine.device);
+        this.shaderData = new ShaderData(ShaderDataGroup.Camera, this._engine);
 
         const transform = this.entity.transform;
         this._transform = transform;
@@ -314,7 +313,7 @@ export class Camera extends Component {
             z = z / pointZ;
         }
 
-        this._innerViewportToWorldPoint(point.x, point.y, (z + 1.0) / 2.0, this._getInvViewProjMat(), out);
+        Camera._innerViewportToWorldPoint(point.x, point.y, (z + 1.0) / 2.0, this._getInvViewProjMat(), out);
         return out;
     }
 
@@ -327,9 +326,9 @@ export class Camera extends Component {
     viewportPointToRay(point: Vector2, out: Ray): Ray {
         const invViewProjMat = this._getInvViewProjMat();
         // Use the intersection of the near clipping plane as the origin point.
-        const origin = this._innerViewportToWorldPoint(point.x, point.y, 0.0, invViewProjMat, out.origin);
+        const origin = Camera._innerViewportToWorldPoint(point.x, point.y, 0.0, invViewProjMat, out.origin);
         // Use the intersection of the far clipping plane as the origin point.
-        const direction = this._innerViewportToWorldPoint(point.x, point.y, 1.0, invViewProjMat, out.direction);
+        const direction = Camera._innerViewportToWorldPoint(point.x, point.y, 1.0, invViewProjMat, out.direction);
         Vector3.subtract(direction, origin, direction);
         direction.normalize();
         return out;
@@ -418,13 +417,19 @@ export class Camera extends Component {
             this._globalShaderMacro
         );
 
-        const shaderData = this.shaderData;
-        shaderData.setMatrix(Camera._viewMatrixProperty, this.viewMatrix);
-        shaderData.setMatrix(Camera._projectionMatrixProperty, this.projectionMatrix);
-        shaderData.setMatrix(Camera._vpMatrixProperty, this._viewProjMatrix);
-        shaderData.setMatrix(Camera._inverseViewMatrixProperty, this._transform.worldMatrix);
-        shaderData.setMatrix(Camera._inverseProjectionMatrixProperty, this._getInverseProjectionMatrix());
-        shaderData.setVector3(Camera._cameraPositionProperty, this._transform.worldPosition);
+        const cameraData = this._cameraData;
+        cameraData.set(this.viewMatrix.elements, 0);
+        cameraData.set(this.projectionMatrix.elements, 16);
+        cameraData.set(this._viewProjMatrix.elements, 32);
+        cameraData.set(this._transform.worldMatrix.elements, 48);
+        cameraData.set(this._getInverseProjectionMatrix().elements, 64);
+        const worldPosition = this._transform.worldPosition;
+        cameraData[80] = worldPosition[0];
+        cameraData[81] = worldPosition[1];
+        cameraData[82] = worldPosition[2];
+        // pad
+        cameraData[83] = 0;
+        this.shaderData.setFloatArray(Camera._cameraProperty, cameraData);
     }
 
     /**
@@ -460,7 +465,7 @@ export class Camera extends Component {
         this._isInvViewProjDirty.flag = true;
     }
 
-    private _innerViewportToWorldPoint(x: number, y: number, z: number, invViewProjMat: Matrix, out: Vector3): Vector3 {
+    private static _innerViewportToWorldPoint(x: number, y: number, z: number, invViewProjMat: Matrix, out: Vector3): Vector3 {
         // Depth is a normalized value, 0 is nearPlane, 1 is farClipPlane.
         // Transform to clipping space matrix
         const clipPoint = MathTemp.tempVec3;

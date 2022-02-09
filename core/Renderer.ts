@@ -14,12 +14,7 @@ import {RenderElement} from "./rendering/RenderElement";
  * Renderable component.
  */
 export abstract class Renderer extends Component {
-    private static _localMatrixProperty = Shader.getPropertyByName("u_localMat");
-    private static _worldMatrixProperty = Shader.getPropertyByName("u_modelMat");
-    private static _mvMatrixProperty = Shader.getPropertyByName("u_MVMat");
-    private static _mvpMatrixProperty = Shader.getPropertyByName("u_MVPMat");
-    private static _mvInvMatrixProperty = Shader.getPropertyByName("u_MVInvMat");
-    private static _normalMatrixProperty = Shader.getPropertyByName("u_normalMat");
+    private static _rendererProperty = Shader.getPropertyByName("u_rendererData");
 
     /** ShaderData related to renderer. */
     @deepClone
@@ -64,6 +59,9 @@ export abstract class Renderer extends Component {
     private _normalMatrix: Matrix = new Matrix();
     @ignoreClone
     private _materialsInstanced: boolean[] = [];
+    // localMat, modelMat, MVMat, MVPMat, MVInvMat, normalMat
+    @ignoreClone
+    private _rendererData: Float32Array = new Float32Array(96);
 
     /**
      * Material count.
@@ -97,7 +95,7 @@ export abstract class Renderer extends Component {
      */
     constructor(entity: Entity) {
         super(entity);
-        this.shaderData = new ShaderData(ShaderDataGroup.Renderer, this._engine.device);
+        this.shaderData = new ShaderData(ShaderDataGroup.Renderer, this._engine);
 
         const prototype = Renderer.prototype;
         this._overrideUpdate = this.update !== prototype.update;
@@ -246,7 +244,7 @@ export abstract class Renderer extends Component {
     /**
      * @internal
      */
-    _updateShaderData(viewMatrix: Matrix, projectionMatrix:Matrix): void {
+    _updateShaderData(viewMatrix: Matrix, projectionMatrix: Matrix): void {
         const shaderData = this.shaderData;
         const worldMatrix = this.entity.transform.worldMatrix;
         const mvMatrix = this._mvMatrix;
@@ -260,12 +258,14 @@ export abstract class Renderer extends Component {
         Matrix.invert(worldMatrix, normalMatrix);
         normalMatrix.transpose();
 
-        shaderData.setMatrix(Renderer._localMatrixProperty, this.entity.transform.localMatrix);
-        shaderData.setMatrix(Renderer._worldMatrixProperty, worldMatrix);
-        shaderData.setMatrix(Renderer._mvMatrixProperty, mvMatrix);
-        shaderData.setMatrix(Renderer._mvpMatrixProperty, mvpMatrix);
-        shaderData.setMatrix(Renderer._mvInvMatrixProperty, mvInvMatrix);
-        shaderData.setMatrix(Renderer._normalMatrixProperty, normalMatrix);
+        const rendererData = this._rendererData;
+        rendererData.set(this.entity.transform.localMatrix.elements, 0);
+        rendererData.set(worldMatrix.elements, 16);
+        rendererData.set(mvMatrix.elements, 32);
+        rendererData.set(mvpMatrix.elements, 48);
+        rendererData.set(mvInvMatrix.elements, 64);
+        rendererData.set(normalMatrix.elements, 80);
+        this.shaderData.setFloatArray(Renderer._rendererProperty, rendererData);
     }
 
     _onEnable(): void {
@@ -300,9 +300,9 @@ export abstract class Renderer extends Component {
      * @param transparentQueue
      */
     _pushPrimitive(element: RenderElement,
-                  opaqueQueue: RenderElement[],
-                  alphaTestQueue: RenderElement[],
-                  transparentQueue: RenderElement[]) {
+                   opaqueQueue: RenderElement[],
+                   alphaTestQueue: RenderElement[],
+                   transparentQueue: RenderElement[]) {
         const renderQueueType = element.material.renderQueueType;
 
         if (renderQueueType > (RenderQueueType.Transparent + RenderQueueType.AlphaTest) >> 1) {

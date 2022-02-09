@@ -1,11 +1,11 @@
-import { Background } from "./Background";
-import { EngineObject, Logger } from "./base";
-import { Camera } from "./Camera";
-import { Engine } from "./Engine";
-import { Entity } from "./Entity";
-import { ShaderDataGroup } from "./shader/ShaderDataGroup";
-import { ShaderData } from "./shader";
-import { ShaderMacroCollection } from "./shader/ShaderMacroCollection";
+import {Background} from "./Background";
+import {EngineObject, Logger} from "./base";
+import {Camera} from "./Camera";
+import {Engine} from "./Engine";
+import {Entity} from "./Entity";
+import {ShaderDataGroup} from "./shader/ShaderDataGroup";
+import {ShaderData} from "./shader";
+import {ShaderMacroCollection} from "./shader/ShaderMacroCollection";
 
 /**
  * Scene.
@@ -73,7 +73,7 @@ export class Scene extends EngineObject {
     constructor(engine: Engine, name?: string) {
         super(engine);
         this.name = name || "";
-        this.shaderData = new ShaderData(ShaderDataGroup.Scene, this._engine.device);
+        this.shaderData = new ShaderData(ShaderDataGroup.Scene, this._engine);
 
         const shaderData = this.shaderData;
         shaderData._addRefCount(1);

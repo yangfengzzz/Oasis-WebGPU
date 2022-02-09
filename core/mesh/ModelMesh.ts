@@ -336,7 +336,7 @@ export class ModelMesh extends Mesh {
             this._updateVertices(vertices);
 
             const newVertexBuffer = new Buffer(this.engine, vertices, GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST);
-            newVertexBuffer.setData(vertices);
+            newVertexBuffer.uploadData(vertices);
             this._setVertexBufferBinding(0, newVertexBuffer);
         }
 
@@ -345,7 +345,7 @@ export class ModelMesh extends Mesh {
             if (!indexBuffer || _indices.byteLength != indexBuffer.byteLength) {
                 // indexBuffer?.destroy();
                 let newIndexBuffer = new Buffer(this.engine, <Uint32Array>this._indices, GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST);
-                newIndexBuffer.setData(<Uint32Array>this._indices);
+                newIndexBuffer.uploadData(<Uint32Array>this._indices);
                 this._setIndexBufferBinding(new IndexBufferBinding(newIndexBuffer, this._indicesFormat));
             }
         }
