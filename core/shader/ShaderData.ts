@@ -45,6 +45,13 @@ export class ShaderData implements IRefObject, IClone {
 
     /**
      * Get float by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Float
+     */
+    getFloat(propertyID: number): Buffer;
+
+    /**
+     * Get float by shader property name.
      * @param propertyName - Shader property name
      * @returns Float
      */
@@ -57,7 +64,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getFloat(property: ShaderProperty): Buffer;
 
-    getFloat(property: string | ShaderProperty): Buffer {
+    getFloat(property: number | string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -82,6 +89,14 @@ export class ShaderData implements IRefObject, IClone {
         this._setDataBuffer(property, ShaderData._floatArray1);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    /**
+     * Get int by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Int
+     */
+    getInt(propertyID: number): Buffer;
+
     /**
      * Get int by shader property name.
      * @param propertyName - Shader property name
@@ -96,7 +111,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getInt(property: ShaderProperty): Buffer;
 
-    getInt(property: string | ShaderProperty): Buffer {
+    getInt(property: number | string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -121,6 +136,14 @@ export class ShaderData implements IRefObject, IClone {
         this._setDataBuffer(property, ShaderData._intArray1);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    /**
+     * Get float array by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Float array
+     */
+    getFloatArray(propertyID: number): Buffer;
+
     /**
      * Get float array by shader property name.
      * @param propertyName - Shader property name
@@ -135,7 +158,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getFloatArray(property: ShaderProperty): Buffer;
 
-    getFloatArray(property: string | ShaderProperty): Buffer {
+    getFloatArray(property: number | string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -159,6 +182,14 @@ export class ShaderData implements IRefObject, IClone {
         this._setDataBuffer(property, value);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    /**
+     * Get int array by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Int Array
+     */
+    getIntArray(propertyID: number): Buffer;
+
     /**
      * Get int array by shader property name.
      * @param propertyName - Shader property name
@@ -173,7 +204,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getIntArray(property: ShaderProperty): Buffer;
 
-    getIntArray(property: string | ShaderProperty): Buffer {
+    getIntArray(property: number | string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -197,6 +228,14 @@ export class ShaderData implements IRefObject, IClone {
         this._setDataBuffer(property, value);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    /**
+     * Get two-dimensional from shader property name.
+     * @param propertyID - Shader property name
+     * @returns Two-dimensional vector
+     */
+    getVector2(propertyID: number): Buffer;
+
     /**
      * Get two-dimensional from shader property name.
      * @param propertyName - Shader property name
@@ -211,7 +250,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getVector2(property: ShaderProperty): Buffer;
 
-    getVector2(property: string | ShaderProperty): Buffer {
+    getVector2(property: number | string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -237,6 +276,14 @@ export class ShaderData implements IRefObject, IClone {
         this._setDataBuffer(property, ShaderData._floatArray2);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    /**
+     * Get vector3 by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Three-dimensional vector
+     */
+    getVector3(propertyID: number): Buffer;
+
     /**
      * Get vector3 by shader property name.
      * @param propertyName - Shader property name
@@ -251,7 +298,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getVector3(property: ShaderProperty): Buffer;
 
-    getVector3(property: string | ShaderProperty): Buffer {
+    getVector3(property: number | string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -278,6 +325,14 @@ export class ShaderData implements IRefObject, IClone {
         this._setDataBuffer(property, ShaderData._floatArray3);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    /**
+     * Get vector4 by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Four-dimensional vector
+     */
+    getVector4(propertyID: number): Buffer;
+
     /**
      * Get vector4 by shader property name.
      * @param propertyName - Shader property name
@@ -292,7 +347,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getVector4(property: ShaderProperty): Buffer;
 
-    getVector4(property: string | ShaderProperty): Buffer {
+    getVector4(property: number | string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -320,6 +375,14 @@ export class ShaderData implements IRefObject, IClone {
         this._setDataBuffer(property, ShaderData._floatArray4);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    /**
+     * Get matrix by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Matrix
+     */
+    getMatrix(propertyID: number): Buffer;
+
     /**
      * Get matrix by shader property name.
      * @param propertyName - Shader property name
@@ -334,7 +397,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getMatrix(property: ShaderProperty): Buffer;
 
-    getMatrix(property: string | ShaderProperty): Buffer {
+    getMatrix(property: number | string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -358,6 +421,14 @@ export class ShaderData implements IRefObject, IClone {
         this._setDataBuffer(property, value.elements);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    /**
+     * Get color by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Color
+     */
+    getColor(propertyID: number): Buffer;
+
     /**
      * Get color by shader property name.
      * @param propertyName - Shader property name
@@ -372,7 +443,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getColor(property: ShaderProperty): Buffer;
 
-    getColor(property: string | ShaderProperty): Buffer {
+    getColor(property: number | string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -403,6 +474,13 @@ export class ShaderData implements IRefObject, IClone {
     //------------------------------------------------------------------------------------------------------------------
     /**
      * Get texture by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Texture
+     */
+    getTextureView(propertyID: number): GPUTextureView;
+
+    /**
+     * Get texture by shader property name.
      * @param propertyName - Shader property name
      * @returns Texture
      */
@@ -415,9 +493,16 @@ export class ShaderData implements IRefObject, IClone {
      */
     getTextureView(property: ShaderProperty): GPUTextureView;
 
-    getTextureView(property: string | ShaderProperty): GPUTextureView {
+    getTextureView(property: number | string | ShaderProperty): GPUTextureView {
         return this._getTextureView(property);
     }
+
+    /**
+     * Get texture by shader property name.
+     * @param propertyID - Shader property name
+     * @returns Texture
+     */
+    getSampler(propertyID: number): GPUSampler;
 
     /**
      * Get texture by shader property name.
@@ -433,7 +518,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     getSampler(property: ShaderProperty): GPUSampler;
 
-    getSampler(property: string | ShaderProperty): GPUSampler {
+    getSampler(property: number | string | ShaderProperty): GPUSampler {
         return this._getSampler(property);
     }
 
@@ -457,6 +542,7 @@ export class ShaderData implements IRefObject, IClone {
         this._setSampledTexture(textureProperty, samplerProperty, value);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
     /**
      * Enable macro.
      * @param macroName - Macro name
@@ -552,6 +638,7 @@ export class ShaderData implements IRefObject, IClone {
         // }
     }
 
+    //------------------------------------------------------------------------------------------------------------------
     /**
      * @internal
      */
@@ -621,28 +708,37 @@ export class ShaderData implements IRefObject, IClone {
     /**
      * @internal
      */
-    _getDataBuffer(property: string | ShaderProperty): Buffer {
+    _getDataBuffer(property: number | string | ShaderProperty): Buffer {
         if (typeof property === "string") {
-            property = Shader.getPropertyByName(property);
+            property = Shader.getPropertyByName(property)._uniqueId;
         }
-        return this._propertyResources[property._uniqueId] as Buffer;
+        if (typeof property !== "string" && typeof property !== "number") {
+            property = property._uniqueId;
+        }
+        return this._propertyResources[property] as Buffer;
     }
 
     /**
      * @internal
      */
-    _getSampler(property: string | ShaderProperty): GPUSampler {
+    _getSampler(property: number | string | ShaderProperty): GPUSampler {
         if (typeof property === "string") {
-            property = Shader.getPropertyByName(property);
+            property = Shader.getPropertyByName(property)._uniqueId;
         }
-        return (<SamplerTexture>this._propertyResources[property._uniqueId]).sampler;
+        if (typeof property !== "string" && typeof property !== "number") {
+            property = property._uniqueId;
+        }
+        return (<SamplerTexture>this._propertyResources[property]).sampler;
     }
 
-    _getTextureView(property: string | ShaderProperty): GPUTextureView {
+    _getTextureView(property: number | string | ShaderProperty): GPUTextureView {
         if (typeof property === "string") {
-            property = Shader.getPropertyByName(property);
+            property = Shader.getPropertyByName(property)._uniqueId;
         }
-        return (<SamplerTexture>this._propertyResources[property._uniqueId]).textureView;
+        if (typeof property !== "string" && typeof property !== "number") {
+            property = property._uniqueId;
+        }
+        return (<SamplerTexture>this._propertyResources[property]).textureView;
     }
 
     /**
