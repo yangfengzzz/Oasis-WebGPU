@@ -12,8 +12,9 @@
   "dependencies": {
     "@oasis-engine/controls": "^0.4.6",
     "@oasis-engine/stats": "^0.4.9",
+    "@webgpu/types": "latest",
     "dat.gui": "^0.7.7",
-    "oasis-engine": "^0.6.0",
-    "@webgpu/types": "latest"
+    "murmurhash-js": "^1.0.0",
+    "oasis-engine": "^0.6.0"
   }
 }
