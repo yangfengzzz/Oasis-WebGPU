@@ -1,10 +1,13 @@
 import {SamplerTexture} from "./SamplerTexture";
 import {Engine} from "../Engine";
+import {TextureViewDescriptor} from "../webgpu";
 
 /**
  * Two-dimensional texture.
  */
 export class SamplerTexture2D extends SamplerTexture {
+    private static _textureViewDescriptor: TextureViewDescriptor = new TextureViewDescriptor();
+
     /**
      * Texture format.
      */
@@ -18,6 +21,7 @@ export class SamplerTexture2D extends SamplerTexture {
      * @param width - Texture width
      * @param height - Texture height
      * @param format - Texture format. default  `TextureFormat.R8G8B8A8`
+     * @param usage - Texture usage. default  `TEXTURE_BINDING | COPY_DST`
      * @param mipmap - Whether to use multi-level texture
      */
     constructor(
@@ -25,15 +29,27 @@ export class SamplerTexture2D extends SamplerTexture {
         width: number,
         height: number,
         format: GPUTextureFormat = 'rgba8sint',
+        usage: GPUTextureUsageFlags = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
         mipmap: boolean = true
     ) {
         super(engine);
-        this._mipmap = mipmap;
-        this._platformTextureDesc.size[0] = width;
-        this._platformTextureDesc.size[1] = height;
-        this._platformTextureDesc.format = format;
-        this._platformTextureDesc.mipLevelCount = this._getMipmapCount();
-        this.minFilterMode = this.magFilterMode = 'linear';
-        this.wrapModeU = this.wrapModeV = 'repeat';
+        const textureDesc = this._platformTextureDesc;
+        textureDesc.size[0] = width;
+        textureDesc.size[1] = height;
+        textureDesc.format = format;
+        textureDesc.usage = usage;
+        textureDesc.mipLevelCount = this._getMipmapCount(mipmap);
+        this._platformSamplerDesc = engine.device.createTexture(textureDesc);
+    }
+
+    get textureView(): GPUTextureView {
+        const textureViewDescriptor = SamplerTexture2D._textureViewDescriptor;
+        const platformTextureDesc = this._platformTextureDesc;
+        textureViewDescriptor.format = platformTextureDesc.format;
+        textureViewDescriptor.dimension = '2d';
+        textureViewDescriptor.mipLevelCount = platformTextureDesc.mipLevelCount;
+        textureViewDescriptor.arrayLayerCount = platformTextureDesc.size.depthOrArrayLayers;
+        textureViewDescriptor.aspect = 'all';
+        return this._platformTexture.createView(textureViewDescriptor);
     }
 }

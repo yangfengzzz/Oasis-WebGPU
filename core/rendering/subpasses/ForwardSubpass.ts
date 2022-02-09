@@ -62,18 +62,21 @@ export class ForwardSubpass extends Subpass {
             console.log(reflect.entry.vertex[0].inputs[0].type.name); // "vec3"
             console.log(reflect.entry.vertex[0].inputs[0].type.format.name); // "f32"
 
-            const useBindGroup0 = false;
-            const useBindGroup1 = false;
-            const wgslFragment = pp`
-              ${pp._if(useBindGroup0)}
-              @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, read>;
-              ${pp._endif}
-              ${pp._if(useBindGroup1)}
-              @group(1) @binding(0) var image1 : texture_storage_2d<rgba8unorm, read>;
-              ${pp._endif}
-              @stage(fragment) fn main() {}
-            `;
-            console.log(wgslFragment);
+            const groups = reflect.getBindGroups();
+            console.log(groups[0][1].resource.name); // "buffer", the type of resource at group(0) binding(1)
+debugger;
+            // const useBindGroup0 = false;
+            // const useBindGroup1 = false;
+            // const wgslFragment = pp`
+            //   ${pp._if(useBindGroup0)}
+            //   @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, read>;
+            //   ${pp._endif}
+            //   ${pp._if(useBindGroup1)}
+            //   @group(1) @binding(0) var image1 : texture_storage_2d<rgba8unorm, read>;
+            //   ${pp._endif}
+            //   @stage(fragment) fn main() {}
+            // `;
+            // console.log(wgslFragment);
         }
 
         {

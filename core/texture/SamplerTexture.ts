@@ -1,60 +1,34 @@
 import {RefObject} from "../asset/RefObject";
-import {SamplerDescriptor} from "../webgpu/SamplerDescriptor";
-import {TextureDescriptor} from "../webgpu/TextureDescriptor";
+import {ImageCopyBuffer, ImageCopyTexture, TextureDescriptor, SamplerDescriptor} from "../webgpu";
+import {Engine} from "../Engine";
 
 /**
  * The base class of texture, contains some common functions of texture-related classes.
  */
 export abstract class SamplerTexture extends RefObject {
+    private static _imageCopyBuffer: ImageCopyBuffer = new ImageCopyBuffer();
+    private static _imageCopyTexture: ImageCopyTexture = new ImageCopyTexture();
+
     name: string;
 
-    /** @internal */
-    _platformTexture: GPUTexture;
-    /** @internal */
-    _platformTextureDesc: TextureDescriptor;
-    /** @internal */
-    _platformSampler: GPUSampler;
-    /** @internal */
-    _platformSamplerDesc: SamplerDescriptor;
-    /** @internal */
-    _mipmap: boolean;
+    protected _platformTexture: GPUTexture;
+    protected _platformTextureDesc: TextureDescriptor;
+    protected _platformSampler: GPUSampler;
+    protected _platformSamplerDesc: SamplerDescriptor;
+    protected _isDirty: boolean = false;
 
     /**
      * The width of the texture.
      */
     get width(): number {
-        return this._platformTextureDesc.size[0];
+        return this._platformTextureDesc.size.width;
     }
 
     /**
      * The height of the texture.
      */
     get height(): number {
-        return this._platformTextureDesc.size[1];
-    }
-
-    /**
-     * Wrapping mode for texture coordinate S.
-     */
-    get wrapModeU(): GPUAddressMode {
-        return this._platformSamplerDesc.addressModeU;
-    }
-
-    set wrapModeU(value: GPUAddressMode) {
-        if (value === this._platformSamplerDesc.addressModeU) return;
-        this._platformSamplerDesc.addressModeU = value;
-    }
-
-    /**
-     * Wrapping mode for texture coordinate T.
-     */
-    get wrapModeV(): GPUAddressMode {
-        return this._platformSamplerDesc.addressModeV;
-    }
-
-    set wrapModeV(value: GPUAddressMode) {
-        if (value === this._platformSamplerDesc.addressModeV) return;
-        this._platformSamplerDesc.addressModeV = value;
+        return this._platformTextureDesc.size.height;
     }
 
     /**
@@ -63,6 +37,54 @@ export abstract class SamplerTexture extends RefObject {
     get mipmapCount(): number {
         return this._platformTextureDesc.mipLevelCount;
     }
+
+    /**
+     * Texture format.
+     */
+    get format(): GPUTextureFormat {
+        return this._platformTextureDesc.format;
+    }
+
+    get texture(): GPUTexture {
+        return this._platformTexture;
+    }
+
+    get sampler(): GPUSampler {
+        if (this._isDirty) {
+            this._platformSampler = this.engine.device.createSampler(this._platformSamplerDesc);
+            this._isDirty = false;
+        }
+        return this._platformSampler;
+    }
+
+    abstract get textureView(): GPUTextureView;
+
+    /**
+     * Wrapping mode for texture coordinate S.
+     */
+    get addressModeU(): GPUAddressMode {
+        return this._platformSamplerDesc.addressModeU;
+    }
+
+    set addressModeU(value: GPUAddressMode) {
+        if (value === this._platformSamplerDesc.addressModeU) return;
+        this._platformSamplerDesc.addressModeU = value;
+        this._isDirty = true;
+    }
+
+    /**
+     * Wrapping mode for texture coordinate T.
+     */
+    get addressModeV(): GPUAddressMode {
+        return this._platformSamplerDesc.addressModeV;
+    }
+
+    set addressModeV(value: GPUAddressMode) {
+        if (value === this._platformSamplerDesc.addressModeV) return;
+        this._platformSamplerDesc.addressModeV = value;
+        this._isDirty = true;
+    }
+
 
     /**
      * Filter mode for texture.
@@ -74,6 +96,7 @@ export abstract class SamplerTexture extends RefObject {
     set minFilterMode(value: GPUFilterMode) {
         if (value === this._platformSamplerDesc.minFilter) return;
         this._platformSamplerDesc.minFilter = value;
+        this._isDirty = true;
     }
 
     /**
@@ -86,6 +109,20 @@ export abstract class SamplerTexture extends RefObject {
     set magFilterMode(value: GPUFilterMode) {
         if (value === this._platformSamplerDesc.magFilter) return;
         this._platformSamplerDesc.magFilter = value;
+        this._isDirty = true;
+    }
+
+    /**
+     * Filter mode for texture.
+     */
+    get mipmapFilter(): GPUFilterMode {
+        return this._platformSamplerDesc.mipmapFilter;
+    }
+
+    set mipmapFilter(value: GPUFilterMode) {
+        if (value === this._platformSamplerDesc.mipmapFilter) return;
+        this._platformSamplerDesc.mipmapFilter = value;
+        this._isDirty = true;
     }
 
     /**
@@ -98,6 +135,26 @@ export abstract class SamplerTexture extends RefObject {
     set anisoLevel(value: number) {
         if (value === this._platformSamplerDesc.maxAnisotropy) return;
         this._platformSamplerDesc.maxAnisotropy = value;
+        this._isDirty = true;
+    }
+
+    get compareFunction(): GPUCompareFunction {
+        return this._platformSamplerDesc.compare;
+    }
+
+    set compareFunction(value: GPUCompareFunction) {
+        if (value === this._platformSamplerDesc.compare) return;
+        this._platformSamplerDesc.compare = value;
+        this._isDirty = true;
+    }
+
+    protected constructor(engine: Engine) {
+        super(engine);
+        this.minFilterMode = 'linear';
+        this.magFilterMode = 'linear';
+        this.mipmapFilter = 'linear';
+        this.addressModeU = 'repeat';
+        this.addressModeV = 'repeat';
     }
 
     /**
@@ -116,7 +173,29 @@ export abstract class SamplerTexture extends RefObject {
         return Math.floor(Math.log2(size));
     }
 
-    protected _getMipmapCount(): number {
-        return this._mipmap ? Math.floor(Math.log2(Math.max(this._platformTextureDesc.size[0], this._platformTextureDesc.size[1]))) + 1 : 1;
+    protected _getMipmapCount(mipmap: boolean): number {
+        return mipmap ? Math.floor(Math.log2(Math.max(this._platformTextureDesc.size[0], this._platformTextureDesc.size[1]))) + 1 : 1;
+    }
+
+    protected _createImageCopyBuffer(buffer: GPUBuffer,
+                                     offset: number,
+                                     bytesPerRow: number,
+                                     rowsPerImage: number): ImageCopyBuffer {
+        const imageCopyBuffer = SamplerTexture._imageCopyBuffer;
+        imageCopyBuffer.buffer = buffer;
+        imageCopyBuffer.offset = offset;
+        imageCopyBuffer.bytesPerRow = bytesPerRow;
+        imageCopyBuffer.rowsPerImage = rowsPerImage;
+        return imageCopyBuffer;
+    }
+
+    protected _createImageCopyTexture(mipLevel: number, origin: GPUOrigin3D,
+                                      aspect: GPUTextureAspect = 'all'): ImageCopyTexture {
+        const imageCopyTexture = SamplerTexture._imageCopyTexture;
+        imageCopyTexture.texture = this._platformTexture;
+        imageCopyTexture.mipLevel = mipLevel;
+        imageCopyTexture.origin = origin;
+        imageCopyTexture.aspect = aspect;
+        return imageCopyTexture;
     }
 }
