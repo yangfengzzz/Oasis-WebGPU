@@ -8,39 +8,43 @@ import {SamplerTexture2D} from "../texture/SamplerTexture2D";
  * PBR (Specular-Glossiness Workflow) Material.
  */
 export class PBRSpecularMaterial extends PBRBaseMaterial {
-    private static _specularColorProp = Shader.getPropertyByName("u_specularColor");
-    private static _glossinessProp = Shader.getPropertyByName("u_glossiness");
-    private static _specularGlossinessTextureProp = Shader.getPropertyByName("u_specularGlossinessSampler");
+    private static _pbrSpecularProp = Shader.getPropertyByName("u_pbrSpecularData");
+    private static _specularGlossinessTextureProp = Shader.getPropertyByName("u_specularGlossinessTexture");
+    private static _specularGlossinessSamplerProp = Shader.getPropertyByName("u_specularGlossinessSampler");
 
-    private _specularColor = new Color();
-    private _glossiness: number;
+    // specularColor, glossiness, _pad1, _pad2, _pad3
+    private _pbrSpecularData: Float32Array = new Float32Array(8);
     private _specularGlossinessTexture: SamplerTexture2D;
 
     /**
      * Specular color.
      */
-    get specularColor(): Color {
-        return this._specularColor;
+    specularColor(color:Color): Color {
+        const pbrSpecularData = this._pbrSpecularData;
+        color.setValue(pbrSpecularData[0], pbrSpecularData[1], pbrSpecularData[2], pbrSpecularData[3]);
+        return color;
     }
 
-    set specularColor(value: Color) {
-        const specularColor = this._specularColor;
-        if (value !== specularColor) {
-            value.cloneTo(specularColor);
-        }
-        this.shaderData.setColor(PBRSpecularMaterial._specularColorProp, specularColor);
+    setSpecularColor(value: Color) {
+        const pbrSpecularData = this._pbrSpecularData;
+        pbrSpecularData[0] = value.r;
+        pbrSpecularData[1] = value.g;
+        pbrSpecularData[2] = value.b;
+        pbrSpecularData[3] = value.a;
+        this.shaderData.setFloatArray(PBRSpecularMaterial._pbrSpecularProp, pbrSpecularData);
     }
 
     /**
      * Glossiness.
      */
     get glossiness(): number {
-        return this._glossiness;
+        return this._pbrSpecularData[4];
     }
 
     set glossiness(value: number) {
-        this._glossiness = value;
-        this.shaderData.setFloat(PBRSpecularMaterial._glossinessProp, value);
+        const pbrSpecularData = this._pbrSpecularData;
+        pbrSpecularData[4] = value;
+        this.shaderData.setFloatArray(PBRSpecularMaterial._pbrSpecularProp, pbrSpecularData);
     }
 
     /**
@@ -53,7 +57,7 @@ export class PBRSpecularMaterial extends PBRBaseMaterial {
 
     set specularGlossinessTexture(value: SamplerTexture2D) {
         this._specularGlossinessTexture = value;
-        this.shaderData.setTexture(PBRSpecularMaterial._specularGlossinessTextureProp, value);
+        this.shaderData.setSampledTexture(PBRSpecularMaterial._specularGlossinessTextureProp, PBRSpecularMaterial._specularGlossinessSamplerProp, value);
         if (value) {
             this.shaderData.enableMacro("HAS_SPECULARGLOSSINESSMAP");
         } else {
@@ -68,8 +72,19 @@ export class PBRSpecularMaterial extends PBRBaseMaterial {
     constructor(engine: Engine) {
         super(engine, Shader.find("pbr-specular"));
 
-        this.shaderData.setColor(PBRSpecularMaterial._specularColorProp, new Color(1, 1, 1, 1));
-        this.shaderData.setFloat(PBRSpecularMaterial._glossinessProp, 1.0);
+        const pbrSpecularData = this._pbrSpecularData;
+        // specularColor
+        pbrSpecularData[0] = 1;
+        pbrSpecularData[1] = 1;
+        pbrSpecularData[2] = 1;
+        pbrSpecularData[3] = 1;
+        // glossiness
+        pbrSpecularData[4] = 1;
+        // pad1, pad2, pad3
+        pbrSpecularData[5] = 0;
+        pbrSpecularData[6] = 0;
+        pbrSpecularData[7] = 0;
+        this.shaderData.setFloatArray(PBRSpecularMaterial._pbrSpecularProp, pbrSpecularData);
     }
 
     /**

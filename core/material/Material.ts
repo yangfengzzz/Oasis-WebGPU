@@ -30,7 +30,7 @@ export class Material extends RefObject implements IClone {
      */
     constructor(engine: Engine, shader: Shader) {
         super(engine);
-        this.shaderData = new ShaderData(ShaderDataGroup.Material, this._engine.device);
+        this.shaderData = new ShaderData(ShaderDataGroup.Material, this._engine);
         this.shader = shader;
     }
 

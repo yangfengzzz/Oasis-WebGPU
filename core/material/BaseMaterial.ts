@@ -5,15 +5,58 @@ import {BlendMode} from "./enums/BlendMode";
 import {RenderFace} from "./enums/RenderFace";
 import {RenderQueueType} from "./enums/RenderQueueType";
 import {Material} from "./Material";
+import {Vector4} from "@oasis-engine/math";
 
 export class BaseMaterial extends Material {
     private static _alphaCutoffMacro: ShaderMacro = Shader.getMacroByName("ALPHA_CUTOFF");
     private static _alphaCutoffProp = Shader.getPropertyByName("u_alphaCutoff");
+    private static _tilingOffsetProp = Shader.getPropertyByName("u_tilingOffset");
 
     private _renderFace: RenderFace = RenderFace.Front;
     private _isTransparent: boolean = false;
     private _blendMode: BlendMode;
+
+    private _tilingOffset = new Vector4(1, 1, 0, 0);
     private _alphaCutoff: number;
+
+    /**
+     * Alpha cutoff value.
+     * @remarks
+     * Fragments with alpha channel lower than cutoff value will be discarded.
+     * `0` means no fragment will be discarded.
+     */
+    get alphaCutoff(): number {
+        return this._alphaCutoff;
+    }
+
+    set alphaCutoff(value: number) {
+        this._alphaCutoff = value;
+        this.shaderData.setFloat(BaseMaterial._alphaCutoffProp, value);
+
+        if (value > 0) {
+            this.shaderData.enableMacro(BaseMaterial._alphaCutoffMacro);
+            this.renderQueueType = this._isTransparent ? RenderQueueType.Transparent : RenderQueueType.AlphaTest;
+        } else {
+            this.shaderData.disableMacro(BaseMaterial._alphaCutoffMacro);
+            this.renderQueueType = this._isTransparent ? RenderQueueType.Transparent : RenderQueueType.Opaque;
+        }
+    }
+
+    /**
+     * Tiling and offset of main textures.
+     */
+    get tilingOffset(): Vector4 {
+        return this._tilingOffset;
+    }
+
+    set tilingOffset(value: Vector4) {
+        const tilingOffset = this._tilingOffset;
+        if (value !== tilingOffset) {
+            value.cloneTo(tilingOffset);
+        }
+        this.shaderData.setVector4(BaseMaterial._tilingOffsetProp, tilingOffset);
+    }
+
     /**
      * Is this material transparent.
      * @remarks
@@ -42,29 +85,6 @@ export class BaseMaterial extends Material {
             this.renderQueueType = this.shaderData.getFloat(BaseMaterial._alphaCutoffProp)
                 ? RenderQueueType.AlphaTest
                 : RenderQueueType.Opaque;
-        }
-    }
-
-    /**
-     * Alpha cutoff value.
-     * @remarks
-     * Fragments with alpha channel lower than cutoff value will be discarded.
-     * `0` means no fragment will be discarded.
-     */
-    get alphaCutoff(): number {
-        return this._alphaCutoff;
-    }
-
-    set alphaCutoff(value: number) {
-        this._alphaCutoff = value;
-        this.shaderData.setFloat(BaseMaterial._alphaCutoffProp, value);
-
-        if (value > 0) {
-            this.shaderData.enableMacro(BaseMaterial._alphaCutoffMacro);
-            this.renderQueueType = this._isTransparent ? RenderQueueType.Transparent : RenderQueueType.AlphaTest;
-        } else {
-            this.shaderData.disableMacro(BaseMaterial._alphaCutoffMacro);
-            this.renderQueueType = this._isTransparent ? RenderQueueType.Transparent : RenderQueueType.Opaque;
         }
     }
 
@@ -136,6 +156,7 @@ export class BaseMaterial extends Material {
         super(engine, shader);
         this.blendMode = BlendMode.Normal;
         this.shaderData.setFloat(BaseMaterial._alphaCutoffProp, 0);
+        this.shaderData.setVector4(BaseMaterial._tilingOffsetProp, new Vector4(1, 1, 0, 0));
     }
 
     /**
