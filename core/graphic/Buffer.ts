@@ -1,20 +1,25 @@
 import {RefObject} from "../asset/RefObject";
 import {Engine} from "../Engine";
 import {TypedArray} from "../base/Constant";
+import {BufferDescriptor} from "../webgpu";
 
 /**
  * Buffer.
  */
 export class Buffer extends RefObject {
-    _nativeBuffer: GPUBuffer;
-
-    private _byteLength: number;
+    private static _bufferDescriptor: BufferDescriptor = new BufferDescriptor();
+    private readonly _nativeBuffer: GPUBuffer;
+    private readonly _byteLength: number;
 
     /**
      * Byte length.
      */
     get byteLength(): number {
         return this._byteLength;
+    }
+
+    get buffer(): GPUBuffer {
+        return this._nativeBuffer;
     }
 
     /**
@@ -37,70 +42,26 @@ export class Buffer extends RefObject {
                 byteLengthOrData: number | ArrayBuffer | ArrayBufferView,
                 bufferUsage: GPUBufferUsageFlags) {
         super(engine);
+        const bufferDescriptor = Buffer._bufferDescriptor;
         if (typeof byteLengthOrData === "number") {
             this._byteLength = byteLengthOrData;
-            this._nativeBuffer = engine.device.createBuffer({
-                size: this._byteLength,
-                usage: bufferUsage,
-                mappedAtCreation: true
-            });
         } else {
             this._byteLength = byteLengthOrData.byteLength;
-            this._nativeBuffer = engine.device.createBuffer({
-                size: this._byteLength,
-                usage: bufferUsage,
-                mappedAtCreation: true
-            });
         }
+
+        bufferDescriptor.usage = bufferUsage;
+        bufferDescriptor.size = this._byteLength;
+        this._nativeBuffer = engine.device.createBuffer(bufferDescriptor);
     }
 
-    map(mode: GPUMapModeFlags) {
+    map(mode: GPUMapModeFlags): Promise<undefined> {
         return this._nativeBuffer.mapAsync(mode);
     }
 
-    /**
-     * Set buffer data.
-     * @param typedArray - Input buffer data
-     */
-    setData(typedArray: TypedArray): void;
-
-    /**
-     * Set buffer data.
-     * @param typedArray - Input buffer data
-     * @param bufferByteOffset - buffer byte offset
-     */
-    setData(typedArray: TypedArray, bufferByteOffset: number): void;
-
-    /**
-     * Set buffer data.
-     * @param typedArray - Input buffer data
-     * @param bufferByteOffset - Buffer byte offset
-     * @param dataOffset - Buffer byte offset
-     * @param dataLength - Data length
-     */
-    setData(typedArray: TypedArray, bufferByteOffset: number, dataOffset: number, dataLength?: number): void;
-
-    setData(typedArray: TypedArray,
-            bufferByteOffset: number = 0,
-            dataOffset: number = 0,
-            dataLength?: number): void {
-        // TypeArray is BYTES_PER_ELEMENT, unTypeArray is 1
-        const byteSize = (<Uint8Array>typedArray).BYTES_PER_ELEMENT || 1;
-        const dataByteLength = dataLength ? byteSize * dataLength : typedArray.byteLength;
-
-        let constructor = typedArray.constructor as new (buffer: ArrayBuffer) => TypedArray;
-
-        let view = new constructor(this._nativeBuffer.getMappedRange(dataOffset, dataByteLength));
-
-        view.set(typedArray, bufferByteOffset);
-
-        this._nativeBuffer.unmap();
+    uploadData(typedArray: TypedArray, bufferByteOffset: number = 0, dataOffset: number = 0, dataLength: number = 0) {
+        this.engine.device.queue.writeBuffer(this._nativeBuffer, bufferByteOffset, typedArray, dataOffset, dataLength)
     }
 
-    /**
-     * @override
-     * Destroy.
-     */
-    _onDestroy() {
+    protected _onDestroy(): void {
     }
 }

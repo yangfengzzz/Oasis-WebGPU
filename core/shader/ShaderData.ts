@@ -1,7 +1,6 @@
 import {IClone} from "../clone/IClone"
 import {Color, Matrix, Vector2, Vector3, Vector4} from "@oasis-engine/math";
 import {IRefObject} from "../asset/IRefObject";
-import {CloneManager} from "../clone/CloneManager";
 import {ShaderDataGroup} from "./ShaderDataGroup";
 import {Shader} from "./Shader";
 import {ShaderMacro} from "./ShaderMacro";
@@ -9,11 +8,12 @@ import {ShaderMacroCollection} from "./ShaderMacroCollection";
 import {ShaderProperty} from "./ShaderProperty";
 import {SamplerTexture2D} from "../texture/SamplerTexture2D";
 import {SamplerTexture} from "../texture/SamplerTexture";
+import {Buffer} from "../graphic/Buffer";
+import {Engine} from "../Engine";
 
 export type ShaderPropertyResourceType =
-    | GPUBuffer
-    | GPUTexture
-    | GPUSampler
+    | Buffer
+    | SamplerTexture
 
 /**
  * Shader data collection,Correspondence includes shader properties data and macros data.
@@ -28,20 +28,18 @@ export class ShaderData implements IRefObject, IClone {
     /** @internal */
     _group: ShaderDataGroup;
     /** @internal */
-    _propertyResources: Record<number, ShaderPropertyResourceType[]> = Object.create(null);
+    _propertyResources: Record<number, ShaderPropertyResourceType> = Object.create(null);
     /** @internal */
     _macroCollection: ShaderMacroCollection = new ShaderMacroCollection();
-
+    private _engine: Engine;
     private _variableMacros: Record<string, string> = Object.create(null);
     private _refCount: number = 0;
-
-    private _device: GPUDevice;
 
     /**
      * @internal
      */
-    constructor(group: ShaderDataGroup, device: GPUDevice) {
-        this._device = device;
+    constructor(group: ShaderDataGroup, engine: Engine) {
+        this._engine = engine;
         this._group = group;
     }
 
@@ -50,16 +48,16 @@ export class ShaderData implements IRefObject, IClone {
      * @param propertyName - Shader property name
      * @returns Float
      */
-    getFloat(propertyName: string): GPUBuffer;
+    getFloat(propertyName: string): Buffer;
 
     /**
      * Get float by shader property.
      * @param property - Shader property
      * @returns Float
      */
-    getFloat(property: ShaderProperty): GPUBuffer;
+    getFloat(property: ShaderProperty): Buffer;
 
-    getFloat(property: string | ShaderProperty): GPUBuffer {
+    getFloat(property: string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -89,16 +87,16 @@ export class ShaderData implements IRefObject, IClone {
      * @param propertyName - Shader property name
      * @returns Int
      */
-    getInt(propertyName: string): GPUBuffer;
+    getInt(propertyName: string): Buffer;
 
     /**
      * Get int by shader property.
      * @param property - Shader property
      * @returns Int
      */
-    getInt(property: ShaderProperty): GPUBuffer;
+    getInt(property: ShaderProperty): Buffer;
 
-    getInt(property: string | ShaderProperty): GPUBuffer {
+    getInt(property: string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -128,16 +126,16 @@ export class ShaderData implements IRefObject, IClone {
      * @param propertyName - Shader property name
      * @returns Float array
      */
-    getFloatArray(propertyName: string): GPUBuffer;
+    getFloatArray(propertyName: string): Buffer;
 
     /**
      * Get float array by shader property.
      * @param property - Shader property
      * @returns Float array
      */
-    getFloatArray(property: ShaderProperty): GPUBuffer;
+    getFloatArray(property: ShaderProperty): Buffer;
 
-    getFloatArray(property: string | ShaderProperty): GPUBuffer {
+    getFloatArray(property: string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -166,16 +164,16 @@ export class ShaderData implements IRefObject, IClone {
      * @param propertyName - Shader property name
      * @returns Int Array
      */
-    getIntArray(propertyName: string): GPUBuffer;
+    getIntArray(propertyName: string): Buffer;
 
     /**
      * Get int array by shader property.
      * @param property - Shader property
      * @returns Int Array
      */
-    getIntArray(property: ShaderProperty): GPUBuffer;
+    getIntArray(property: ShaderProperty): Buffer;
 
-    getIntArray(property: string | ShaderProperty): GPUBuffer {
+    getIntArray(property: string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -204,16 +202,16 @@ export class ShaderData implements IRefObject, IClone {
      * @param propertyName - Shader property name
      * @returns Two-dimensional vector
      */
-    getVector2(propertyName: string): GPUBuffer;
+    getVector2(propertyName: string): Buffer;
 
     /**
      * Get two-dimensional from shader property.
      * @param property - Shader property
      * @returns Two-dimensional vector
      */
-    getVector2(property: ShaderProperty): GPUBuffer;
+    getVector2(property: ShaderProperty): Buffer;
 
-    getVector2(property: string | ShaderProperty): GPUBuffer {
+    getVector2(property: string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -244,21 +242,21 @@ export class ShaderData implements IRefObject, IClone {
      * @param propertyName - Shader property name
      * @returns Three-dimensional vector
      */
-    getVector3(propertyName: string): GPUBuffer;
+    getVector3(propertyName: string): Buffer;
 
     /**
      * Get vector3 by shader property.
      * @param property - Shader property
      * @returns Three-dimensional vector
      */
-    getVector3(property: ShaderProperty): GPUBuffer;
+    getVector3(property: ShaderProperty): Buffer;
 
-    getVector3(property: string | ShaderProperty): GPUBuffer {
+    getVector3(property: string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
     /**
-     * Set three dimensional vector by shader property name.
+     * Set three-dimensional vector by shader property name.
      * @remarks Correspondence includes vec3、ivec3 and bvec3 shader property type.
      * @param property - Shader property name
      * @param value - Three-dimensional vector
@@ -266,7 +264,7 @@ export class ShaderData implements IRefObject, IClone {
     setVector3(property: string, value: Vector3): void;
 
     /**
-     * Set three dimensional vector by shader property.
+     * Set three-dimensional vector by shader property.
      * @remarks Correspondence includes vec3、ivec3 and bvec3 shader property type.
      * @param property - Shader property
      * @param value - Three-dimensional vector
@@ -285,16 +283,16 @@ export class ShaderData implements IRefObject, IClone {
      * @param propertyName - Shader property name
      * @returns Four-dimensional vector
      */
-    getVector4(propertyName: string): GPUBuffer;
+    getVector4(propertyName: string): Buffer;
 
     /**
      * Get vector4 by shader property.
      * @param property - Shader property
      * @returns Four-dimensional vector
      */
-    getVector4(property: ShaderProperty): GPUBuffer;
+    getVector4(property: ShaderProperty): Buffer;
 
-    getVector4(property: string | ShaderProperty): GPUBuffer {
+    getVector4(property: string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -327,16 +325,16 @@ export class ShaderData implements IRefObject, IClone {
      * @param propertyName - Shader property name
      * @returns Matrix
      */
-    getMatrix(propertyName: string): GPUBuffer;
+    getMatrix(propertyName: string): Buffer;
 
     /**
      * Get matrix by shader property.
      * @param property - Shader property
      * @returns Matrix
      */
-    getMatrix(property: ShaderProperty): GPUBuffer;
+    getMatrix(property: ShaderProperty): Buffer;
 
-    getMatrix(property: string | ShaderProperty): GPUBuffer {
+    getMatrix(property: string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -365,16 +363,16 @@ export class ShaderData implements IRefObject, IClone {
      * @param propertyName - Shader property name
      * @returns Color
      */
-    getColor(propertyName: string): GPUBuffer;
+    getColor(propertyName: string): Buffer;
 
     /**
      * Get color by shader property.
      * @param property - Shader property
      * @returns Color
      */
-    getColor(property: ShaderProperty): GPUBuffer;
+    getColor(property: ShaderProperty): Buffer;
 
-    getColor(property: string | ShaderProperty): GPUBuffer {
+    getColor(property: string | ShaderProperty): Buffer {
         return this._getDataBuffer(property);
     }
 
@@ -402,40 +400,61 @@ export class ShaderData implements IRefObject, IClone {
         this._setDataBuffer(property, ShaderData._floatArray4);
     }
 
+    //------------------------------------------------------------------------------------------------------------------
     /**
      * Get texture by shader property name.
      * @param propertyName - Shader property name
      * @returns Texture
      */
-    getTexture(propertyName: string): [GPUTexture, GPUSampler];
+    getTextureView(propertyName: string): GPUTextureView;
 
     /**
      * Get texture by shader property.
      * @param property - Shader property
      * @returns Texture
      */
-    getTexture(property: ShaderProperty): [GPUTexture, GPUSampler];
+    getTextureView(property: ShaderProperty): GPUTextureView;
 
-    getTexture(property: string | ShaderProperty): [GPUTexture, GPUSampler] {
-        return this._getDataTexture(property);
+    getTextureView(property: string | ShaderProperty): GPUTextureView {
+        return this._getTextureView(property);
+    }
+
+    /**
+     * Get texture by shader property name.
+     * @param propertyName - Shader property name
+     * @returns Texture
+     */
+    getSampler(propertyName: string): GPUSampler;
+
+    /**
+     * Get texture by shader property.
+     * @param property - Shader property
+     * @returns Texture
+     */
+    getSampler(property: ShaderProperty): GPUSampler;
+
+    getSampler(property: string | ShaderProperty): GPUSampler {
+        return this._getSampler(property);
     }
 
     /**
      * Set texture by shader property name.
-     * @param propertyName - Shader property name
+     * @param textureName - Shader property name
+     * @param samplerName - Shader property name
      * @param value - Texture
      */
-    setTexture(propertyName: string, value: SamplerTexture2D): void;
+    setSampledTexture(textureName: string, samplerName: string, value: SamplerTexture2D): void;
 
     /**
      * Set texture by shader property.
-     * @param property - Shader property
+     * @param textureProperty - Shader property
+     * @param samplerProperty - Shader property
      * @param value - Texture
      */
-    setTexture(property: ShaderProperty, value: SamplerTexture2D): void;
+    setSampledTexture(textureProperty: ShaderProperty, samplerProperty: ShaderProperty, value: SamplerTexture2D): void;
 
-    setTexture(property: string | ShaderProperty, value: SamplerTexture2D): void {
-        this._setDataTexture(property, value);
+    setSampledTexture(textureProperty: string | ShaderProperty, samplerProperty: string | ShaderProperty, value: SamplerTexture2D): void {
+        this._setSampledTexture(textureProperty, samplerProperty, value);
     }
 
     /**
@@ -497,7 +516,7 @@ export class ShaderData implements IRefObject, IClone {
     }
 
     clone(): ShaderData {
-        const shaderData = new ShaderData(this._group, this._device);
+        const shaderData = new ShaderData(this._group, this._engine);
         this.cloneTo(shaderData);
         return shaderData;
     }
@@ -550,56 +569,80 @@ export class ShaderData implements IRefObject, IClone {
         }
 
         if (this._propertyResources[property._uniqueId] == undefined) {
-            this._propertyResources[property._uniqueId] = [this._device.createBuffer({
-                size: value.byteLength,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-                mappedAtCreation: false
-            })];
+            this._propertyResources[property._uniqueId] = new Buffer(this._engine, value.byteLength, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
         }
-
-        this._device.queue.writeBuffer(<GPUBuffer>this._propertyResources[property._uniqueId][0], 0, value);
+        (<Buffer>this._propertyResources[property._uniqueId]).uploadData(value, 0, 0, value.length * 4);
     }
 
     /**
      * @internal
      */
-    _setDataTexture(property: string | ShaderProperty, value: SamplerTexture): void {
-        if (typeof property === "string") {
-            property = Shader.getPropertyByName(property);
-        }
+    _setSampledTexture(texProperty: string | ShaderProperty,
+                       sampleProperty: string | ShaderProperty,
+                       value: SamplerTexture): void {
+        // texture
+        {
+            if (typeof texProperty === "string") {
+                texProperty = Shader.getPropertyByName(texProperty);
+            }
 
-        if (property._group !== this._group) {
-            if (property._group === undefined) {
-                property._group = this._group;
-            } else {
-                throw `Shader property ${property.name} has been used as ${ShaderDataGroup[property._group]} property.`;
+            if (texProperty._group !== this._group) {
+                if (texProperty._group === undefined) {
+                    texProperty._group = this._group;
+                } else {
+                    throw `Shader property ${texProperty.name} has been used as ${ShaderDataGroup[texProperty._group]} property.`;
+                }
+            }
+
+            if (this._propertyResources[texProperty._uniqueId] == undefined) {
+                this._propertyResources[texProperty._uniqueId] = value;
             }
         }
+        // sampler
+        {
+            if (typeof sampleProperty === "string") {
+                sampleProperty = Shader.getPropertyByName(sampleProperty);
+            }
 
-        if (this._propertyResources[property._uniqueId] == undefined) {
-            this._propertyResources[property._uniqueId] = [value._platformTexture, value._platformSampler];
+            if (sampleProperty._group !== this._group) {
+                if (sampleProperty._group === undefined) {
+                    sampleProperty._group = this._group;
+                } else {
+                    throw `Shader property ${sampleProperty.name} has been used as ${ShaderDataGroup[sampleProperty._group]} property.`;
+                }
+            }
+
+            if (this._propertyResources[sampleProperty._uniqueId] == undefined) {
+                this._propertyResources[sampleProperty._uniqueId] = value;
+            }
         }
     }
 
     /**
      * @internal
      */
-    _getDataBuffer(property: string | ShaderProperty): GPUBuffer {
+    _getDataBuffer(property: string | ShaderProperty): Buffer {
         if (typeof property === "string") {
             property = Shader.getPropertyByName(property);
         }
-        return this._propertyResources[property._uniqueId][0] as GPUBuffer;
+        return this._propertyResources[property._uniqueId] as Buffer;
     }
 
     /**
      * @internal
      */
-    _getDataTexture(property: string | ShaderProperty): [GPUTexture, GPUSampler] {
+    _getSampler(property: string | ShaderProperty): GPUSampler {
         if (typeof property === "string") {
             property = Shader.getPropertyByName(property);
         }
-        return [this._propertyResources[property._uniqueId][0] as GPUTexture,
-            this._propertyResources[property._uniqueId][1] as GPUSampler];
+        return (<SamplerTexture>this._propertyResources[property._uniqueId]).sampler;
+    }
+
+    _getTextureView(property: string | ShaderProperty): GPUTextureView {
+        if (typeof property === "string") {
+            property = Shader.getPropertyByName(property);
+        }
+        return (<SamplerTexture>this._propertyResources[property._uniqueId]).textureView;
     }
 
     /**
