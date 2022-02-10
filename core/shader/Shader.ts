@@ -3,6 +3,7 @@ import { ShaderMacro } from "./ShaderMacro";
 import { ShaderMacroCollection } from "./ShaderMacroCollection";
 // import { ShaderProgram } from "./ShaderProgram";
 import { ShaderProperty } from "./ShaderProperty";
+import {WGSL} from "../shaderlib";
 
 /**
  * Shader containing vertex and fragment source.
@@ -24,7 +25,7 @@ export class Shader {
    * @param vertexSource - Vertex source code
    * @param fragmentSource - Fragment source code
    */
-  static create(name: string, vertexSource: string, fragmentSource: string): Shader {
+  static create(name: string, vertexSource: WGSL, fragmentSource: WGSL): Shader {
     const shaderMap = Shader._shaderMap;
     if (shaderMap[name]) {
       throw `Shader named "${name}" already exists.`;
@@ -110,10 +111,10 @@ export class Shader {
   /** @internal */
   _shaderId: number = 0;
 
-  private _vertexSource: string;
-  private _fragmentSource: string;
+  private _vertexSource: WGSL;
+  private _fragmentSource: WGSL;
 
-  private constructor(name: string, vertexSource: string, fragmentSource: string) {
+  private constructor(name: string, vertexSource: WGSL, fragmentSource: WGSL) {
     this._shaderId = Shader._shaderCounter++;
     this.name = name;
     this._vertexSource = vertexSource;
