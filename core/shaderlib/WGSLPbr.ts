@@ -42,8 +42,6 @@ export class WGSLPbrVertex extends WGSL {
     private _worldPosVert: WGSLWorldPosVert;
     private _positionVert: WGSLPositionVert;
 
-    private _macros: ShaderMacroCollection;
-
     constructor() {
         super();
         this._common = new WGSLCommon();
@@ -65,22 +63,6 @@ export class WGSLPbrVertex extends WGSL {
         this._positionVert = new WGSLPositionVert("in", "out");
     }
 
-    entry(): string {
-        const macros = this._macros;
-
-        let source: string = "";
-        source += this._beginPositionVert.execute(macros);
-        source += this._beginNormalVert.execute(macros);
-        source += this._blendShapeVert.execute(macros);
-        source += this._skinningVert.execute(macros);
-        source += this._uvVert.execute(macros);
-        source += this._colorVert.execute(macros);
-        source += this._normalVert.execute(macros);
-        source += this._worldPosVert.execute(macros);
-        source += this._positionVert.execute(macros);
-        return source;
-    }
-
     compile(macros: ShaderMacroCollection): [string, BindGroupInfo] {
         this._source = "";
         this._bindGroupInfo.clear();
@@ -97,8 +79,19 @@ export class WGSLPbrVertex extends WGSL {
             this._worldPosShare.execute(encoder, macros, outputStructCounter);
             encoder.addInoutType("VertexOut", BuiltInType.Position, "position", UniformType.Vec4f32);
 
-            this._macros = macros;
-            encoder.addEntry([["in", "VertexIn"]], ["out", "VertexOut"], this.entry);
+            encoder.addEntry([["in", "VertexIn"]], ["out", "VertexOut"], ()=>{
+                let source: string = "";
+                source += this._beginPositionVert.execute(macros);
+                source += this._beginNormalVert.execute(macros);
+                source += this._blendShapeVert.execute(macros);
+                source += this._skinningVert.execute(macros);
+                source += this._uvVert.execute(macros);
+                source += this._colorVert.execute(macros);
+                source += this._normalVert.execute(macros);
+                source += this._worldPosVert.execute(macros);
+                source += this._positionVert.execute(macros);
+                return source;
+            });
             encoder.flush();
         }
         WGSLEncoder.endCounter(inputStructCounter);
@@ -119,8 +112,6 @@ export class WGSLPbrFragment extends WGSL {
     private _pbrHelper: WGSLPbrHelper;
     private _pbrFrag: WGSLPbrFrag;
 
-    private _macros: ShaderMacroCollection;
-
     constructor(is_metallic_workflow: boolean) {
         super();
         this._common = new WGSLCommon();
@@ -134,15 +125,6 @@ export class WGSLPbrFragment extends WGSL {
         this._pbrFragDefine = new WGSLPbrFragDefine("VertexOut", is_metallic_workflow);
         this._pbrHelper = new WGSLPbrHelper("VertexOut", is_metallic_workflow);
         this._pbrFrag = new WGSLPbrFrag("in", "out", is_metallic_workflow);
-    }
-
-    entry(): string {
-        const macros = this._macros;
-
-        let source: string = "";
-        source += this._pbrFrag.execute(macros);
-        source += "out.finalColor =vec4<f32>(totalRadiance, material.opacity);\n";
-        return source;
     }
 
     compile(macros: ShaderMacroCollection): [string, BindGroupInfo] {
@@ -162,8 +144,12 @@ export class WGSLPbrFragment extends WGSL {
             this._pbrHelper.execute(encoder, macros, inputStructCounter);
             encoder.addInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
 
-            this._macros = macros;
-            encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], this.entry);
+            encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], ()=>{
+                let source: string = "";
+                source += this._pbrFrag.execute(macros);
+                source += "out.finalColor =vec4<f32>(totalRadiance, material.opacity);\n";
+                return source;
+            });
             encoder.flush();
         }
         WGSLEncoder.endCounter(inputStructCounter);

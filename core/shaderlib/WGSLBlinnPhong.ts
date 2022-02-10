@@ -47,8 +47,6 @@ export class WGSLBlinnPhongVertex extends WGSL {
     private _worldPosVert: WGSLWorldPosVert;
     private _positionVert: WGSLPositionVert;
 
-    private _macros: ShaderMacroCollection;
-
     constructor() {
         super();
         this._common = new WGSLCommon();
@@ -70,22 +68,6 @@ export class WGSLBlinnPhongVertex extends WGSL {
         this._positionVert = new WGSLPositionVert("in", "out");
     }
 
-    entry(): string {
-        const macros = this._macros;
-
-        let source: string = "";
-        source += this._beginPositionVert.execute(macros);
-        source += this._beginNormalVert.execute(macros);
-        source += this._blendShapeVert.execute(macros);
-        source += this._skinningVert.execute(macros);
-        source += this._uvVert.execute(macros);
-        source += this._colorVert.execute(macros);
-        source += this._normalVert.execute(macros);
-        source += this._worldPosVert.execute(macros);
-        source += this._positionVert.execute(macros);
-        return source;
-    }
-
     compile(macros: ShaderMacroCollection): [string, BindGroupInfo] {
         this._source = "";
         this._bindGroupInfo.clear();
@@ -102,8 +84,19 @@ export class WGSLBlinnPhongVertex extends WGSL {
             this._worldPosShare.execute(encoder, macros, outputStructCounter);
             encoder.addInoutType("VertexOut", BuiltInType.Position, "position", UniformType.Vec4f32);
 
-            this._macros = macros;
-            encoder.addEntry([["in", "VertexIn"]], ["out", "VertexOut"], this.entry);
+            encoder.addEntry([["in", "VertexIn"]], ["out", "VertexOut"], (() => {
+                let source: string = "";
+                source += this._beginPositionVert.execute(macros);
+                source += this._beginNormalVert.execute(macros);
+                source += this._blendShapeVert.execute(macros);
+                source += this._skinningVert.execute(macros);
+                source += this._uvVert.execute(macros);
+                source += this._colorVert.execute(macros);
+                source += this._normalVert.execute(macros);
+                source += this._worldPosVert.execute(macros);
+                source += this._positionVert.execute(macros);
+                return source;
+            }));
             encoder.flush();
         }
         WGSLEncoder.endCounter(inputStructCounter);
@@ -127,8 +120,6 @@ export class WGSLBlinnPhongFragment extends WGSL {
     private _beginViewDirFrag: WGSLBeginViewDirFrag;
     private _mobileBlinnphoneFrag: WGSLMobileBlinnphongFrag;
 
-    private _macros: ShaderMacroCollection;
-
     constructor() {
         super();
         this._common = new WGSLCommon();
@@ -144,18 +135,6 @@ export class WGSLBlinnPhongFragment extends WGSL {
         this._beginMobileFrag = new WGSLBeginMobileFrag("in", "out");
         this._beginViewDirFrag = new WGSLBeginViewDirFrag("in", "out");
         this._mobileBlinnphoneFrag = new WGSLMobileBlinnphongFrag("in", "out");
-    }
-
-    entry(): string {
-        const macros = this._macros;
-
-        let source: string = "";
-        source += this._beginMobileFrag.execute(macros);
-        source += this._beginViewDirFrag.execute(macros);
-        source += this._mobileBlinnphoneFrag.execute(macros);
-        source += "out.finalColor = emission + ambient + diffuse + specular;\n";
-        source += "out.finalColor.a = diffuse.a;\n";
-        return source;
     }
 
     compile(macros: ShaderMacroCollection): [string, BindGroupInfo] {
@@ -175,8 +154,15 @@ export class WGSLBlinnPhongFragment extends WGSL {
             this._normalGet.execute(encoder, macros, inputStructCounter);
             encoder.addInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
 
-            this._macros = macros;
-            encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], this.entry);
+            encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], (() => {
+                let source: string = "";
+                source += this._beginMobileFrag.execute(macros);
+                source += this._beginViewDirFrag.execute(macros);
+                source += this._mobileBlinnphoneFrag.execute(macros);
+                source += "out.finalColor = emission + ambient + diffuse + specular;\n";
+                source += "out.finalColor.a = diffuse.a;\n";
+                return source;
+            }));
             encoder.flush();
         }
         WGSLEncoder.endCounter(inputStructCounter);

@@ -21,8 +21,6 @@ export class WGSLUnlitVertex extends WGSL {
     private _uvVert: WGSLUVVert;
     private _positionVert: WGSLPositionVert;
 
-    private _macros: ShaderMacroCollection;
-
     constructor() {
         super();
         this._commonVert = new WGSLCommonVert("VertexIn");
@@ -33,18 +31,6 @@ export class WGSLUnlitVertex extends WGSL {
         this._skinningVert = new WGSLSkinningVert("in", "out");
         this._uvVert = new WGSLUVVert("in", "out");
         this._positionVert = new WGSLPositionVert("in", "out");
-    }
-
-    entry(): string {
-        const macros = this._macros;
-
-        let source: string = "";
-        source += this._beginPositionVert.execute(macros);
-        source += this._blendShapeVert.execute(macros);
-        source += this._skinningVert.execute(macros);
-        source += this._uvVert.execute(macros);
-        source += this._positionVert.execute(macros);
-        return source;
     }
 
     compile(macros: ShaderMacroCollection): [string, BindGroupInfo] {
@@ -59,8 +45,15 @@ export class WGSLUnlitVertex extends WGSL {
             this._uvShare.execute(encoder, macros, outputStructCounter);
             encoder.addInoutType("VertexOut", BuiltInType.Position, "position", UniformType.Vec4f32);
 
-            this._macros = macros;
-            encoder.addEntry([["in", "VertexIn"]], ["out", "VertexOut"], this.entry);
+            encoder.addEntry([["in", "VertexIn"]], ["out", "VertexOut"], (() => {
+                let source: string = "";
+                source += this._beginPositionVert.execute(macros);
+                source += this._blendShapeVert.execute(macros);
+                source += this._skinningVert.execute(macros);
+                source += this._uvVert.execute(macros);
+                source += this._positionVert.execute(macros);
+                return source;
+            }));
             encoder.flush();
         }
         WGSLEncoder.endCounter(inputStructCounter);
@@ -73,30 +66,10 @@ export class WGSLUnlitFragment extends WGSL {
     private _common: WGSLCommon;
     private _uvShare: WGSLUVShare;
 
-    private _macros: ShaderMacroCollection;
-
     constructor() {
         super();
         this._common = new WGSLCommon();
         this._uvShare = new WGSLUVShare("VertexOut");
-    }
-
-    entry(): string {
-        const macros = this._macros;
-
-        let source: string = "";
-        source += "var baseColor = u_baseColor;\n";
-        if (macros.isEnable("HAS_BASE_TEXTURE")) {
-            source += "var textureColor = textureSample(u_baseTexture, u_baseSampler, in.v_uv);\n";
-            source += "baseColor = baseColor * textureColor;\n";
-        }
-        if (macros.isEnable("NEED_ALPHA_CUTOFF")) {
-            source += "if( baseColor.a < u_alphaCutoff ) {\n";
-            source += "    discard;\n";
-            source += "}\n";
-        }
-        source += "out.finalColor = baseColor;\n";
-        return source;
     }
 
     compile(macros: ShaderMacroCollection): [string, BindGroupInfo] {
@@ -114,8 +87,21 @@ export class WGSLUnlitFragment extends WGSL {
                 encoder.addSampledTextureBinding("u_baseTexture", TextureType.Texture2Df32, "u_baseSampler", SamplerType.Sampler);
             }
 
-            this._macros = macros;
-            encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], this.entry);
+            encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], (() => {
+                let source: string = "";
+                source += "var baseColor = u_baseColor;\n";
+                if (macros.isEnable("HAS_BASE_TEXTURE")) {
+                    source += "var textureColor = textureSample(u_baseTexture, u_baseSampler, in.v_uv);\n";
+                    source += "baseColor = baseColor * textureColor;\n";
+                }
+                if (macros.isEnable("NEED_ALPHA_CUTOFF")) {
+                    source += "if( baseColor.a < u_alphaCutoff ) {\n";
+                    source += "    discard;\n";
+                    source += "}\n";
+                }
+                source += "out.finalColor = baseColor;\n";
+                return source;
+            }));
             encoder.flush();
         }
         WGSLEncoder.endCounter(inputStructCounter);

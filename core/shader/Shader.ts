@@ -2,9 +2,13 @@ import {ShaderDataGroup} from "./ShaderDataGroup";
 import {ShaderMacro} from "./ShaderMacro";
 import {ShaderMacroCollection} from "./ShaderMacroCollection";
 import {ShaderProperty} from "./ShaderProperty";
-import {WGSL} from "../shaderlib";
+import {BindGroupInfo, WGSL} from "../shaderlib";
 import {Engine} from "../Engine";
 import {ShaderProgram} from "./ShaderProgram";
+import {BindGroupLayoutDescriptor, BindGroupLayoutEntry} from "../webgpu";
+
+type BindGroupLayoutEntryVecMap = Map<number, BindGroupLayoutEntry[]>;
+type BindGroupLayoutDescriptorMap = Map<number, BindGroupLayoutDescriptor>;
 
 /**
  * Shader containing vertex and fragment source.
@@ -113,7 +117,14 @@ export class Shader {
     _shaderId: number = 0;
 
     private _vertexSource: WGSL;
-    private _fragmentSource: WGSL;
+    private readonly _fragmentSource: WGSL;
+    private _bindGroupInfo: BindGroupInfo;
+    private _bindGroupLayoutEntryVecMap: BindGroupLayoutEntryVecMap;
+    private _bindGroupLayoutDescriptorMap: BindGroupLayoutDescriptorMap;
+
+    get bindGroupLayoutDescriptorMap(): BindGroupLayoutDescriptorMap {
+        return this._bindGroupLayoutDescriptorMap;
+    }
 
     private constructor(name: string, vertexSource: WGSL, fragmentSource: WGSL) {
         this._shaderId = Shader._shaderCounter++;
@@ -129,73 +140,79 @@ export class Shader {
      * Usually a shader contains some macros,any combination of macros is called shader variant.
      *
      * @param engine - Engine to which the shader variant belongs
-     * @param macros - Macro name list
-     * @returns Is the compiled shader variant valid
+     * @param macroCollection - Macro name list
      */
-    compileVariant(engine: Engine, macros: string[]) {
-        const compileMacros = Shader._compileMacros;
-        compileMacros.clear();
-        for (let i = 0, n = macros.length; i < n; i++) {
-            compileMacros.enable(Shader.getMacroByName(macros[i]));
-        }
-        this._getShaderProgram(engine, compileMacros);
-    }
-
-    /**
-     * @internal
-     */
-    _getShaderProgram(engine: Engine, macroCollection: ShaderMacroCollection): ShaderProgram {
+    getShaderProgram(engine: Engine, macroCollection: ShaderMacroCollection): ShaderProgram {
         const shaderProgramPool = engine._getShaderProgramPool(this);
         let shaderProgram = shaderProgramPool.get(macroCollection);
         if (shaderProgram) {
             return shaderProgram;
         }
 
-        //   const isWebGL2: boolean = engine._hardwareRenderer.isWebGL2;
-        //   const macroNameList = [];
-        //   Shader._getNamesByMacros(macroCollection, macroNameList);
-        //   const macroNameStr = ShaderFactory.parseCustomMacros(macroNameList);
-        //   const versionStr = isWebGL2 ? "#version 300 es" : "#version 100";
-        //   let precisionStr = `
-        //   #ifdef GL_FRAGMENT_PRECISION_HIGH
-        //     precision highp float;
-        //     precision highp int;
-        //   #else
-        //     precision mediump float;
-        //     precision mediump int;
-        //   #endif
-        //   `;
-        //
-        //   if (engine._hardwareRenderer.canIUse(GLCapabilityType.shaderTextureLod)) {
-        //     precisionStr += "#define HAS_TEX_LOD\n";
-        //   }
-        //   if (engine._hardwareRenderer.canIUse(GLCapabilityType.standardDerivatives)) {
-        //     precisionStr += "#define HAS_DERIVATIVES\n";
-        //   }
-        //
-        //   let vertexSource = ShaderFactory.parseIncludes(
-        //     ` ${versionStr}
-        //       ${precisionStr}
-        //       ${macroNameStr}
-        //       ` + this._vertexSource
-        //   );
-        //
-        //   let fragmentSource = ShaderFactory.parseIncludes(
-        //     ` ${versionStr}
-        //       ${isWebGL2 ? "" : ShaderFactory.parseExtension(Shader._shaderExtension)}
-        //       ${precisionStr}
-        //       ${macroNameStr}
-        //     ` + this._fragmentSource
-        //   );
-        //
-        //   if (isWebGL2) {
-        //     vertexSource = ShaderFactory.convertTo300(vertexSource);
-        //     fragmentSource = ShaderFactory.convertTo300(fragmentSource, true);
-        //   }
-        //
-        //   shaderProgram = new ShaderProgram(engine, vertexSource, fragmentSource);
-        //
-        //   shaderProgramPool.cache(shaderProgram);
-        //   return shaderProgram;
+        // merge info
+        const vertexCode = this._vertexSource.compile(macroCollection);
+        vertexCode[1].forEach(((value, key) => {
+            value.forEach((value1 => {
+                this._bindGroupInfo[key].push(value1);
+            }))
+        }));
+        const fragmentCode = this._fragmentSource.compile(macroCollection);
+        fragmentCode[1].forEach(((value, key) => {
+            value.forEach((value1 => {
+                this._bindGroupInfo[key].push(value1);
+            }))
+        }));
+
+        // move to vecMap
+        this._bindGroupInfo.forEach(((value, key) => {
+            this._bindGroupLayoutEntryVecMap[key].length = value.size;
+            value.forEach((value1 => {
+                this._bindGroupLayoutEntryVecMap[key].push(this._findEntry(key, value1));
+            }));
+        }));
+
+        // generate map
+        this._bindGroupLayoutEntryVecMap.forEach(((value, key) => {
+            const desc = new BindGroupLayoutDescriptor();
+            desc.entries = value;
+            this._bindGroupLayoutDescriptorMap[key] = desc;
+        }));
+
+
+        shaderProgram = new ShaderProgram(engine.device, vertexCode[0], fragmentCode[0]);
+        shaderProgramPool.cache(shaderProgram);
+        return shaderProgram;
+    }
+
+    flush() {
+        this._bindGroupInfo.clear();
+        this._bindGroupLayoutEntryVecMap.clear();
+        this._bindGroupLayoutDescriptorMap.clear();
+    }
+
+    _findEntry(group: number, binding: number): BindGroupLayoutEntry {
+        let entry: BindGroupLayoutEntry = undefined;
+
+        const entryMap = this._vertexSource.bindGroupLayoutEntryMap;
+        if (entryMap.has(group) && entryMap[group].has(binding)) {
+            entry = entryMap[group][binding];
+        }
+
+        if (this._fragmentSource) {
+            const entryMap = this._fragmentSource.bindGroupLayoutEntryMap;
+            if (entryMap.has(group) && entryMap[group].has(binding)) {
+                if (entry !== undefined) {
+                    entry.visibility |= GPUShaderStage.FRAGMENT;
+                } else {
+                    entry = entryMap[group][binding];
+                }
+            }
+        }
+
+        if (entry !== undefined) {
+            return entry;
+        } else {
+            throw "have bug!";
+        }
     }
 }

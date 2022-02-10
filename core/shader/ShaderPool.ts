@@ -17,6 +17,6 @@ export class ShaderPool {
         Shader.create("unlit", new WGSLUnlitVertex(), new WGSLUnlitFragment());
         Shader.create("blinn-phong", new WGSLBlinnPhongVertex(), new WGSLBlinnPhongFragment());
         Shader.create("pbr", new WGSLPbrVertex(), new WGSLPbrFragment(true));
-        Shader.create("pbr-specular", new WGSLPbrVertex(), new WGSLPbrFragment(true));
+        Shader.create("pbr-specular", new WGSLPbrVertex(), new WGSLPbrFragment(false));
     }
 }
