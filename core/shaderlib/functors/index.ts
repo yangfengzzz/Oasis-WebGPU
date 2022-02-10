@@ -24,3 +24,7 @@ export * from "./WGSLColorVert"
 export * from "./WGSLPositionVert"
 export * from "./WGSLNormalVert"
 export * from "./WGSLWorldPosVert"
+
+export * from "./WGSLBeginMobileFrag"
+export * from "./WGSLBeginViewDirFrag"
+export * from "./WGSLMobileBlinnphongFrag"
