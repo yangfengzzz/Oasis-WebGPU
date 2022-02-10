@@ -11,7 +11,7 @@ export class WGSLBeginPositionVert {
         this._formatTemplate = `var position = vec4<f32>( ${input}.Position , 1.0 );\\n`;
     }
 
-    execute(source: string, macros: ShaderData) {
-        source += this._formatTemplate;
+    execute(macros: ShaderData): string {
+        return this._formatTemplate;
     }
 }
