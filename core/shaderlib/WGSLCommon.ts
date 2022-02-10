@@ -17,7 +17,7 @@ export enum Attributes {
     TOTAL_COUNT
 }
 
-function attributesString(attr: Attributes): string {
+export function attributesString(attr: Attributes): string {
     attr.toString();
     switch (attr) {
         case Attributes.Position:

@@ -7,10 +7,10 @@ export class BindGroupLayoutEntry implements GPUBindGroupLayoutEntry {
     binding: GPUIndex32;
     visibility: GPUShaderStageFlags;
     buffer?: BufferBindingLayout;
-    externalTexture?: ExternalTextureBindingLayout;
     sampler?: SamplerBindingLayout;
-    storageTexture?: StorageTextureBindingLayout;
     texture?: TextureBindingLayout;
+    storageTexture?: StorageTextureBindingLayout;
+    externalTexture?: ExternalTextureBindingLayout;
 }
 
 export class BufferBindingLayout implements GPUBufferBindingLayout {

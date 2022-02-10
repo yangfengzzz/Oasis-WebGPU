@@ -2,8 +2,8 @@ import {BindGroupLayoutEntry} from "../webgpu";
 import {ShaderMacroCollection} from "../shader/ShaderMacroCollection";
 import {WGSLEncoder} from "./WGSLEncoder";
 
-type BindGroupInfo = Map<number, Set<number>>;
-type BindGroupLayoutEntryMap = Map<number, Map<number, BindGroupLayoutEntry>>;
+export type BindGroupInfo = Map<number, Set<number>>;
+export type BindGroupLayoutEntryMap = Map<number, Map<number, BindGroupLayoutEntry>>;
 
 export class WGSL {
     private _source: string;
