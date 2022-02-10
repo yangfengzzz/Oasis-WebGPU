@@ -6,15 +6,15 @@ export type BindGroupInfo = Map<number, Set<number>>;
 export type BindGroupLayoutEntryMap = Map<number, Map<number, BindGroupLayoutEntry>>;
 
 export class WGSL {
-    private _source: string;
-    private _bindGroupInfo: BindGroupInfo = new Map<number, Set<number>>();
-    private _bindGroupLayoutEntryMap: BindGroupLayoutEntryMap = new Map<number, Map<number, BindGroupLayoutEntry>>();
+    protected _source: string;
+    protected _bindGroupInfo: BindGroupInfo = new Map<number, Set<number>>();
+    protected _bindGroupLayoutEntryMap: BindGroupLayoutEntryMap = new Map<number, Map<number, BindGroupLayoutEntry>>();
 
     get bindGroupLayoutEntryMap(): BindGroupLayoutEntryMap {
         return this._bindGroupLayoutEntryMap;
     }
 
-    constructor(source: string, info: BindGroupInfo, entryMap: BindGroupLayoutEntryMap) {
+    constructor(source?: string, info?: BindGroupInfo, entryMap?: BindGroupLayoutEntryMap) {
         this._source = source;
         this._bindGroupInfo = info;
         this._bindGroupLayoutEntryMap = entryMap;
