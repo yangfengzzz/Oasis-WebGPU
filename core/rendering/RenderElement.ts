@@ -8,7 +8,7 @@ import { Renderer } from "../Renderer";
  */
 export class RenderElement {
     /** Render component. */
-    component: Renderer;
+    renderer: Renderer;
     /** Mesh. */
     mesh: Mesh;
     /** Sub mesh. */
@@ -16,8 +16,8 @@ export class RenderElement {
     /** Material. */
     material: Material;
 
-    setValue(component: Renderer, mesh: Mesh, subMesh: SubMesh, material: Material): void {
-        this.component = component;
+    setValue(renderer: Renderer, mesh: Mesh, subMesh: SubMesh, material: Material): void {
+        this.renderer = renderer;
         this.mesh = mesh;
         this.subMesh = subMesh;
         this.material = material;

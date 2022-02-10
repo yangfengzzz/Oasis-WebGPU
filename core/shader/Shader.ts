@@ -20,6 +20,8 @@ export class Shader {
     private static _shaderCounter: number = 0;
     private static _shaderMap: Record<string, Shader> = Object.create(null);
     private static _propertyNameMap: Record<string, ShaderProperty> = Object.create(null);
+    private static _propertyGroupMap: Record<number, ShaderProperty> = Object.create(null);
+
     private static _macroMaskMap: string[][] = [];
     private static _macroCounter: number = 0;
     private static _macroMap: Record<string, ShaderMacro> = Object.create(null);
@@ -77,37 +79,19 @@ export class Shader {
      */
     static getPropertyByName(name: string): ShaderProperty {
         const propertyNameMap = Shader._propertyNameMap;
+        const propertyGroupMap = Shader._propertyGroupMap;
         if (propertyNameMap[name] != null) {
             return propertyNameMap[name];
         } else {
             const property = new ShaderProperty(name);
             propertyNameMap[name] = property;
+            propertyGroupMap[property._uniqueId] = property;
             return property;
         }
     }
 
-    /**
-     * @internal
-     */
-    static _getShaderPropertyGroup(propertyName: string): ShaderDataGroup | null {
-        const shaderProperty = Shader._propertyNameMap[propertyName];
-        return shaderProperty?._group;
-    }
-
-    private static _getNamesByMacros(macros: ShaderMacroCollection, out: string[]): void {
-        const maskMap = Shader._macroMaskMap;
-        const mask = macros._mask;
-        out.length = 0;
-        for (let i = 0, n = macros._length; i < n; i++) {
-            const subMaskMap = maskMap[i];
-            const subMask = mask[i];
-            const n = subMask < 0 ? 32 : Math.floor(Math.log2(subMask)) + 1; // if is negative must contain 1 << 31.
-            for (let j = 0; j < n; j++) {
-                if (subMask & (1 << j)) {
-                    out.push(subMaskMap[j]);
-                }
-            }
-        }
+    static getShaderPropertyGroup(uniqueID: number): ShaderDataGroup | null {
+        return Shader._propertyGroupMap[uniqueID]?._group;
     }
 
     /** The name of shader. */

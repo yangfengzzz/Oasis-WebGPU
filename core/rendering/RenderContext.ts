@@ -20,8 +20,8 @@ export class RenderContext {
         this._device = device;
         this._context = context;
 
-        this._size.width = context.canvas.width;
-        this._size.height = context.canvas.height;
+        this._size.width = (<HTMLCanvasElement>context.canvas).width;
+        this._size.height = (<HTMLCanvasElement>context.canvas).height;
         this._size.depthOrArrayLayers = 1;
 
         this._configure = new CanvasConfiguration();
