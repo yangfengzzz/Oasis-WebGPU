@@ -11,7 +11,7 @@ import {
 import {WGSLEncoder} from "./WGSLEncoder";
 import {BuiltInType, SamplerType, TextureType, UniformType} from "./WGSLCommon";
 
-class WGSLUnlitVertex extends WGSL {
+export class WGSLUnlitVertex extends WGSL {
     private _commonVert: WGSLCommonVert;
     private _blendShapeInput: WGSLBlendShapeInput;
     private _uvShare: WGSLUVShare;
@@ -69,8 +69,7 @@ class WGSLUnlitVertex extends WGSL {
     }
 }
 
-//MARK: - Unlit Fragment Code
-class WGSLUnlitFragment extends WGSL {
+export class WGSLUnlitFragment extends WGSL {
     private _common: WGSLCommon;
     private _uvShare: WGSLUVShare;
 

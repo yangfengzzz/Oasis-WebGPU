@@ -1,10 +1,8 @@
 import {BindGroupInfo, WGSL} from "./WGSL";
 import {ShaderMacroCollection} from "../shader/ShaderMacroCollection";
 import {
-    WGSLBeginMobileFrag,
     WGSLBeginNormalVert,
     WGSLBeginPositionVert,
-    WGSLBeginViewDirFrag,
     WGSLBlendShapeInput,
     WGSLBlendShapeVert,
     WGSLColorShare,
@@ -13,11 +11,8 @@ import {
     WGSLCommonFrag,
     WGSLCommonVert,
     WGSLLightFragDefine,
-    WGSLMobileBlinnphongFrag,
-    WGSLMobileMaterialShare,
-    WGSLNormalGet,
     WGSLNormalShare,
-    WGSLNormalVert,
+    WGSLNormalVert, WGSLPbrFrag, WGSLPbrFragDefine, WGSLPbrHelper,
     WGSLPositionVert,
     WGSLSkinningVert,
     WGSLUVShare,
@@ -28,7 +23,7 @@ import {
 import {WGSLEncoder} from "./WGSLEncoder";
 import {BuiltInType, UniformType} from "./WGSLCommon";
 
-export class WGSLBlinnPhongVertex extends WGSL {
+export class WGSLPbrVertex extends WGSL {
     private _common: WGSLCommon;
     private _commonVert: WGSLCommonVert;
     private _blendShapeInput: WGSLBlendShapeInput;
@@ -112,7 +107,7 @@ export class WGSLBlinnPhongVertex extends WGSL {
     }
 }
 
-export class WGSLBlinnPhongFragment extends WGSL {
+export class WGSLPbrFragment extends WGSL {
     private _common: WGSLCommon;
     private _commonFrag: WGSLCommonFrag;
     private _uvShare: WGSLUVShare;
@@ -120,16 +115,13 @@ export class WGSLBlinnPhongFragment extends WGSL {
     private _normalShare: WGSLNormalShare;
     private _worldPosShare: WGSLWorldPosShare;
     private _lightFragDefine: WGSLLightFragDefine;
-    private _mobileMaterialShare: WGSLMobileMaterialShare;
-    private _normalGet: WGSLNormalGet;
-
-    private _beginMobileFrag: WGSLBeginMobileFrag;
-    private _beginViewDirFrag: WGSLBeginViewDirFrag;
-    private _mobileBlinnphoneFrag: WGSLMobileBlinnphongFrag;
+    private _pbrFragDefine: WGSLPbrFragDefine;
+    private _pbrHelper: WGSLPbrHelper;
+    private _pbrFrag: WGSLPbrFrag;
 
     private _macros: ShaderMacroCollection;
 
-    constructor() {
+    constructor(is_metallic_workflow: boolean) {
         super();
         this._common = new WGSLCommon();
         this._commonFrag = new WGSLCommonFrag("VertexOut");
@@ -138,23 +130,18 @@ export class WGSLBlinnPhongFragment extends WGSL {
         this._normalShare = new WGSLNormalShare("VertexOut");
         this._worldPosShare = new WGSLWorldPosShare("VertexOut");
         this._lightFragDefine = new WGSLLightFragDefine("VertexOut");
-        this._mobileMaterialShare = new WGSLMobileMaterialShare("VertexOut");
-        this._normalGet = new WGSLNormalGet("VertexOut");
 
-        this._beginMobileFrag = new WGSLBeginMobileFrag("in", "out");
-        this._beginViewDirFrag = new WGSLBeginViewDirFrag("in", "out");
-        this._mobileBlinnphoneFrag = new WGSLMobileBlinnphongFrag("in", "out");
+        this._pbrFragDefine = new WGSLPbrFragDefine("VertexOut", is_metallic_workflow);
+        this._pbrHelper = new WGSLPbrHelper("VertexOut", is_metallic_workflow);
+        this._pbrFrag = new WGSLPbrFrag("in", "out", is_metallic_workflow);
     }
 
     entry(): string {
         const macros = this._macros;
 
         let source: string = "";
-        source += this._beginMobileFrag.execute(macros);
-        source += this._beginViewDirFrag.execute(macros);
-        source += this._mobileBlinnphoneFrag.execute(macros);
-        source += "out.finalColor = emission + ambient + diffuse + specular;\n";
-        source += "out.finalColor.a = diffuse.a;\n";
+        source += this._pbrFrag.execute(macros);
+        source += "out.finalColor =vec4<f32>(totalRadiance, material.opacity);\n";
         return source;
     }
 
@@ -171,8 +158,8 @@ export class WGSLBlinnPhongFragment extends WGSL {
             this._normalShare.execute(encoder, macros, inputStructCounter);
             this._worldPosShare.execute(encoder, macros, inputStructCounter);
             this._lightFragDefine.execute(encoder, macros, inputStructCounter);
-            this._mobileMaterialShare.execute(encoder, macros, inputStructCounter);
-            this._normalGet.execute(encoder, macros, inputStructCounter);
+            this._pbrFragDefine.execute(encoder, macros, inputStructCounter);
+            this._pbrHelper.execute(encoder, macros, inputStructCounter);
             encoder.addInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
 
             this._macros = macros;
