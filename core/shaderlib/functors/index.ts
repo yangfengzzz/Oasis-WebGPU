@@ -14,3 +14,5 @@ export * from "./WGSLPbrHelper"
 export * from "./WGSLIBLFragDefine"
 export * from "./WGSLDirectIrradianceFragDefine"
 export * from "./WGSLBRDF"
+
+export * from "./WGSLBeginPositionVert"
