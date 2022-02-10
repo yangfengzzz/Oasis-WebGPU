@@ -248,7 +248,7 @@ export class WGSLEncoder {
         this._entryBlock += outType[1];
         this._entryBlock += " {\n";
 
-        this._entryBlock += `var {outType[0]}:{outType[1]};\n`;
+        this._entryBlock += `var ${outType[0]}:${outType[1]};\n`;
 
         this._entryBlock += code();
 
