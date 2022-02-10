@@ -6,7 +6,7 @@ import {SubMesh} from "./SubMesh";
 import {UpdateFlag} from "../UpdateFlag";
 import {UpdateFlagManager} from "../UpdateFlagManager";
 import {Buffer} from "./Buffer";
-import {VertexBufferLayout} from "../webgpu/state/VertexState";
+import {VertexBufferLayout} from "../webgpu";
 
 /**
  * Mesh.

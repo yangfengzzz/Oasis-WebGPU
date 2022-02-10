@@ -1,7 +1,6 @@
 import {RenderTargetBlendState} from "./RenderTargetBlendState";
 import {Color} from "@oasis-engine/math";
 import {
-    ColorTargetState as WGPUColorTargetState,
     BlendState as WGPUBlendState,
 } from "../../webgpu/state/FragmentState";
 import {RenderPipelineDescriptor} from "../../webgpu";
