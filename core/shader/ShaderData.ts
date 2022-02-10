@@ -543,6 +543,28 @@ export class ShaderData implements IRefObject, IClone {
     }
 
     //------------------------------------------------------------------------------------------------------------------
+    isEnable(macroName: string): boolean {
+        const variableValue = this._variableMacros[macroName];
+        if (variableValue) {
+            const macro = Shader.getMacroByName(`${macroName} ${variableValue}`);
+            return this._macroCollection.isEnable(macro);
+        } else {
+            const macro = Shader.getMacroByName(macroName);
+            return this._macroCollection.isEnable(macro);
+        }
+    }
+
+    variableMacros(macroName: string): string {
+        const variableValue = this._variableMacros[macroName];
+        if (variableValue) {
+            const macro = Shader.getMacroByName(`${macroName} ${variableValue}`);
+            if (this._macroCollection.isEnable(macro)) {
+                return variableValue;
+            }
+        }
+        return "0";
+    }
+
     /**
      * Enable macro.
      * @param macroName - Macro name
