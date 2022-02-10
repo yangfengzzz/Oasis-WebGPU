@@ -20,6 +20,7 @@ import {ShaderMacroCollection} from "./shader/ShaderMacroCollection";
 import {ForwardSubpass} from "./rendering/subpasses/ForwardSubpass";
 import {RenderElement} from "./rendering/RenderElement";
 import {ClassPool} from "./rendering/ClassPool";
+import {ShaderProgramPool} from "./shader/ShaderProgramPool";
 
 ShaderPool.init();
 
@@ -30,6 +31,8 @@ export class Engine {
     _componentsManager: ComponentsManager = new ComponentsManager();
     _renderElementPool: ClassPool<RenderElement> = new ClassPool(RenderElement);
 
+    /** @internal */
+    _shaderProgramPools: ShaderProgramPool[] = [];
     /** @internal */
     _macroCollection: ShaderMacroCollection = new ShaderMacroCollection();
 
@@ -280,5 +283,22 @@ export class Engine {
         } else {
             Logger.debug("NO active camera.");
         }
+    }
+
+    /**
+     * @internal
+     */
+    _getShaderProgramPool(shader: Shader): ShaderProgramPool {
+        const index = shader._shaderId;
+        const shaderProgramPools = this._shaderProgramPools;
+        let pool = shaderProgramPools[index];
+        if (!pool) {
+            const length = index + 1;
+            if (length < shaderProgramPools.length) {
+                shaderProgramPools.length = length;
+            }
+            shaderProgramPools[index] = pool = new ShaderProgramPool();
+        }
+        return pool;
     }
 }
