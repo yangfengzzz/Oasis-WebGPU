@@ -15,11 +15,13 @@ import {RenderPass} from "./rendering/RenderPass";
 import {SceneManager} from "./SceneManager";
 import {Scene} from "./Scene";
 import {ShaderMacro} from "./shader/ShaderMacro";
-import {Shader} from "./shader";
+import {Shader, ShaderPool} from "./shader";
 import {ShaderMacroCollection} from "./shader/ShaderMacroCollection";
 import {ForwardSubpass} from "./rendering/subpasses/ForwardSubpass";
 import {RenderElement} from "./rendering/RenderElement";
 import {ClassPool} from "./rendering/ClassPool";
+
+ShaderPool.init();
 
 export class Engine {
     /** @internal */
