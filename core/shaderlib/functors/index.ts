@@ -17,3 +17,5 @@ export * from "./WGSLBRDF"
 
 export * from "./WGSLBeginPositionVert"
 export * from "./WGSLBeginNormalVert"
+export * from "./WGSLBlendShapeVert"
+export * from "./WGSLSkinningVert"
