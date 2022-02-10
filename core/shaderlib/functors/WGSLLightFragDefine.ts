@@ -1,6 +1,6 @@
-import {ShaderData} from "../../shader";
 import {WGSLEncoder} from "../WGSLEncoder";
 import {SamplerType, TextureType, UniformType} from "../WGSLCommon";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLLightFragDefine {
     private readonly _outputStructName: string;
@@ -9,7 +9,7 @@ export class WGSLLightFragDefine {
         this._outputStructName = outputStructName;
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         if (macros.isEnable("DIRECT_LIGHT_COUNT")) {
             encoder.addStruct("struct DirectLight {\n " +
                 " color : vec3<f32>;\n " +

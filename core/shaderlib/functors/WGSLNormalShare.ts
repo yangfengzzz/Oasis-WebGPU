@@ -1,6 +1,6 @@
-import {ShaderData} from "../../shader";
 import {WGSLEncoder} from "../WGSLEncoder";
 import {UniformType} from "../WGSLCommon";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLNormalShare {
     private readonly _outputStructName: string;
@@ -9,7 +9,7 @@ export class WGSLNormalShare {
         this._outputStructName = outputStructName;
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         const outputStructName = this._outputStructName;
         if (macros.isEnable("HAS_NORMAL")) {
             if (macros.isEnable("HAS_TANGENT") && macros.isEnable("HAS_NORMAL_TEXTURE")) {

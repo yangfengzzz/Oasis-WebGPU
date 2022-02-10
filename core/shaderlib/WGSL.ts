@@ -24,8 +24,8 @@ export class WGSL {
         return [this._source, this._bindGroupInfo];
     }
 
-    createSourceEncoder(currentStage: GPUShaderStage): WGSLEncoder {
-        return new WGSLEncoder();
+    createSourceEncoder(currentStage: number): WGSLEncoder {
+        return new WGSLEncoder(this, currentStage);
     }
 
     /**

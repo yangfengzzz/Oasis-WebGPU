@@ -1,6 +1,6 @@
-import {ShaderData} from "../../shader";
 import {WGSLEncoder} from "../WGSLEncoder";
 import {SamplerType, TextureType, UniformType} from "../WGSLCommon";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLMobileMaterialShare {
     private readonly _outputStructName: string;
@@ -18,7 +18,7 @@ export class WGSLMobileMaterialShare {
             "};\n";
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         encoder.addStruct(this._blinnPhongStruct);
         encoder.addUniformBinding("u_blinnPhongData", "BlinnPhongData", 0);
 

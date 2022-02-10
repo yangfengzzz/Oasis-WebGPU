@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLColorVert {
     private readonly _input: string;
@@ -9,7 +9,7 @@ export class WGSLColorVert {
         this._output = output;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         if (macros.isEnable("HAS_VERTEXCOLOR")) {
             return `${this._output}.v_color = ${this._input}.COLOR_0;\n`;
         }

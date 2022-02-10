@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLNormalVert {
     private readonly _input: string;
@@ -9,7 +9,7 @@ export class WGSLNormalVert {
         this._output = output;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         const output = this._output;
         let source: string = "";
         if (macros.isEnable("HAS_NORMAL")) {

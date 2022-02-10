@@ -1,8 +1,8 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLCommon {
-    execute(encoder: WGSLEncoder, macros: ShaderData) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection) {
         encoder.addStruct("let PI:f32 = 3.14159265359;\n");
         encoder.addStruct("let RECIPROCAL_PI:f32 = 0.31830988618;\n");
         encoder.addStruct("let EPSILON:f32 = 1.0e-6;\n");

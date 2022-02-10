@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLPbrFrag {
     private readonly _input: string;
@@ -11,7 +11,7 @@ export class WGSLPbrFrag {
         this._is_metallic_workflow = is_metallic_workflow;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         const input = this._input;
         const is_metallic_workflow = this._is_metallic_workflow;
 

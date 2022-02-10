@@ -1,5 +1,5 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLIBLFragDefine {
     private _paramName: string = "in";
@@ -17,7 +17,7 @@ export class WGSLIBLFragDefine {
         this._outputStructName = outputStructName;
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         // sh need be pre-scaled in CPU.
         let func = "fn getLightProbeIrradiance(sh: array<vec3<f32>, 9>, normal:vec3<f32>)->vec3<f32> {\n";
         func += "      var result = sh[0] +\n";

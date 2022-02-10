@@ -1,6 +1,6 @@
 import {WGSLEncoder} from "../WGSLEncoder";
 import {Attributes, UniformType} from "../WGSLCommon";
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLCommonVert {
     private _inputStructName: string;
@@ -29,7 +29,7 @@ export class WGSLCommonVert {
         this._rendererStruct += "}\n";
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection) {
         const inputStructName = this._inputStructName;
         encoder.addAttributeType(inputStructName, Attributes.Position, UniformType.Vec3f32);
         if (macros.isEnable("HAS_UV")) {

@@ -1,5 +1,5 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLCommonFrag {
     private _inputStructName: string;
@@ -28,7 +28,7 @@ export class WGSLCommonFrag {
         this._rendererStruct += "}\n";
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection) {
         encoder.addStruct(this._cameraStruct);
         encoder.addUniformBinding("u_cameraData", "CameraData", 0);
         encoder.addStruct(this._rendererStruct);

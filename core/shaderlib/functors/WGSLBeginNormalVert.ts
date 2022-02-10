@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLBeginNormalVert {
     private readonly _input: string;
@@ -9,7 +9,7 @@ export class WGSLBeginNormalVert {
         this._output = output;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         let source: string = "";
         if (macros.isEnable("HAS_NORMAL")) {
             source += `var normal = ${this._input}.Normal;\n`;

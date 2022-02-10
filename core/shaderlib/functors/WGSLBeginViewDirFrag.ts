@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLBeginViewDirFrag {
     private readonly _input: string;
@@ -9,7 +9,7 @@ export class WGSLBeginViewDirFrag {
         this._output = output;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         if (macros.isEnable("NEED_WORLDPOS")) {
             return `var V = normalize(u_cameraData.u_cameraPos - ${this._input}.v_pos);\n`;
         }

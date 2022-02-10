@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLPositionVert {
     private readonly _input: string;
@@ -9,7 +9,7 @@ export class WGSLPositionVert {
         this._output = output;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         return `${this._output}.position = u_rendererData.u_MVPMat * position;\n`;
     }
 }

@@ -1,9 +1,9 @@
-import {ShaderData} from "../../shader";
 import {WGSLEncoder} from "../WGSLEncoder";
 import {WGSLNormalGet} from "./WGSLNormalGet";
 import {WGSLBRDF} from "./WGSLBRDF";
 import {WGSLDirectIrradianceFragDefine} from "./WGSLDirectIrradianceFragDefine";
 import {WGSLIBLFragDefine} from "./WGSLIBLFragDefine";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLPbrHelper {
     private readonly _outputStructName: string;
@@ -28,7 +28,7 @@ export class WGSLPbrHelper {
         this._is_metallic_workflow = is_metallic_workflow;
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         this._normalGet.execute(encoder, macros, counterIndex);
 
         encoder.addFunction("fn pow2(x: f32)->f32 {\n" +

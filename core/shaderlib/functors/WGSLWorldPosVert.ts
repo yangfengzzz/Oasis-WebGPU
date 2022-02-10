@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLWorldPosVert {
     private readonly _input: string;
@@ -9,7 +9,7 @@ export class WGSLWorldPosVert {
         this._output = output;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         let source: string = "";
         if (macros.isEnable("NEED_WORLDPOS")) {
             source += "var temp_pos = u_rendererData.u_modelMat * position;\n";

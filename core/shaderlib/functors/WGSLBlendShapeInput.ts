@@ -1,6 +1,6 @@
-import {ShaderData} from "../../shader";
 import {WGSLEncoder} from "../WGSLEncoder";
 import {UniformType} from "../WGSLCommon";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLBlendShapeInput {
     private _inputStructName: string;
@@ -9,7 +9,7 @@ export class WGSLBlendShapeInput {
         this._inputStructName = inputStructName;
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         const inputStructName = this._inputStructName;
         if (macros.isEnable("HAS_BLENDSHAPE")) {
             if (!macros.isEnable("HAS_BASE_TEXTURE")) {

@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLUVVert {
     private readonly _input: string;
@@ -9,7 +9,7 @@ export class WGSLUVVert {
         this._output = output;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         const output = this._output;
         const input = this._input;
         let source: string = "";

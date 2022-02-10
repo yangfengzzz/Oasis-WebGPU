@@ -1,5 +1,5 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLBRDF {
     private _paramName: string = "in";
@@ -17,7 +17,7 @@ export class WGSLBRDF {
         this._outputStructName = outputStructName;
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         // Original approximation by Christophe Schlick '94
         // float fresnel = pow( 1.0 - dotLH, 5.0 );
         // Optimized variant (presented by Epic at SIGGRAPH '13)

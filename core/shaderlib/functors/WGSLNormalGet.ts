@@ -1,6 +1,5 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {ShaderData} from "../../shader";
-import {UniformType} from "../WGSLCommon";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLNormalGet {
     private _paramName: string = "in";
@@ -18,7 +17,7 @@ export class WGSLNormalGet {
         this._outputStructName = outputStructName;
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         let source = `fn getNormal(${this._paramName}:${this._outputStructName}, \n`;
         if (macros.isEnable("HAS_NORMAL_TEXTURE")) {
             source += "     u_normalTexture: texture_2d<f32>,\n";

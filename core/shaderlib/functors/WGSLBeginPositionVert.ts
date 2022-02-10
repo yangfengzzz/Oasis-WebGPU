@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLBeginPositionVert {
     private readonly _input: string;
@@ -11,7 +11,7 @@ export class WGSLBeginPositionVert {
         this._formatTemplate = `var position = vec4<f32>( ${input}.Position , 1.0 );\\n`;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         return this._formatTemplate;
     }
 }

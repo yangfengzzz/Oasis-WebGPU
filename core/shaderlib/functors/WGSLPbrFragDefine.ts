@@ -1,6 +1,6 @@
-import {ShaderData} from "../../shader";
 import {WGSLEncoder} from "../WGSLEncoder";
 import {SamplerType, TextureType, UniformType} from "../WGSLCommon";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLPbrFragDefine {
     private readonly _outputStructName: string;
@@ -30,7 +30,7 @@ export class WGSLPbrFragDefine {
         }
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         encoder.addUniformBinding("u_alphaCutoff", UniformType.F32, 0);
         encoder.addStruct(this._pbrStruct);
         encoder.addUniformBinding("u_pbrBaseData", "PbrBaseData", 0);

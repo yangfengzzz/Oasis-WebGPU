@@ -1,5 +1,5 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLDirectIrradianceFragDefine {
     private _paramName: string = "in";
@@ -17,7 +17,7 @@ export class WGSLDirectIrradianceFragDefine {
         this._outputStructName = outputStructName;
     }
 
-    execute(encoder: WGSLEncoder, macros: ShaderData, counterIndex: number) {
+    execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         let func = "fn addDirectRadiance(incidentDirection:vec3<f32>, color:vec3<f32>, geometry:GeometricContext, \n";
         func += "material:PhysicalMaterial, reflectedLight:ptr<func, ReflectedLight>) {\n";
         func += "   var dotNL = saturate( dot( geometry.normal, incidentDirection ) );\n";

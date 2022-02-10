@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLBlendShapeVert {
     private readonly _input: string;
@@ -9,7 +9,7 @@ export class WGSLBlendShapeVert {
         this._output = output;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         let source: string = "";
         if (macros.isEnable("HAS_BLENDSHAPE")) {
             if (macros.isEnable("HAS_BASE_TEXTURE")) {

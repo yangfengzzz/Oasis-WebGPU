@@ -1,4 +1,4 @@
-import {ShaderData} from "../../shader";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLBeginMobileFrag {
     private readonly _input: string;
@@ -9,7 +9,7 @@ export class WGSLBeginMobileFrag {
         this._output = output;
     }
 
-    execute(macros: ShaderData): string {
+    execute(macros: ShaderMacroCollection): string {
         const input = this._input;
         let source = "var ambient = vec4<f32>(0.0);\n";
         source += "var emission = u_blinnPhongData.emissiveColor;\n";
