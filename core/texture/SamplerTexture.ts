@@ -1,4 +1,4 @@
-import {RefObject} from "../asset/RefObject";
+import {RefObject} from "../asset";
 import {ImageCopyBuffer, ImageCopyTexture, TextureDescriptor, SamplerDescriptor} from "../webgpu";
 import {Engine} from "../Engine";
 
@@ -12,9 +12,9 @@ export abstract class SamplerTexture extends RefObject {
     name: string;
 
     protected _platformTexture: GPUTexture;
-    protected _platformTextureDesc: TextureDescriptor;
+    protected _platformTextureDesc: TextureDescriptor = new TextureDescriptor();
     protected _platformSampler: GPUSampler;
-    protected _platformSamplerDesc: SamplerDescriptor;
+    protected _platformSamplerDesc: SamplerDescriptor = new SamplerDescriptor();
     protected _isDirty: boolean = false;
 
     /**
@@ -174,7 +174,7 @@ export abstract class SamplerTexture extends RefObject {
     }
 
     protected _getMipmapCount(mipmap: boolean): number {
-        return mipmap ? Math.floor(Math.log2(Math.max(this._platformTextureDesc.size[0], this._platformTextureDesc.size[1]))) + 1 : 1;
+        return mipmap ? Math.floor(Math.log2(Math.max(this._platformTextureDesc.size.width, this._platformTextureDesc.size.height))) + 1 : 1;
     }
 
     protected _createImageCopyBuffer(buffer: GPUBuffer,

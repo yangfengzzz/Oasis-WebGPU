@@ -1,6 +1,7 @@
 import {SamplerTexture} from "./SamplerTexture";
 import {Engine} from "../Engine";
 import {TextureViewDescriptor} from "../webgpu";
+import {Extent3DDict} from "../webgpu";
 
 /**
  * Two-dimensional texture.
@@ -34,12 +35,13 @@ export class SamplerTexture2D extends SamplerTexture {
     ) {
         super(engine);
         const textureDesc = this._platformTextureDesc;
-        textureDesc.size[0] = width;
-        textureDesc.size[1] = height;
+        textureDesc.size = new Extent3DDict();
+        textureDesc.size.width = width;
+        textureDesc.size.height = height;
         textureDesc.format = format;
         textureDesc.usage = usage;
         textureDesc.mipLevelCount = this._getMipmapCount(mipmap);
-        this._platformSamplerDesc = engine.device.createTexture(textureDesc);
+        this._platformTexture = engine.device.createTexture(textureDesc);
     }
 
     get textureView(): GPUTextureView {

@@ -7,6 +7,8 @@ import {Vector3, Color} from "@oasis-engine/math";
 import {Script} from "./core/Script";
 import {OrbitControl} from "./core/control";
 import {PointLight} from "./core/lighting";
+import {SamplerTexture2D} from "./core/texture/SamplerTexture2D";
+import "./core/loader/Texture2DLoader"
 
 class MoveScript extends Script {
     private _rTri = 0
@@ -54,6 +56,13 @@ engine.init().then(() => {
     const sphereRenderer = sphereEntity.addComponent(MeshRenderer);
     sphereRenderer.mesh = PrimitiveMesh.createSphere(engine, 1);
     sphereRenderer.setMaterial(new BlinnPhongMaterial(engine));
+
+    engine.resourceManager
+        .load<SamplerTexture2D>("http://192.168.31.204:8000/wood.png")
+        .then((texture) => {
+            console.log(texture);
+            debugger;
+        });
 
     engine.run();
 });
