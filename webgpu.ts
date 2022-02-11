@@ -55,13 +55,13 @@ engine.init().then(() => {
     sphereEntity.addComponent(MoveScript);
     const sphereRenderer = sphereEntity.addComponent(MeshRenderer);
     sphereRenderer.mesh = PrimitiveMesh.createSphere(engine, 1);
-    sphereRenderer.setMaterial(new BlinnPhongMaterial(engine));
 
     engine.resourceManager
         .load<SamplerTexture2D>("http://192.168.31.204:8000/wood.png")
         .then((texture) => {
-            console.log(texture);
-            debugger;
+            const unlit = new BlinnPhongMaterial(engine)
+            unlit.baseTexture = texture;
+            sphereRenderer.setMaterial(unlit);
         });
 
     engine.run();

@@ -9,9 +9,16 @@ export class TextureDescriptor implements GPUTextureDescriptor {
 }
 
 export class Extent3DDict implements GPUExtent3DDict {
-    depthOrArrayLayers?: GPUIntegerCoordinate;
-    height?: GPUIntegerCoordinate;
     width: GPUIntegerCoordinate;
+    height?: GPUIntegerCoordinate;
+    depthOrArrayLayers?: GPUIntegerCoordinate;
+}
+
+export class Extent3DDictStrict implements GPUExtent3DDictStrict {
+    width: GPUIntegerCoordinate;
+    height?: GPUIntegerCoordinate;
+    depthOrArrayLayers?: GPUIntegerCoordinate;
+    depth?: undefined;
 }
 
 export class TextureViewDescriptor implements GPUTextureViewDescriptor {
@@ -43,6 +50,20 @@ export class ImageCopyTexture implements GPUImageCopyTexture {
     aspect?: GPUTextureAspect;
     mipLevel?: GPUIntegerCoordinate;
     origin?: GPUOrigin3D;
+}
+
+export class ImageCopyTextureTagged implements GPUImageCopyTextureTagged {
+    texture: GPUTexture;
+    aspect?: GPUTextureAspect;
+    colorSpace?: GPUPredefinedColorSpace;
+    mipLevel?: GPUIntegerCoordinate;
+    origin?: GPUOrigin3D;
+    premultipliedAlpha?: boolean;
+}
+
+export class ImageCopyExternalImage implements GPUImageCopyExternalImage {
+    source: ImageBitmap | HTMLCanvasElement | OffscreenCanvas;
+    origin?: GPUOrigin2D;
 }
 
 export function bytesPerPixel(format: GPUTextureFormat): number {

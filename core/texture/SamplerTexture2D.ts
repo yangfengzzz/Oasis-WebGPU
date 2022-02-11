@@ -1,6 +1,6 @@
 import {SamplerTexture} from "./SamplerTexture";
 import {Engine} from "../Engine";
-import {TextureViewDescriptor} from "../webgpu";
+import {Extent3DDictStrict, ImageCopyExternalImage, ImageCopyTextureTagged, TextureViewDescriptor} from "../webgpu";
 import {Extent3DDict} from "../webgpu";
 
 /**
@@ -29,9 +29,9 @@ export class SamplerTexture2D extends SamplerTexture {
         engine: Engine,
         width: number,
         height: number,
-        format: GPUTextureFormat = 'rgba8sint',
-        usage: GPUTextureUsageFlags = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-        mipmap: boolean = true
+        format: GPUTextureFormat = 'rgba8unorm',
+        usage: GPUTextureUsageFlags = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+        mipmap: boolean = false
     ) {
         super(engine);
         const textureDesc = this._platformTextureDesc;
@@ -53,5 +53,37 @@ export class SamplerTexture2D extends SamplerTexture {
         textureViewDescriptor.arrayLayerCount = platformTextureDesc.size.depthOrArrayLayers;
         textureViewDescriptor.aspect = 'all';
         return this._platformTexture.createView(textureViewDescriptor);
+    }
+
+    /**
+     * Setting pixels data through TexImageSource, designated area and texture mipmapping level.
+     * @param imageSource - The source of texture
+     * @param mipLevel - Texture mipmapping level
+     * @param flipY - Whether to flip the Y axis
+     * @param premultiplyAlpha - Whether to premultiply the transparent channel
+     * @param x - X coordinate of area start
+     * @param y - Y coordinate of area start
+     */
+    setImageSource(
+        imageSource: ImageBitmap | HTMLCanvasElement | OffscreenCanvas,
+        mipLevel: number = 0,
+        flipY: boolean = false,
+        premultiplyAlpha: boolean = false,
+        x?: number,
+        y?: number
+    ): void {
+        const imageCopyExternalImage = new ImageCopyExternalImage();
+        imageCopyExternalImage.source = imageSource;
+        imageCopyExternalImage.origin = [0, 0];
+        const imageCopyTextureTagged = new ImageCopyTextureTagged();
+        imageCopyTextureTagged.texture = this._platformTexture;
+        imageCopyTextureTagged.aspect = 'all'
+        imageCopyTextureTagged.mipLevel = 0;
+        imageCopyTextureTagged.premultipliedAlpha = premultiplyAlpha;
+        const extent3DDictStrict = new Extent3DDictStrict();
+        extent3DDictStrict.width = this._platformTextureDesc.size.width;
+        extent3DDictStrict.height = this._platformTextureDesc.size.height;
+
+        this._engine.device.queue.copyExternalImageToTexture(imageCopyExternalImage, imageCopyTextureTagged, extent3DDictStrict)
     }
 }
