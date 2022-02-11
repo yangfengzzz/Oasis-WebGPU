@@ -5,7 +5,7 @@ import {ColorSpace} from "./enums/ColorSpace";
 import {Entity} from "./Entity";
 import {RenderContext} from "./rendering/RenderContext";
 import {ComponentsManager} from "./ComponentsManager";
-import {ResourceManager} from "./asset/ResourceManager";
+import {ResourceManager} from "./asset";
 import {
     RenderPassColorAttachment,
     RenderPassDepthStencilAttachment,
@@ -41,7 +41,7 @@ export class Engine {
     protected _canvas: WebCanvas;
 
     private _settings: EngineSettings = {};
-    private _resourceManager: ResourceManager = new ResourceManager();
+    private _resourceManager: ResourceManager = new ResourceManager(this);
     private _sceneManager: SceneManager = new SceneManager(this);
     private _vSyncCount: number = 1;
     private _targetFrameRate: number = 60;

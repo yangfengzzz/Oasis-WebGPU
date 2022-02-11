@@ -1,9 +1,9 @@
-import {ObjectValues} from "../base/Util";
+import {ObjectValues, EngineObject} from "../base";
 import {AssetPromise} from "./AssetPromise";
 import {Loader} from "./Loader";
 import {LoadItem} from "./LoadItem";
 import {RefObject} from "./RefObject";
-import {EngineObject} from "../base";
+import {Engine} from "../Engine";
 
 /**
  * ResourceManager
@@ -46,8 +46,9 @@ export class ResourceManager {
 
     /**
      * Create a ResourceManager.
+     * @param engine - Engine to which the current ResourceManager belongs
      */
-    constructor() {
+    constructor(public readonly engine: Engine) {
     }
 
     /**
