@@ -38,10 +38,18 @@ export class ShaderMacroCollection {
             outMask[i] = maxMask[i];
         }
         out._length = maxSize;
+
+        const variableMacros = out._variableMacros;
+        left._variableMacros.forEach(((variable, name) => {
+            variableMacros.set(name, variable);
+        }))
+        right._variableMacros.forEach(((variable, name) => {
+            variableMacros.set(name, variable);
+        }))
     }
 
-    private _variableMacros: Record<string, string> = Object.create(null);
-
+    /** @internal */
+    _variableMacros: Map<string, string> = new Map<string, string>();
     /** @internal */
     _mask: number[] = [];
     /** @internal */
@@ -156,8 +164,8 @@ export class ShaderMacroCollection {
     isEnable(macroName: string): boolean;
 
     isEnable(macroName: string): boolean {
-        const variableValue = this._variableMacros[macroName];
-        if (variableValue) {
+        const variableValue = this._variableMacros.get(macroName);
+        if (variableValue !== undefined) {
             const macro = Shader.getMacroByName(`${macroName} ${variableValue}`);
             return this._isEnable(macro);
         } else {
@@ -171,8 +179,8 @@ export class ShaderMacroCollection {
     variableMacros(macroName: string): string;
 
     variableMacros(macroName: string): string {
-        const variableValue = this._variableMacros[macroName];
-        if (variableValue) {
+        const variableValue = this._variableMacros.get(macroName);
+        if (variableValue !== undefined) {
             const macro = Shader.getMacroByName(`${macroName} ${variableValue}`);
             if (this._isEnable(macro)) {
                 return variableValue;
@@ -195,8 +203,8 @@ export class ShaderMacroCollection {
     disableMacro(macro: string | ShaderMacro): void {
         if (typeof macro === "string") {
             // @todo: should optimization variable macros disable performance
-            const variableValue = this._variableMacros[macro];
-            if (variableValue) {
+            const variableValue = this._variableMacros.get(macro);
+            if (variableValue !== undefined) {
                 this._disableVariableMacro(macro, variableValue);
             } else {
                 macro = Shader.getMacroByName(macro);
@@ -209,20 +217,20 @@ export class ShaderMacroCollection {
 
     private _enableVariableMacro(name: string, value: string): void {
         const variableMacro = this._variableMacros;
-        const variableValue = variableMacro[name];
+        const variableValue = variableMacro.get(name);
         if (variableValue !== value) {
             variableValue && this._disableVariableMacro(name, variableValue);
 
             const macro = Shader.getMacroByName(`${name} ${value}`);
             this.enable(macro);
-            variableMacro[name] = value;
+            variableMacro.set(name, value);
         }
     }
 
     private _disableVariableMacro(name: string, value: string): void {
         const oldMacro = Shader.getMacroByName(`${name} ${value}`);
         this.disable(oldMacro);
-        delete this._variableMacros[name];
+        this._variableMacros.delete(name);
     }
 
     /**

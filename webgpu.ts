@@ -21,6 +21,9 @@ const engine = new WebGPUEngine("canvas");
 engine.canvas.resizeByClientSize();
 engine.init().then(() => {
     const scene = engine.sceneManager.activeScene;
+    const diffuseSolidColor = scene.ambientLight.diffuseSolidColor;
+    diffuseSolidColor.setValue(0.5, 0.5, 0.5, 1);
+    scene.ambientLight.diffuseSolidColor = diffuseSolidColor;
     const rootEntity = scene.createRootEntity();
 
     // init camera
@@ -32,16 +35,17 @@ engine.init().then(() => {
 
     // init point light
     const light = rootEntity.createChild("light");
-    light.transform.setPosition(0, 3, 0);
+    light.transform.setPosition(0, 10, 0);
+    light.transform.lookAt(new Vector3());
     const pointLight = light.addComponent(PointLight);
-    pointLight.intensity = 0.3;
+    pointLight.intensity = 0.6;
 
     const cubeEntity = rootEntity.createChild();
     cubeEntity.addComponent(MoveScript);
     const renderer = cubeEntity.addComponent(MeshRenderer);
     renderer.mesh = PrimitiveMesh.createCuboid(engine, 1);
-    const material = new UnlitMaterial(engine);
-    material.baseColor = new Color(0.4, 0.3, 0.2, 1);
+    const material = new BlinnPhongMaterial(engine);
+    material.setBaseColor(new Color(0.7, 0.5, 0.4, 1));
     renderer.setMaterial(material);
 
     const sphereEntity = rootEntity.createChild();

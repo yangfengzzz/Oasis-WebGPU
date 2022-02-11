@@ -68,10 +68,10 @@ export class AmbientLight {
         const envMapLight = this._envMapLight;
         if (value !== this._diffuseSolidColor) {
             value.cloneTo(this._diffuseSolidColor);
-            envMapLight[0] = value.r;
-            envMapLight[1] = value.g;
-            envMapLight[2] = value.b;
         }
+        envMapLight[0] = value.r;
+        envMapLight[1] = value.g;
+        envMapLight[2] = value.b;
         this._scene.shaderData.setFloatArray(AmbientLight._envMapProperty, envMapLight);
     }
 

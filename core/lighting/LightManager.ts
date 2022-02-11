@@ -92,7 +92,7 @@ export class LightManager {
     }
 
     updateShaderData(shaderData: ShaderData) {
-        const {_pointLights, _pointLightDatas, _spotLights, _spotLightDatas, _directLights, _directLightDatas} = this;
+        const {_pointLights, _spotLights, _directLights} = this;
         const pointLightData = LightManager._pointLightData;
         const pointLightCount = _pointLights.length;
         const spotLightData = LightManager._spotLightData;
@@ -100,13 +100,13 @@ export class LightManager {
         const directLightData = LightManager._directLightData;
         const directLightCount = _directLights.length;
 
-        if (_pointLightDatas === undefined || _pointLightDatas.length !== pointLightCount * pointLightData.length) {
+        if (this._pointLightDatas === undefined || this._pointLightDatas.length !== pointLightCount * pointLightData.length) {
             this._pointLightDatas = new Float32Array(_pointLights.length * pointLightData.length);
         }
-        if (_spotLightDatas === undefined || _spotLightDatas.length !== spotLightCount * spotLightData.length) {
+        if (this._spotLightDatas === undefined || this._spotLightDatas.length !== spotLightCount * spotLightData.length) {
             this._spotLightDatas = new Float32Array(_spotLights.length * spotLightData.length);
         }
-        if (_directLightDatas == undefined || _directLightDatas.length !== directLightCount * directLightData.length) {
+        if (this._directLightDatas == undefined || this._directLightDatas.length !== directLightCount * directLightData.length) {
             this._directLightDatas = new Float32Array(_directLights.length * directLightData.length);
         }
 
@@ -142,21 +142,21 @@ export class LightManager {
 
         if (directLightCount) {
             shaderData.enableMacro('DIRECT_LIGHT_COUNT', directLightCount.toString());
-            shaderData.setFloatArray(LightManager._directLightProperty, _directLightDatas);
+            shaderData.setFloatArray(LightManager._directLightProperty, this._directLightDatas);
         } else {
             shaderData.disableMacro('DIRECT_LIGHT_COUNT');
         }
 
         if (pointLightCount) {
             shaderData.enableMacro('POINT_LIGHT_COUNT', pointLightCount.toString());
-            shaderData.setFloatArray(LightManager._pointLightProperty, _pointLightDatas);
+            shaderData.setFloatArray(LightManager._pointLightProperty, this._pointLightDatas);
         } else {
             shaderData.disableMacro('POINT_LIGHT_COUNT');
         }
 
         if (spotLightCount) {
             shaderData.enableMacro('SPOT_LIGHT_COUNT', spotLightCount.toString());
-            shaderData.setFloatArray(LightManager._spotLightProperty, _spotLightDatas);
+            shaderData.setFloatArray(LightManager._spotLightProperty, this._spotLightDatas);
         } else {
             shaderData.disableMacro('SPOT_LIGHT_COUNT');
         }
