@@ -22,6 +22,8 @@ import {Renderer} from "../../Renderer";
 import {ShaderDataGroup} from "../../shader/ShaderDataGroup";
 
 export class ForwardSubpass extends Subpass {
+    static readonly _compileMacros: ShaderMacroCollection = new ShaderMacroCollection();
+
     private _scene: Scene;
     private _camera: Camera;
     private _opaqueQueue: RenderElement[] = [];
@@ -76,14 +78,6 @@ export class ForwardSubpass extends Subpass {
     }
 
     private _drawMeshes(renderPassEncoder: GPURenderPassEncoder): void {
-        const compileMacros = Shader._compileMacros;
-        // union render global macro and material self macro.
-        ShaderMacroCollection.unionCollection(
-            this._scene._globalShaderMacro,
-            this._camera._globalShaderMacro,
-            compileMacros
-        );
-
         this._opaqueQueue = [];
         this._alphaTestQueue = [];
         this._transparentQueue = [];
@@ -92,17 +86,25 @@ export class ForwardSubpass extends Subpass {
         this._alphaTestQueue.sort(Subpass._compareFromNearToFar);
         this._transparentQueue.sort(Subpass._compareFromFarToNear);
 
-        this._drawElement(renderPassEncoder, this._opaqueQueue, compileMacros);
-        this._drawElement(renderPassEncoder, this._alphaTestQueue, compileMacros);
-        this._drawElement(renderPassEncoder, this._transparentQueue, compileMacros);
+        this._drawElement(renderPassEncoder, this._opaqueQueue);
+        this._drawElement(renderPassEncoder, this._alphaTestQueue);
+        this._drawElement(renderPassEncoder, this._transparentQueue);
     }
 
-    private _drawElement(renderPassEncoder: GPURenderPassEncoder, items: RenderElement[], compileMacros: ShaderMacroCollection) {
+    private _drawElement(renderPassEncoder: GPURenderPassEncoder, items: RenderElement[]) {
+        const compileMacros = ForwardSubpass._compileMacros;
+
         for (let i = 0, n = items.length; i < n; i++) {
             const {mesh, subMesh, material, renderer} = items[i];
             // union render global macro and material self macro.
             ShaderMacroCollection.unionCollection(
-                renderer._globalShaderMacro,
+                this._camera._globalShaderMacro,
+                renderer.shaderData._macroCollection,
+                compileMacros
+            );
+
+            ShaderMacroCollection.unionCollection(
+                compileMacros,
                 material.shaderData._macroCollection,
                 compileMacros
             );
@@ -110,33 +112,39 @@ export class ForwardSubpass extends Subpass {
             const device = this._engine.device;
             // PSO
             {
-                const program = material.shader.getShaderProgram(this._engine, compileMacros);
+                const shader = material.shader;
+                const program = shader.getShaderProgram(this._engine, compileMacros);
                 this._vertex.module = program.vertexShader;
                 this._fragment.module = program.fragmentShader;
 
-                const bindGroupLayoutDescriptors = material.shader.bindGroupLayoutDescriptorMap;
+                const bindGroupDescriptor = this._bindGroupDescriptor;
+                const bindGroupEntries = this._bindGroupEntries;
+
+                const bindGroupLayoutDescriptors = program.bindGroupLayoutDescriptorMap;
                 let bindGroupLayouts: BindGroupLayout[] = [];
-                bindGroupLayoutDescriptors.forEach(((value, key) => {
-                    const bindGroupLayout = device.createBindGroupLayout(value);
-                    this._bindGroupEntries.length = value.entries.length;
-                    for (let i = 0, n = value.entries.length; i < n; i++) {
-                        const entry = value.entries[i];
-                        this._bindGroupEntries[i].binding = entry.binding;
+                bindGroupLayoutDescriptors.forEach(((descriptor, group) => {
+                    const bindGroupLayout = device.createBindGroupLayout(descriptor);
+                    this._bindGroupEntries = [];
+                    bindGroupEntries.length = descriptor.entries.length;
+                    for (let i = 0, n = descriptor.entries.length; i < n; i++) {
+                        const entry = descriptor.entries[i];
+                        bindGroupEntries[i] = new BindGroupEntry(); // cache
+                        bindGroupEntries[i].binding = entry.binding;
                         if (entry.buffer !== undefined) {
-                            this._bindingData(this._bindGroupEntries[i], material, renderer);
+                            this._bindingData(bindGroupEntries[i], material, renderer);
                         } else if (entry.texture !== undefined || entry.storageTexture !== undefined) {
-                            this._bindingTexture(this._bindGroupEntries[i], material, renderer);
+                            this._bindingTexture(bindGroupEntries[i], material, renderer);
                         } else if (entry.sampler !== undefined) {
-                            this._bindingSampler(this._bindGroupEntries[i], material, renderer);
+                            this._bindingSampler(bindGroupEntries[i], material, renderer);
                         }
                     }
-                    this._bindGroupDescriptor.layout = bindGroupLayout;
-                    this._bindGroupDescriptor.entries = this._bindGroupEntries;
-                    const uniformBindGroup = device.createBindGroup(this._bindGroupDescriptor);
-                    renderPassEncoder.setBindGroup(key, uniformBindGroup);
+                    bindGroupDescriptor.layout = bindGroupLayout;
+                    bindGroupDescriptor.entries = bindGroupEntries;
+                    const uniformBindGroup = device.createBindGroup(bindGroupDescriptor);
+                    renderPassEncoder.setBindGroup(group, uniformBindGroup);
                     bindGroupLayouts.push(bindGroupLayout);
                 }));
-                material.shader.flush();
+                shader.flush();
 
                 this._pipelineLayoutDescriptor.bindGroupLayouts = bindGroupLayouts;
                 this._pipelineLayout = device.createPipelineLayout(this._pipelineLayoutDescriptor);

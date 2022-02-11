@@ -15,8 +15,6 @@ type BindGroupLayoutDescriptorMap = Map<number, BindGroupLayoutDescriptor>;
  */
 export class Shader {
     /** @internal */
-    static readonly _compileMacros: ShaderMacroCollection = new ShaderMacroCollection();
-
     private static _shaderCounter: number = 0;
     private static _shaderMap: Record<string, Shader> = Object.create(null);
     private static _propertyNameMap: Record<string, ShaderProperty> = Object.create(null);
@@ -106,10 +104,6 @@ export class Shader {
     private _bindGroupLayoutEntryVecMap: BindGroupLayoutEntryVecMap;
     private _bindGroupLayoutDescriptorMap: BindGroupLayoutDescriptorMap;
 
-    get bindGroupLayoutDescriptorMap(): BindGroupLayoutDescriptorMap {
-        return this._bindGroupLayoutDescriptorMap;
-    }
-
     private constructor(name: string, vertexSource: WGSL, fragmentSource: WGSL) {
         this._shaderId = Shader._shaderCounter++;
         this.name = name;
@@ -135,35 +129,34 @@ export class Shader {
 
         // merge info
         const vertexCode = this._vertexSource.compile(macroCollection);
-        vertexCode[1].forEach(((value, key) => {
-            value.forEach((value1 => {
-                this._bindGroupInfo[key].push(value1);
+        vertexCode[1].forEach(((bindings, group) => {
+            bindings.forEach((binding => {
+                this._bindGroupInfo[group].push(binding);
             }))
         }));
         const fragmentCode = this._fragmentSource.compile(macroCollection);
-        fragmentCode[1].forEach(((value, key) => {
-            value.forEach((value1 => {
-                this._bindGroupInfo[key].push(value1);
+        fragmentCode[1].forEach(((bindings, group) => {
+            bindings.forEach((binding => {
+                this._bindGroupInfo[group].push(binding);
             }))
         }));
 
         // move to vecMap
-        this._bindGroupInfo.forEach(((value, key) => {
-            this._bindGroupLayoutEntryVecMap[key].length = value.size;
-            value.forEach((value1 => {
-                this._bindGroupLayoutEntryVecMap[key].push(this._findEntry(key, value1));
+        this._bindGroupInfo.forEach(((bindings, group) => {
+            bindings.forEach((binding => {
+                this._bindGroupLayoutEntryVecMap[group].push(this._findEntry(group, binding));
             }));
         }));
 
         // generate map
-        this._bindGroupLayoutEntryVecMap.forEach(((value, key) => {
+        this._bindGroupLayoutEntryVecMap.forEach(((entries, group) => {
             const desc = new BindGroupLayoutDescriptor();
-            desc.entries = value;
-            this._bindGroupLayoutDescriptorMap[key] = desc;
+            desc.entries = entries;
+            this._bindGroupLayoutDescriptorMap[group] = desc;
         }));
 
-
-        shaderProgram = new ShaderProgram(engine.device, vertexCode[0], fragmentCode[0]);
+        shaderProgram = new ShaderProgram(engine.device, vertexCode[0], fragmentCode[0],
+            this._bindGroupLayoutDescriptorMap);
         shaderProgramPool.cache(shaderProgram);
         return shaderProgram;
     }

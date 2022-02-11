@@ -1,4 +1,6 @@
-import {ShaderModuleDescriptor} from "../webgpu";
+import {BindGroupLayoutDescriptor, ShaderModuleDescriptor} from "../webgpu";
+
+type BindGroupLayoutDescriptorMap = Map<number, BindGroupLayoutDescriptor>;
 
 /**
  * Shader program, corresponding to the GPU shader program.
@@ -7,6 +9,7 @@ import {ShaderModuleDescriptor} from "../webgpu";
 export class ShaderProgram {
     private static _shaderModuleDescriptor: ShaderModuleDescriptor = new ShaderModuleDescriptor();
 
+    private _bindGroupLayoutDescriptorMap: BindGroupLayoutDescriptorMap;
     private _vertexShader: GPUShaderModule;
     private _fragmentShader: GPUShaderModule;
     private _device: GPUDevice;
@@ -19,8 +22,14 @@ export class ShaderProgram {
         return this._fragmentShader;
     }
 
-    constructor(device: GPUDevice, vertexSource: string, fragmentSource: string) {
+    get bindGroupLayoutDescriptorMap(): BindGroupLayoutDescriptorMap {
+        return this._bindGroupLayoutDescriptorMap;
+    }
+
+    constructor(device: GPUDevice, vertexSource: string, fragmentSource: string,
+                bindGroupLayoutDescriptorMap: BindGroupLayoutDescriptorMap) {
         this._device = device;
+        this._bindGroupLayoutDescriptorMap = bindGroupLayoutDescriptorMap;
         this._createProgram(vertexSource, fragmentSource);
     }
 

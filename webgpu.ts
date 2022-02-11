@@ -2,7 +2,7 @@ import {WebGPUEngine} from "./core/WebGPUEngine";
 import {Camera} from "./core/Camera";
 import {MeshRenderer} from "./core/mesh/MeshRenderer";
 import {PrimitiveMesh} from "./core/mesh/PrimitiveMesh";
-import {BlinnPhongMaterial} from "./core/material";
+import {UnlitMaterial} from "./core/material";
 import {Vector3} from "@oasis-engine/math";
 import {Script} from "./core/Script";
 import {OrbitControl} from "./core/control";
@@ -33,14 +33,14 @@ engine.init().then(() => {
     cubeEntity.addComponent(MoveScript);
     const renderer = cubeEntity.addComponent(MeshRenderer);
     renderer.mesh = PrimitiveMesh.createCuboid(engine, 1);
-    renderer.setMaterial(new BlinnPhongMaterial(engine));
+    renderer.setMaterial(new UnlitMaterial(engine));
 
     const sphereEntity = rootEntity.createChild();
     sphereEntity.transform.setPosition(0, 5, 0);
     sphereEntity.addComponent(MoveScript);
     const sphereRenderer = sphereEntity.addComponent(MeshRenderer);
     sphereRenderer.mesh = PrimitiveMesh.createSphere(engine, 1);
-    sphereRenderer.setMaterial(new BlinnPhongMaterial(engine));
+    sphereRenderer.setMaterial(new UnlitMaterial(engine));
 
     engine.run();
 });
