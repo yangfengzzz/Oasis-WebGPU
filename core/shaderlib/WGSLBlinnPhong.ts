@@ -152,7 +152,7 @@ export class WGSLBlinnPhongFragment extends WGSL {
             this._lightFragDefine.execute(encoder, macros, inputStructCounter);
             this._mobileMaterialShare.execute(encoder, macros, inputStructCounter);
             this._normalGet.execute(encoder, macros, inputStructCounter);
-            encoder.addBuiltInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
+            encoder.addInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
 
             encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], (() => {
                 let source: string = "";

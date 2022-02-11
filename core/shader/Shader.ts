@@ -147,9 +147,9 @@ export class Shader {
             }));
         }));
 
-        console.log(vertexCode[0]);
+        // console.log(vertexCode[0]);
         // console.log(fragmentCode[0]);
-        debugger;
+        // debugger;
 
         // move to vecMap
         this._bindGroupInfo.forEach(((bindings, group) => {

@@ -142,7 +142,7 @@ export class WGSLPbrFragment extends WGSL {
             this._lightFragDefine.execute(encoder, macros, inputStructCounter);
             this._pbrFragDefine.execute(encoder, macros, inputStructCounter);
             this._pbrHelper.execute(encoder, macros, inputStructCounter);
-            encoder.addBuiltInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
+            encoder.addInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
 
             encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], ()=>{
                 let source: string = "";

@@ -82,7 +82,7 @@ export class WGSLUnlitFragment extends WGSL {
             this._uvShare.execute(encoder, macros, inputStructCounter);
             encoder.addUniformBinding("u_baseColor", UniformType.Vec4f32, 0);
             encoder.addUniformBinding("u_alphaCutoff", UniformType.F32, 0);
-            encoder.addBuiltInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
+            encoder.addInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
             if (macros.isEnable("HAS_BASE_TEXTURE")) {
                 encoder.addSampledTextureBinding("u_baseTexture", TextureType.Texture2Df32, "u_baseSampler", SamplerType.Sampler);
             }
