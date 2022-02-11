@@ -54,9 +54,9 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
         this._baseTexture = value;
         this.shaderData.setSampledTexture(PBRBaseMaterial._baseTextureProp, PBRBaseMaterial._baseSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("HAS_BASECOLORMAP");
+            this.shaderData.enableMacro('HAS_BASE_COLORMAP');
         } else {
-            this.shaderData.disableMacro("HAS_BASECOLORMAP");
+            this.shaderData.disableMacro('HAS_BASE_COLORMAP');
         }
     }
 
@@ -71,9 +71,9 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
         this._normalTexture = value;
         this.shaderData.setSampledTexture(PBRBaseMaterial._normalTextureProp, PBRBaseMaterial._normalSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("O3_NORMAL_TEXTURE");
+            this.shaderData.enableMacro('HAS_NORMAL_TEXTURE');
         } else {
-            this.shaderData.disableMacro("O3_NORMAL_TEXTURE");
+            this.shaderData.disableMacro('HAS_NORMAL_TEXTURE');
         }
     }
 
@@ -119,9 +119,9 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
         this._emissiveTexture = value;
         this.shaderData.setSampledTexture(PBRBaseMaterial._emissiveTextureProp, PBRBaseMaterial._emissiveSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("HAS_EMISSIVEMAP");
+            this.shaderData.enableMacro('HAS_EMISSIVEMAP');
         } else {
-            this.shaderData.disableMacro("HAS_EMISSIVEMAP");
+            this.shaderData.disableMacro('HAS_EMISSIVEMAP');
         }
     }
 
@@ -136,9 +136,9 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
         this._occlusionTexture = value;
         this.shaderData.setSampledTexture(PBRBaseMaterial._occlusionTextureProp, PBRBaseMaterial._occlusionSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("HAS_OCCLUSIONMAP");
+            this.shaderData.enableMacro('HAS_OCCLUSIONMAP');
         } else {
-            this.shaderData.disableMacro("HAS_OCCLUSIONMAP");
+            this.shaderData.disableMacro('HAS_OCCLUSIONMAP');
         }
     }
 
@@ -165,8 +165,7 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
 
         const shaderData = this.shaderData;
 
-        shaderData.enableMacro("O3_NEED_WORLDPOS");
-        shaderData.enableMacro("O3_NEED_TILINGOFFSET");
+        shaderData.enableMacro('NEED_WORLDPOS');
 
         const pbrBaseData = this._pbrBaseData;
         // baseColor

@@ -41,9 +41,9 @@ export class UnlitMaterial extends BaseMaterial {
         this._baseTexture = value;
         this.shaderData.setSampledTexture(UnlitMaterial._baseTextureProp, UnlitMaterial._baseSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("O3_BASE_TEXTURE");
+            this.shaderData.enableMacro('HAS_BASE_TEXTURE');
         } else {
-            this.shaderData.disableMacro("O3_BASE_TEXTURE");
+            this.shaderData.disableMacro('HAS_BASE_TEXTURE');
         }
     }
 
@@ -55,8 +55,7 @@ export class UnlitMaterial extends BaseMaterial {
         super(engine, Shader.find("unlit"));
 
         const shaderData = this.shaderData;
-        shaderData.enableMacro("OMIT_NORMAL");
-        shaderData.enableMacro("O3_NEED_TILINGOFFSET");
+        shaderData.enableMacro('OMIT_NORMAL');
 
         shaderData.setColor(UnlitMaterial._baseColorProp, new Color(1, 1, 1, 1));
     }

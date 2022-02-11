@@ -53,9 +53,9 @@ export class PBRMaterial extends PBRBaseMaterial {
         this._roughnessMetallicTexture = value;
         this.shaderData.setSampledTexture(PBRMaterial._metallicRoughnessTextureProp, PBRMaterial._metallicRoughnessSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("HAS_METALROUGHNESSMAP");
+            this.shaderData.enableMacro('HAS_METALROUGHNESSMAP');
         } else {
-            this.shaderData.disableMacro("HAS_METALROUGHNESSMAP");
+            this.shaderData.disableMacro('HAS_METALROUGHNESSMAP');
         }
     }
 

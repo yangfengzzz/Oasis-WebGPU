@@ -54,9 +54,9 @@ export class BlinnPhongMaterial extends BaseMaterial {
         this._baseTexture = value;
         this.shaderData.setSampledTexture(BlinnPhongMaterial._baseTextureProp, BlinnPhongMaterial._baseSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("O3_DIFFUSE_TEXTURE");
+            this.shaderData.enableMacro('HAS_DIFFUSE_TEXTURE');
         } else {
-            this.shaderData.disableMacro("O3_DIFFUSE_TEXTURE");
+            this.shaderData.disableMacro('HAS_DIFFUSE_TEXTURE');
         }
     }
 
@@ -89,9 +89,9 @@ export class BlinnPhongMaterial extends BaseMaterial {
         this._specularTexture = value;
         this.shaderData.setSampledTexture(BlinnPhongMaterial._specularTextureProp, BlinnPhongMaterial._specularSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("O3_SPECULAR_TEXTURE");
+            this.shaderData.enableMacro('HAS_SPECULAR_TEXTURE');
         } else {
-            this.shaderData.disableMacro("O3_SPECULAR_TEXTURE");
+            this.shaderData.disableMacro('HAS_SPECULAR_TEXTURE');
         }
     }
 
@@ -124,9 +124,9 @@ export class BlinnPhongMaterial extends BaseMaterial {
         this._emissiveTexture = value;
         this.shaderData.setSampledTexture(BlinnPhongMaterial._emissiveTextureProp, BlinnPhongMaterial._emissiveSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("O3_EMISSIVE_TEXTURE");
+            this.shaderData.enableMacro('HAS_EMISSIVE_TEXTURE');
         } else {
-            this.shaderData.disableMacro("O3_EMISSIVE_TEXTURE");
+            this.shaderData.disableMacro('HAS_EMISSIVE_TEXTURE');
         }
     }
 
@@ -141,9 +141,9 @@ export class BlinnPhongMaterial extends BaseMaterial {
         this._normalTexture = value;
         this.shaderData.setSampledTexture(BlinnPhongMaterial._normalTextureProp, BlinnPhongMaterial._normalSamplerProp, value);
         if (value) {
-            this.shaderData.enableMacro("O3_NORMAL_TEXTURE");
+            this.shaderData.enableMacro( 'HAS_NORMAL_TEXTURE');
         } else {
-            this.shaderData.disableMacro("O3_NORMAL_TEXTURE");
+            this.shaderData.disableMacro('HAS_NORMAL_TEXTURE');
         }
     }
 
@@ -178,8 +178,7 @@ export class BlinnPhongMaterial extends BaseMaterial {
 
         const shaderData = this.shaderData;
 
-        shaderData.enableMacro("O3_NEED_WORLDPOS");
-        shaderData.enableMacro("O3_NEED_TILINGOFFSET");
+        shaderData.enableMacro('NEED_WORLDPOS');
 
         const blinnPhongData = this._blinnPhongData;
         // diffuseColor

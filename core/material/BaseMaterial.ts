@@ -8,7 +8,7 @@ import {Material} from "./Material";
 import {Vector4} from "@oasis-engine/math";
 
 export class BaseMaterial extends Material {
-    private static _alphaCutoffMacro: ShaderMacro = Shader.getMacroByName("ALPHA_CUTOFF");
+    private static _alphaCutoffMacro: ShaderMacro = Shader.getMacroByName('NEED_ALPHA_CUTOFF');
     private static _alphaCutoffProp = Shader.getPropertyByName("u_alphaCutoff");
     private static _tilingOffsetProp = Shader.getPropertyByName("u_tilingOffset");
 
@@ -157,6 +157,7 @@ export class BaseMaterial extends Material {
         this.blendMode = BlendMode.Normal;
         this.shaderData.setFloat(BaseMaterial._alphaCutoffProp, 0);
         this.shaderData.setVector4(BaseMaterial._tilingOffsetProp, new Vector4(1, 1, 0, 0));
+        this.shaderData.enableMacro('NEED_TILINGOFFSET');
     }
 
     /**
