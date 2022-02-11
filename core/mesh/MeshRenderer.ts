@@ -8,6 +8,7 @@ import {Renderer} from "../Renderer";
 import {Shader} from "../shader";
 import {UpdateFlag} from "../UpdateFlag";
 import {RenderElement} from "../rendering/RenderElement";
+import {Attributes} from "../shaderlib";
 
 /**
  * MeshRenderer Component.
@@ -71,18 +72,18 @@ export class MeshRenderer extends Renderer implements ICustomClone {
 
                 for (let i = 0, n = vertexLayouts.length; i < n; i++) {
                     for (let j = 0, m = vertexLayouts[i].attributes.length; j < m; j++) {
-                        const {semantic} = vertexLayouts[i].attributes[j];
-                        switch (semantic) {
-                            case "TEXCOORD_0":
+                        const {shaderLocation} = vertexLayouts[i].attributes[j];
+                        switch (shaderLocation) {
+                            case Attributes.UV_0:
                                 shaderData.enableMacro(MeshRenderer._uvMacro);
                                 break;
-                            case "NORMAL":
+                            case Attributes.Normal:
                                 shaderData.enableMacro(MeshRenderer._normalMacro);
                                 break;
-                            case "TANGENT":
+                            case Attributes.Tangent:
                                 shaderData.enableMacro(MeshRenderer._tangentMacro);
                                 break;
-                            case "COLOR_0":
+                            case Attributes.Color_0:
                                 shaderData.enableMacro(MeshRenderer._vertexColorMacro);
                                 break;
                         }
