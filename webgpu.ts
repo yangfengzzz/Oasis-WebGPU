@@ -2,10 +2,11 @@ import {WebGPUEngine} from "./core/WebGPUEngine";
 import {Camera} from "./core/Camera";
 import {MeshRenderer} from "./core/mesh/MeshRenderer";
 import {PrimitiveMesh} from "./core/mesh/PrimitiveMesh";
-import {UnlitMaterial} from "./core/material";
+import {BlinnPhongMaterial, UnlitMaterial} from "./core/material";
 import {Vector3, Color} from "@oasis-engine/math";
 import {Script} from "./core/Script";
 import {OrbitControl} from "./core/control";
+import {PointLight} from "./core/lighting";
 
 class MoveScript extends Script {
     private _rTri = 0
@@ -29,6 +30,12 @@ engine.init().then(() => {
     cameraEntity.transform.lookAt(new Vector3());
     cameraEntity.addComponent(OrbitControl)
 
+    // init point light
+    const light = rootEntity.createChild("light");
+    light.transform.setPosition(0, 3, 0);
+    const pointLight = light.addComponent(PointLight);
+    pointLight.intensity = 0.3;
+
     const cubeEntity = rootEntity.createChild();
     cubeEntity.addComponent(MoveScript);
     const renderer = cubeEntity.addComponent(MeshRenderer);
@@ -42,7 +49,7 @@ engine.init().then(() => {
     sphereEntity.addComponent(MoveScript);
     const sphereRenderer = sphereEntity.addComponent(MeshRenderer);
     sphereRenderer.mesh = PrimitiveMesh.createSphere(engine, 1);
-    sphereRenderer.setMaterial(new UnlitMaterial(engine));
+    sphereRenderer.setMaterial(new BlinnPhongMaterial(engine));
 
     engine.run();
 });

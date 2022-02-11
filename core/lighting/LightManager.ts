@@ -110,19 +110,34 @@ export class LightManager {
             this._directLightDatas = new Float32Array(_directLights.length * directLightData.length);
         }
 
-        for (let i = 0; i < pointLightCount; i++) {
-            this._pointLights[i]._updateShaderData(pointLightData);
-            this._pointLightDatas.set(pointLightData, i * pointLightData.length);
+        // point light
+        {
+            const elements = _pointLights._elements;
+            for (let i = pointLightCount - 1; i >= 0; --i) {
+                const element = elements[i];
+                element._updateShaderData(pointLightData);
+                this._pointLightDatas.set(pointLightData, i * pointLightData.length);
+            }
         }
 
-        for (let i = 0; i < spotLightCount; i++) {
-            this._spotLights[i]._updateShaderData(spotLightData);
-            this._spotLightDatas.set(spotLightData, i * spotLightData.length);
+        // spotlight
+        {
+            const elements = _spotLights._elements;
+            for (let i = spotLightCount - 1; i >= 0; --i) {
+                const element = elements[i];
+                element._updateShaderData(spotLightData);
+                this._spotLightDatas.set(spotLightData, i * spotLightData.length);
+            }
         }
 
-        for (let i = 0; i < directLightCount; i++) {
-            this._directLights[i]._updateShaderData(directLightData);
-            this._directLightDatas.set(directLightData, i * directLightData.length);
+        // direct light
+        {
+            const elements = _directLights._elements;
+            for (let i = directLightCount - 1; i >= 0; --i) {
+                const element = elements[i];
+                element._updateShaderData(directLightData);
+                this._directLightDatas.set(directLightData, i * directLightData.length);
+            }
         }
 
         if (directLightCount) {
