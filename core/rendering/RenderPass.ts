@@ -34,6 +34,7 @@ export class RenderPass {
      * @param subpass Subpass to append
      */
     addSubpass(subpass: Subpass): void {
+        subpass.setRenderPass(this);
         this._subpasses.push(subpass);
     }
 
