@@ -154,8 +154,6 @@ export class Engine {
     constructor(canvas: WebCanvas, settings?: EngineSettings) {
         this._canvas = canvas;
 
-        this._sceneManager.activeScene = new Scene(this, "DefaultScene");
-
         const colorSpace = settings?.colorSpace || ColorSpace.Linear;
         // colorSpace === ColorSpace.Gamma && this._macroCollection.enable(Engine._gammaMacro);
         this._settings.colorSpace = colorSpace;
@@ -198,6 +196,8 @@ export class Engine {
         this._renderPassDepthStencilAttachment.view = this._renderContext.depthStencilTexture();
         this._renderPass = new RenderPass(this._renderPassDescriptor);
         this._renderPass.addSubpass(new ForwardSubpass(this));
+
+        this._sceneManager.activeScene = new Scene(this, "DefaultScene");
     }
 
     /**
