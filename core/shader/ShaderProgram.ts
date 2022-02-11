@@ -9,7 +9,7 @@ type BindGroupLayoutDescriptorMap = Map<number, BindGroupLayoutDescriptor>;
 export class ShaderProgram {
     private static _shaderModuleDescriptor: ShaderModuleDescriptor = new ShaderModuleDescriptor();
 
-    private _bindGroupLayoutDescriptorMap: BindGroupLayoutDescriptorMap;
+    private readonly _bindGroupLayoutDescriptorMap: BindGroupLayoutDescriptorMap;
     private _vertexShader: GPUShaderModule;
     private _fragmentShader: GPUShaderModule;
     private _device: GPUDevice;
@@ -28,8 +28,14 @@ export class ShaderProgram {
 
     constructor(device: GPUDevice, vertexSource: string, fragmentSource: string,
                 bindGroupLayoutDescriptorMap: BindGroupLayoutDescriptorMap) {
+        this._bindGroupLayoutDescriptorMap = new Map<number, BindGroupLayoutDescriptor>();
+        bindGroupLayoutDescriptorMap.forEach(((descriptor, group) => {
+            const bindGroupLayoutDescriptor = new BindGroupLayoutDescriptor();
+            descriptor.cloneTo(bindGroupLayoutDescriptor);
+            this._bindGroupLayoutDescriptorMap.set(group, bindGroupLayoutDescriptor);
+        }))
+
         this._device = device;
-        this._bindGroupLayoutDescriptorMap = bindGroupLayoutDescriptorMap;
         this._createProgram(vertexSource, fragmentSource);
     }
 
