@@ -1,5 +1,4 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {SamplerType, TextureType, UniformType} from "../WGSLCommon";
 import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLLightFragDefine {
@@ -51,17 +50,17 @@ export class WGSLLightFragDefine {
         encoder.addUniformBinding("u_envMapLight", "EnvMapLight", 0);
 
         if (macros.isEnable("HAS_SH")) {
-            encoder.addUniformBinding("u_env_sh", UniformType.Vec3f32, 0);
+            encoder.addUniformBinding("u_env_sh", 'vec3<f32>', 0);
         }
 
         if (macros.isEnable("HAS_DIFFUSE_ENV")) {
-            encoder.addSampledTextureBinding("u_env_diffuseTexture", TextureType.TextureCubef32,
-                "u_env_diffuseSampler", SamplerType.Sampler);
+            encoder.addSampledTextureBinding("u_env_diffuseTexture", 'texture_cube<f32>',
+                "u_env_diffuseSampler", 'sampler');
         }
 
         if (macros.isEnable("HAS_SPECULAR_ENV")) {
-            encoder.addSampledTextureBinding("u_env_specularTexture", TextureType.TextureCubef32,
-                "u_env_specularSampler", SamplerType.Sampler);
+            encoder.addSampledTextureBinding("u_env_specularTexture",'texture_cube<f32>',
+                "u_env_specularSampler", 'sampler');
         }
     }
 }

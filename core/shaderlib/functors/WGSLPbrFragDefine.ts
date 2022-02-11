@@ -1,5 +1,4 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {SamplerType, TextureType, UniformType} from "../WGSLCommon";
 import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLPbrFragDefine {
@@ -31,7 +30,7 @@ export class WGSLPbrFragDefine {
     }
 
     execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
-        encoder.addUniformBinding("u_alphaCutoff", UniformType.F32, 0);
+        encoder.addUniformBinding("u_alphaCutoff", 'f32', 0);
         encoder.addStruct(this._pbrStruct);
         encoder.addUniformBinding("u_pbrBaseData", "PbrBaseData", 0);
         if (this._is_metallic_workflow) {
@@ -41,33 +40,33 @@ export class WGSLPbrFragDefine {
         }
 
         if (macros.isEnable("HAS_BASE_COLORMAP")) {
-            encoder.addSampledTextureBinding("u_baseColorTexture", TextureType.Texture2Df32,
-                "u_baseColorSampler", SamplerType.Sampler);
+            encoder.addSampledTextureBinding("u_baseColorTexture", 'texture_2d<f32>',
+                "u_baseColorSampler", 'sampler');
         }
 
         if (macros.isEnable("HAS_NORMAL_TEXTURE")) {
-            encoder.addSampledTextureBinding("u_normalTexture", TextureType.Texture2Df32,
-                "u_normalSampler", SamplerType.Sampler);
+            encoder.addSampledTextureBinding("u_normalTexture", 'texture_2d<f32>',
+                "u_normalSampler", 'sampler');
         }
 
         if (macros.isEnable("HAS_EMISSIVE_TEXTURE")) {
-            encoder.addSampledTextureBinding("u_emissiveTexture", TextureType.Texture2Df32,
-                "u_emissiveSampler", SamplerType.Sampler);
+            encoder.addSampledTextureBinding("u_emissiveTexture", 'texture_2d<f32>',
+                "u_emissiveSampler", 'sampler');
         }
 
         if (macros.isEnable("HAS_METALROUGHNESSMAP") && this._is_metallic_workflow) {
-            encoder.addSampledTextureBinding("u_metallicRoughnessTexture", TextureType.Texture2Df32,
-                "u_metallicRoughnessSampler", SamplerType.Sampler);
+            encoder.addSampledTextureBinding("u_metallicRoughnessTexture", 'texture_2d<f32>',
+                "u_metallicRoughnessSampler", 'sampler');
         }
 
         if (macros.isEnable("HAS_SPECULARGLOSSINESSMAP") && !this._is_metallic_workflow) {
-            encoder.addSampledTextureBinding("u_specularGlossinessTexture", TextureType.Texture2Df32,
-                "u_specularGlossinessSampler", SamplerType.Sampler);
+            encoder.addSampledTextureBinding("u_specularGlossinessTexture", 'texture_2d<f32>',
+                "u_specularGlossinessSampler", 'sampler');
         }
 
         if (macros.isEnable("HAS_OCCLUSIONMAP")) {
-            encoder.addSampledTextureBinding("u_occlusionTexture", TextureType.Texture2Df32,
-                "u_occlusionSampler", SamplerType.Sampler);
+            encoder.addSampledTextureBinding("u_occlusionTexture", 'texture_2d<f32>',
+                "u_occlusionSampler", 'sampler');
         }
 
         let structType = "struct ReflectedLight {\n";

@@ -1,5 +1,4 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {UniformType} from "../WGSLCommon";
 import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLWorldPosShare {
@@ -12,7 +11,7 @@ export class WGSLWorldPosShare {
     execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         if (macros.isEnable("NEED_WORLDPOS")) {
             encoder.addInoutType(this._outputStructName, WGSLEncoder.getCounterNumber(counterIndex),
-                "v_pos", UniformType.Vec3f32);
+                "v_pos", 'vec3<f32>');
         }
     }
 }

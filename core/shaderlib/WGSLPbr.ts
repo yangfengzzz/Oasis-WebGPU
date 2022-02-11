@@ -77,7 +77,7 @@ export class WGSLPbrVertex extends WGSL {
             this._colorShare.execute(encoder, macros, outputStructCounter);
             this._normalShare.execute(encoder, macros, outputStructCounter);
             this._worldPosShare.execute(encoder, macros, outputStructCounter);
-            encoder.addBuiltInoutType("VertexOut", BuiltInType.Position, "position", UniformType.Vec4f32);
+            encoder.addBuiltInoutType("VertexOut", 'position', "position", 'vec4<f32>');
 
             encoder.addEntry([["in", "VertexIn"]], ["out", "VertexOut"], ()=>{
                 let source: string = "";
@@ -142,7 +142,7 @@ export class WGSLPbrFragment extends WGSL {
             this._lightFragDefine.execute(encoder, macros, inputStructCounter);
             this._pbrFragDefine.execute(encoder, macros, inputStructCounter);
             this._pbrHelper.execute(encoder, macros, inputStructCounter);
-            encoder.addInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
+            encoder.addInoutType("Output", 0, "finalColor", 'vec4<f32>');
 
             encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], ()=>{
                 let source: string = "";

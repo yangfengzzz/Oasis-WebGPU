@@ -1,5 +1,5 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {Attributes, UniformType} from "../WGSLCommon";
+import {Attributes} from "../WGSLCommon";
 import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLCommonVert {
@@ -31,14 +31,14 @@ export class WGSLCommonVert {
 
     execute(encoder: WGSLEncoder, macros: ShaderMacroCollection) {
         const inputStructName = this._inputStructName;
-        encoder.addAttributeType(inputStructName, Attributes.Position, UniformType.Vec3f32);
+        encoder.addAttributeType(inputStructName, Attributes.Position, 'vec3<f32>');
         if (macros.isEnable("HAS_UV")) {
-            encoder.addAttributeType(inputStructName, Attributes.UV_0, UniformType.Vec2f32);
+            encoder.addAttributeType(inputStructName, Attributes.UV_0, 'vec2<f32>');
         }
 
         if (macros.isEnable("HAS_SKIN")) {
-            encoder.addAttributeType(inputStructName, Attributes.Joints_0, UniformType.Vec4f32);
-            encoder.addAttributeType(inputStructName, Attributes.Weights_0, UniformType.Vec4f32);
+            encoder.addAttributeType(inputStructName, Attributes.Joints_0, 'vec4<f32>');
+            encoder.addAttributeType(inputStructName, Attributes.Weights_0, 'vec4<f32>');
             if (macros.isEnable("HAS_JOINT_TEXTURE")) {
                 // TODO
             } else {
@@ -50,7 +50,7 @@ export class WGSLCommonVert {
         }
 
         if (macros.isEnable("HAS_VERTEXCOLOR")) {
-            encoder.addAttributeType(inputStructName, Attributes.Color_0, UniformType.Vec4f32);
+            encoder.addAttributeType(inputStructName, Attributes.Color_0, 'vec4<f32>');
         }
 
         encoder.addStruct(this._cameraStruct);
@@ -58,14 +58,14 @@ export class WGSLCommonVert {
         encoder.addStruct(this._rendererStruct);
         encoder.addUniformBinding("u_rendererData", "RendererData", 0);
 
-        encoder.addUniformBinding("u_tilingOffset", UniformType.Vec4f32, 0);
+        encoder.addUniformBinding("u_tilingOffset", 'vec4<f32>', 0);
 
         if (!macros.isEnable("OMIT_NORMAL")) {
             if (macros.isEnable("HAS_NORMAL")) {
-                encoder.addAttributeType(this._inputStructName, Attributes.Normal, UniformType.Vec3f32);
+                encoder.addAttributeType(this._inputStructName, Attributes.Normal, 'vec3<f32>');
             }
             if (macros.isEnable("HAS_TANGENT")) {
-                encoder.addAttributeType(this._inputStructName, Attributes.Tangent, UniformType.Vec4f32);
+                encoder.addAttributeType(this._inputStructName, Attributes.Tangent, 'vec4<f32>');
             }
         }
     }

@@ -6,6 +6,7 @@ import {BindGroupInfo, WGSL} from "../shaderlib";
 import {Engine} from "../Engine";
 import {ShaderProgram} from "./ShaderProgram";
 import {BindGroupLayoutDescriptor, BindGroupLayoutEntry} from "../webgpu";
+import {MacroName} from "./InternalMacroName";
 
 type BindGroupLayoutEntryVecMap = Map<number, BindGroupLayoutEntry[]>;
 type BindGroupLayoutDescriptorMap = Map<number, BindGroupLayoutDescriptor>;
@@ -46,7 +47,11 @@ export class Shader {
         return Shader._shaderMap[name];
     }
 
-    /**
+    static getMacroByName(name: MacroName): ShaderMacro;
+
+    static getMacroByName(name: string): ShaderMacro;
+
+        /**
      * Get shader macro by name.
      * @param name - Name of the shader macro
      * @returns Shader macro

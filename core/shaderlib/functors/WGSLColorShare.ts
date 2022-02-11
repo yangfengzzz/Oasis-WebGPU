@@ -1,5 +1,4 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {UniformType} from "../WGSLCommon";
 import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLColorShare {
@@ -12,7 +11,7 @@ export class WGSLColorShare {
     execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         if (macros.isEnable("HAS_VERTEXCOLOR")) {
             encoder.addInoutType(this._outputStructName, WGSLEncoder.getCounterNumber(counterIndex),
-                "v_color", UniformType.Vec4f32);
+                "v_color", 'vec4<f32>');
         }
     }
 }

@@ -10,6 +10,7 @@ import {SamplerTexture2D} from "../texture/SamplerTexture2D";
 import {SamplerTexture} from "../texture/SamplerTexture";
 import {Buffer} from "../graphic/Buffer";
 import {Engine} from "../Engine";
+import {MacroName} from "./InternalMacroName";
 
 export type ShaderPropertyResourceType =
     | Buffer
@@ -546,6 +547,12 @@ export class ShaderData implements IRefObject, IClone {
      * Enable macro.
      * @param macroName - Macro name
      */
+    enableMacro(macroName: MacroName): void;
+
+    /**
+     * Enable macro.
+     * @param macroName - Macro name
+     */
     enableMacro(macroName: string): void;
 
     /**
@@ -565,6 +572,12 @@ export class ShaderData implements IRefObject, IClone {
     enableMacro(macro: string | ShaderMacro, value: string = null): void {
         this._macroCollection.enableMacro(macro, value);
     }
+
+    /**
+     * Disable macro
+     * @param macroName - Macro name
+     */
+    disableMacro(macroName: MacroName): void;
 
     /**
      * Disable macro

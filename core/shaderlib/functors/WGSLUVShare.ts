@@ -1,5 +1,4 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {UniformType} from "../WGSLCommon";
 import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLUVShare {
@@ -11,6 +10,6 @@ export class WGSLUVShare {
 
     execute(encoder: WGSLEncoder, macros: ShaderMacroCollection, counterIndex: number) {
         encoder.addInoutType(this._outputStructName, WGSLEncoder.getCounterNumber(counterIndex),
-            "v_uv", UniformType.Vec2f32);
+            "v_uv", 'vec2<f32>');
     }
 }

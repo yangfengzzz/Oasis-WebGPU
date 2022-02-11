@@ -1,5 +1,6 @@
 import {ShaderMacro} from "./ShaderMacro";
 import {Shader} from "./Shader";
+import {MacroName} from "./InternalMacroName";
 
 /**
  * Shader macro collection.
@@ -150,6 +151,10 @@ export class ShaderMacroCollection {
     }
 
     //------------------------------------------------------------------------------------------------------------------
+    isEnable(macroName: MacroName): boolean;
+
+    isEnable(macroName: string): boolean;
+
     isEnable(macroName: string): boolean {
         const variableValue = this._variableMacros[macroName];
         if (variableValue) {
@@ -160,6 +165,10 @@ export class ShaderMacroCollection {
             return this._isEnable(macro);
         }
     }
+
+    variableMacros(macroName: MacroName): string;
+
+    variableMacros(macroName: string): string;
 
     variableMacros(macroName: string): string {
         const variableValue = this._variableMacros[macroName];

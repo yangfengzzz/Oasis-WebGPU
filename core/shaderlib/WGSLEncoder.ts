@@ -1,11 +1,9 @@
 import {
-    Attributes, attributesString, bindingType, BuiltInType, builtInTypeString, isMultisampled,
-    SamplerType, samplerTypeString, sampleType,
-    StorageTextureType, storageTextureTypeString, storageTextureViewDimension,
-    TextureType,
-    textureTypeString, textureViewDimension,
-    UniformType,
-    uniformTypeString
+    Attributes, attributesString, bindingType, BuiltInType, isMultisampled,
+    SamplerType, sampleType,
+    StorageTextureType, storageTextureViewDimension,
+    TextureType, textureViewDimension,
+    UniformType
 } from "./WGSLCommon";
 import {BindGroupInfo, BindGroupLayoutEntryMap, WGSL} from "./WGSL";
 import {Shader} from "../shader";
@@ -65,20 +63,16 @@ export class WGSLEncoder {
         this._needFlush = true;
     }
 
-    addUniformBinding(uniformName: string, type: UniformType, group: number);
-
     addUniformBinding(uniformName: string, type: string, group: number);
 
-    addUniformBinding(uniformName: string, typeOrName: string | UniformType, group: number = 0) {
-        if (typeof typeOrName !== 'string') {
-            typeOrName = uniformTypeString(typeOrName);
-        }
+    addUniformBinding(uniformName: string, type: UniformType, group: number);
 
+    addUniformBinding(uniformName: string, type: string, group: number = 0) {
         const property = Shader.getPropertyByName(uniformName);
         if (property !== null) {
             const binding = property._uniqueId;
 
-            this._uniformBlock += `@group(${group.toString()}) @binding(${binding.toString()})\n var<uniform> ${uniformName}: ${typeOrName};\n `;
+            this._uniformBlock += `@group(${group.toString()}) @binding(${binding.toString()})\n var<uniform> ${uniformName}: ${type};\n `;
             const entry = new BindGroupLayoutEntry();
             entry.binding = binding;
             entry.visibility = this._currentStage;
@@ -114,9 +108,9 @@ export class WGSLEncoder {
             const samplerBinding = samplerProperty._uniqueId;
 
             this._uniformBlock += `@group(${group}) @binding(${texBinding}) 
-            var ${texName}: ${textureTypeString(texType)};\n 
+            var ${texName}: ${texType};\n 
             @group(${group}) @binding(${samplerBinding}) 
-            var ${samplerName}: ${samplerTypeString(samplerType)};\n `;
+            var ${samplerName}: ${samplerType};\n `;
 
             const bindGroupLayoutEntryMap = this._bindGroupLayoutEntryMap;
             // Texture
@@ -173,7 +167,7 @@ export class WGSLEncoder {
         if (property !== null) {
             const binding = property._uniqueId;
             this._uniformBlock += `@group(${group}) @binding(${binding})\n 
-            var ${texName}: ${storageTextureTypeString(texType)}<${texelFormat.toString()}, write>;\n `
+            var ${texName}: ${texType}<${texelFormat.toString()}, write>;\n `
 
             const entry = new BindGroupLayoutEntry();
             entry.binding = binding;
@@ -202,16 +196,12 @@ export class WGSLEncoder {
         }
     }
 
-    addInoutType(structName: string, location: number, attributes: string, type: UniformType);
-
     addInoutType(structName: string, location: number, attributes: string, type: string);
 
-    addInoutType(structName: string, location: number, attributes: string, typeOrName: string | UniformType) {
-        if (typeof typeOrName !== 'string') {
-            typeOrName = uniformTypeString(typeOrName);
-        }
+    addInoutType(structName: string, location: number, attributes: string, type: UniformType);
 
-        const formatTemplate = `@location(${location}) ${attributes}: ${typeOrName};`;
+    addInoutType(structName: string, location: number, attributes: string, type: string) {
+        const formatTemplate = `@location(${location}) ${attributes}: ${type};`;
         if (!this._inoutType.has(structName)) {
             this._inoutType.set(structName, []);
         }
@@ -219,16 +209,12 @@ export class WGSLEncoder {
         this._needFlush = true;
     }
 
-    addBuiltInoutType(structName: string, builtin: BuiltInType, attributes: string, type: UniformType);
-
     addBuiltInoutType(structName: string, builtin: BuiltInType, attributes: string, type: string);
 
-    addBuiltInoutType(structName: string, builtin: BuiltInType, attributes: string, typeOrName: string | UniformType) {
-        if (typeof typeOrName !== 'string') {
-            typeOrName = uniformTypeString(typeOrName);
-        }
+    addBuiltInoutType(structName: string, builtin: BuiltInType, attributes: string, type: UniformType);
 
-        const formatTemplate = `@builtin(${builtInTypeString(builtin)}) ${attributes}: ${typeOrName};`;
+    addBuiltInoutType(structName: string, builtin: BuiltInType, attributes: string, type: string) {
+        const formatTemplate = `@builtin(${builtin}) ${attributes}: ${type};`;
         if (!this._inoutType.has(structName)) {
             this._inoutType.set(structName, []);
         }
@@ -237,7 +223,7 @@ export class WGSLEncoder {
     }
 
     addAttributeType(structName: string, attributes: Attributes, type: UniformType) {
-        this.addInoutType(structName, attributes, attributesString(attributes), uniformTypeString(type));
+        this.addInoutType(structName, attributes, attributesString(attributes), type);
     }
 
     addEntry(inParam: [string, string][], outType: [string, string], code: () => string) {

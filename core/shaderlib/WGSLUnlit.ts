@@ -9,7 +9,6 @@ import {
     WGSLUVVert
 } from "./functors";
 import {WGSLEncoder} from "./WGSLEncoder";
-import {BuiltInType, SamplerType, TextureType, UniformType} from "./WGSLCommon";
 
 export class WGSLUnlitVertex extends WGSL {
     private _commonVert: WGSLCommonVert;
@@ -43,7 +42,7 @@ export class WGSLUnlitVertex extends WGSL {
             this._commonVert.execute(encoder, macros);
             this._blendShapeInput.execute(encoder, macros, inputStructCounter);
             this._uvShare.execute(encoder, macros, outputStructCounter);
-            encoder.addBuiltInoutType("VertexOut", BuiltInType.Position, "position", UniformType.Vec4f32);
+            encoder.addBuiltInoutType("VertexOut", 'position', "position", 'vec4<f32>');
 
             encoder.addEntry([["in", "VertexIn"]], ["out", "VertexOut"], (() => {
                 let source: string = "";
@@ -80,11 +79,11 @@ export class WGSLUnlitFragment extends WGSL {
             const encoder = this.createSourceEncoder(GPUShaderStage.FRAGMENT);
             this._common.execute(encoder, macros);
             this._uvShare.execute(encoder, macros, inputStructCounter);
-            encoder.addUniformBinding("u_baseColor", UniformType.Vec4f32, 0);
-            encoder.addUniformBinding("u_alphaCutoff", UniformType.F32, 0);
-            encoder.addInoutType("Output", 0, "finalColor", UniformType.Vec4f32);
+            encoder.addUniformBinding("u_baseColor", 'vec4<f32>', 0);
+            encoder.addUniformBinding("u_alphaCutoff", 'f32', 0);
+            encoder.addInoutType("Output", 0, "finalColor", 'vec4<f32>');
             if (macros.isEnable("HAS_BASE_TEXTURE")) {
-                encoder.addSampledTextureBinding("u_baseTexture", TextureType.Texture2Df32, "u_baseSampler", SamplerType.Sampler);
+                encoder.addSampledTextureBinding("u_baseTexture", 'texture_2d<f32>', "u_baseSampler", 'sampler');
             }
 
             encoder.addEntry([["in", "VertexOut"]], ["out", "Output"], (() => {

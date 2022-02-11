@@ -1,5 +1,4 @@
 import {WGSLEncoder} from "../WGSLEncoder";
-import {UniformType} from "../WGSLCommon";
 import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
 
 export class WGSLNormalShare {
@@ -14,14 +13,14 @@ export class WGSLNormalShare {
         if (macros.isEnable("HAS_NORMAL")) {
             if (macros.isEnable("HAS_TANGENT") && macros.isEnable("HAS_NORMAL_TEXTURE")) {
                 encoder.addInoutType(outputStructName, WGSLEncoder.getCounterNumber(counterIndex),
-                    "v_normalW", UniformType.Vec3f32);
+                    "v_normalW", 'vec3<f32>');
                 encoder.addInoutType(outputStructName, WGSLEncoder.getCounterNumber(counterIndex),
-                    "v_tangentW", UniformType.Vec3f32);
+                    "v_tangentW", 'vec3<f32>');
                 encoder.addInoutType(outputStructName, WGSLEncoder.getCounterNumber(counterIndex),
-                    "v_bitangentW", UniformType.Vec3f32);
+                    "v_bitangentW", 'vec3<f32>');
             } else {
                 encoder.addInoutType(outputStructName, WGSLEncoder.getCounterNumber(counterIndex),
-                    "v_normal", UniformType.Vec3f32);
+                    "v_normal", 'vec3<f32>');
             }
         }
     }
