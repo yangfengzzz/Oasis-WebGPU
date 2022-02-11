@@ -639,7 +639,7 @@ export class ShaderData implements IRefObject, IClone {
         if (this._propertyResources[property._uniqueId] == undefined) {
             this._propertyResources[property._uniqueId] = new Buffer(this._engine, value.byteLength, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
         }
-        (<Buffer>this._propertyResources[property._uniqueId]).uploadData(value, 0, 0, value.length * 4);
+        (<Buffer>this._propertyResources[property._uniqueId]).uploadData(value, 0, 0, value.length);
     }
 
     /**

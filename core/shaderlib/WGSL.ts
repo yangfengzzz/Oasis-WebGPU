@@ -14,10 +14,7 @@ export class WGSL {
         return this._bindGroupLayoutEntryMap;
     }
 
-    constructor(source?: string, info?: BindGroupInfo, entryMap?: BindGroupLayoutEntryMap) {
-        this._source = source;
-        this._bindGroupInfo = info;
-        this._bindGroupLayoutEntryMap = entryMap;
+    constructor() {
     }
 
     compile(macros: ShaderMacroCollection): [string, BindGroupInfo] {
@@ -47,15 +44,15 @@ export class WGSL {
      */
     _setBindGroupLayoutEntryMap(map: BindGroupLayoutEntryMap) {
         const bindGroupLayoutEntryMap = this._bindGroupLayoutEntryMap;
-        map.forEach(((value, key) => {
-            if (bindGroupLayoutEntryMap.has(key)) {
-                value.forEach(((value1, key1) => {
-                    if (!bindGroupLayoutEntryMap[key].has(key1)) {
-                        bindGroupLayoutEntryMap[key][key1] = value1;
+        map.forEach(((bindingEntries, group) => {
+            if (bindGroupLayoutEntryMap.has(group)) {
+                bindingEntries.forEach(((entry, binding) => {
+                    if (!bindGroupLayoutEntryMap.get(group).has(binding)) {
+                        bindGroupLayoutEntryMap.get(group).set(binding, entry);
                     }
                 }));
             } else {
-                bindGroupLayoutEntryMap[key] = value;
+                bindGroupLayoutEntryMap.set(group, bindingEntries);
             }
         }));
     }

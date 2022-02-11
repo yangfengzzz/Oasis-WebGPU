@@ -1,5 +1,5 @@
 import {
-    Attributes, attributesString, bindingType, BuiltInType, isMultisampled,
+    Attributes, attributesString, bindingType, BuiltInType, builtInTypeString, isMultisampled,
     SamplerType, samplerTypeString, sampleType,
     StorageTextureType, storageTextureTypeString, storageTextureViewDimension,
     TextureType,
@@ -24,15 +24,15 @@ export class WGSLEncoder {
     private _currentStage: number;
 
     private _source: string;
-    private _bindGroupInfo: BindGroupInfo
-    private _bindGroupLayoutEntryMap: BindGroupLayoutEntryMap
+    private _bindGroupInfo: BindGroupInfo = new Map<number, Set<number>>();
+    private _bindGroupLayoutEntryMap: BindGroupLayoutEntryMap = new Map<number, Map<number, BindGroupLayoutEntry>>()
     private _needFlush: boolean = false;
 
-    private _structBlock: string;
-    private _uniformBlock: string;
-    private _functionBlock: string
-    private _inoutType: Map<string, string[]>;
-    private _entryBlock: string;
+    private _structBlock: string = "";
+    private _uniformBlock: string = "";
+    private _functionBlock: string = "";
+    private _inoutType: Map<string, string[]> = new Map<string, string[]>();
+    private _entryBlock: string = "";
 
     static startCounter(initVal: number = Attributes.TOTAL_COUNT): number {
         const counters = this._counters;
@@ -87,14 +87,17 @@ export class WGSLEncoder {
 
             const bindGroupLayoutEntryMap = this._bindGroupLayoutEntryMap;
             if (!bindGroupLayoutEntryMap.has(group)) {
-                bindGroupLayoutEntryMap[group] = [];
-                bindGroupLayoutEntryMap[group][binding] = entry;
+                bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
+                bindGroupLayoutEntryMap.get(group).set(binding, entry);
             } else {
-                if (!bindGroupLayoutEntryMap[group].has(binding)) {
-                    bindGroupLayoutEntryMap[group][binding] = entry;
+                if (!bindGroupLayoutEntryMap.get(group).has(binding)) {
+                    bindGroupLayoutEntryMap.get(group).set(binding, entry);
                 }
             }
-            this._bindGroupInfo[group].push(binding);
+            if (!this._bindGroupInfo.has(group)) {
+                this._bindGroupInfo.set(group, new Set<number>());
+            }
+            this._bindGroupInfo.get(group).add(binding);
             this._needFlush = true;
         } else {
             throw  "Unknown Uniform Name";
@@ -126,14 +129,17 @@ export class WGSLEncoder {
                 entry.texture.viewDimension = textureViewDimension(texType);
                 entry.texture.sampleType = sampleType(texType);
                 if (!bindGroupLayoutEntryMap.has(group)) {
-                    bindGroupLayoutEntryMap[group] = [];
-                    bindGroupLayoutEntryMap[group][texBinding] = entry;
+                    bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
+                    bindGroupLayoutEntryMap.get(group).set(texBinding, entry);
                 } else {
-                    if (!bindGroupLayoutEntryMap[group].has(texBinding)) {
-                        bindGroupLayoutEntryMap[group][texBinding] = entry;
+                    if (!bindGroupLayoutEntryMap.get(group).has(texBinding)) {
+                        bindGroupLayoutEntryMap.get(group).set(texBinding, entry);
                     }
                 }
-                this._bindGroupInfo[group].push(texBinding);
+                if (!this._bindGroupInfo.has(group)) {
+                    this._bindGroupInfo.set(group, new Set<number>());
+                }
+                this._bindGroupInfo.get(group).add(texBinding);
             }
             // Sampler
             {
@@ -143,14 +149,17 @@ export class WGSLEncoder {
                 entry.sampler = new SamplerBindingLayout();
                 entry.sampler.type = bindingType(samplerType);
                 if (!bindGroupLayoutEntryMap.has(group)) {
-                    bindGroupLayoutEntryMap[group] = [];
-                    bindGroupLayoutEntryMap[group][samplerBinding] = entry;
+                    bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
+                    bindGroupLayoutEntryMap.get(group).set(samplerBinding, entry);
                 } else {
-                    if (!bindGroupLayoutEntryMap[group].has(samplerBinding)) {
-                        bindGroupLayoutEntryMap[group][samplerBinding] = entry;
+                    if (!bindGroupLayoutEntryMap.get(group).has(samplerBinding)) {
+                        bindGroupLayoutEntryMap.get(group).set(samplerBinding, entry);
                     }
                 }
-                this._bindGroupInfo[group].push(samplerBinding);
+                if (!this._bindGroupInfo.has(group)) {
+                    this._bindGroupInfo.set(group, new Set<number>());
+                }
+                this._bindGroupInfo.get(group).add(samplerBinding);
             }
             this._needFlush = true;
         } else {
@@ -176,14 +185,17 @@ export class WGSLEncoder {
 
             const bindGroupLayoutEntryMap = this._bindGroupLayoutEntryMap;
             if (!bindGroupLayoutEntryMap.has(group)) {
-                bindGroupLayoutEntryMap[group] = [];
-                bindGroupLayoutEntryMap[group][binding] = entry;
+                bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
+                bindGroupLayoutEntryMap.get(group).set(binding, entry);
             } else {
-                if (!bindGroupLayoutEntryMap[group].has(binding)) {
-                    bindGroupLayoutEntryMap[group][binding] = entry;
+                if (!bindGroupLayoutEntryMap.get(group).has(binding)) {
+                    bindGroupLayoutEntryMap.get(group).set(binding, entry);
                 }
             }
-            this._bindGroupInfo[group].push(binding);
+            if (!this._bindGroupInfo.has(group)) {
+                this._bindGroupInfo.set(group, new Set<number>());
+            }
+            this._bindGroupInfo.get(group).add(binding);
             this._needFlush = true;
         } else {
             throw  "Unknown Uniform Name";
@@ -200,10 +212,10 @@ export class WGSLEncoder {
         }
 
         const formatTemplate = `@location(${location}) ${attributes}: ${typeOrName};`;
-        if (this._inoutType[structName] === undefined) {
-            this._inoutType[structName] = [];
+        if (!this._inoutType.has(structName)) {
+            this._inoutType.set(structName, []);
         }
-        this._inoutType[structName].push(formatTemplate);
+        this._inoutType.get(structName).push(formatTemplate);
         this._needFlush = true;
     }
 
@@ -216,11 +228,11 @@ export class WGSLEncoder {
             typeOrName = uniformTypeString(typeOrName);
         }
 
-        const formatTemplate = `@builtin(${builtin}) ${attributes}: ${typeOrName};`;
-        if (this._inoutType[structName] === undefined) {
-            this._inoutType[structName] = [];
+        const formatTemplate = `@builtin(${builtInTypeString(builtin)}) ${attributes}: ${typeOrName};`;
+        if (!this._inoutType.has(structName)) {
+            this._inoutType.set(structName, []);
         }
-        this._inoutType[structName].push(formatTemplate);
+        this._inoutType.get(structName).push(formatTemplate);
         this._needFlush = true;
     }
 
@@ -238,7 +250,8 @@ export class WGSLEncoder {
         }
 
         this._entryBlock += "fn main(";
-        for (const param in inParam) {
+        for (let i = 0, n = inParam.length; i < n; i++) {
+            const param = inParam[i];
             this._entryBlock += param[0];
             this._entryBlock += ": ";
             this._entryBlock += param[1];
@@ -293,16 +306,17 @@ export class WGSLEncoder {
         this._source += this._uniformBlock;
         // Inout
         {
-            this._inoutType.forEach(((value, key) => {
+            this._inoutType.forEach((structMember, structName) => {
                 this._source += "struct ";
-                this._source += key;
+                this._source += structName;
                 this._source += " {\n";
-                for (const typeInfo in value) {
-                    this._source += typeInfo;
+                for (let i = 0, n = structMember.length; i < n; i++) {
+                    const member = structMember[i];
+                    this._source += member;
                     this._source += "\n";
                 }
                 this._source += "}\n";
-            }))
+            });
         }
         this._source += this._functionBlock;
         this._source += this._entryBlock;

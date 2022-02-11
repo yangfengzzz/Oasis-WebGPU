@@ -8,7 +8,7 @@ export class WGSLBeginPositionVert {
     constructor(input: string, output: string) {
         this._input = input;
         this._output = output;
-        this._formatTemplate = `var position = vec4<f32>( ${input}.Position , 1.0 );\\n`;
+        this._formatTemplate = `var position = vec4<f32>( ${input}.Position , 1.0 );\n`;
     }
 
     execute(macros: ShaderMacroCollection): string {
