@@ -21,6 +21,7 @@ import {ForwardSubpass} from "./rendering/subpasses/ForwardSubpass";
 import {RenderElement} from "./rendering/RenderElement";
 import {ClassPool} from "./rendering/ClassPool";
 import {ShaderProgramPool} from "./shader/ShaderProgramPool";
+import {LightManager} from "./lighting";
 
 ShaderPool.init();
 
@@ -28,6 +29,7 @@ export class Engine {
     /** @internal */
     static _gammaMacro: ShaderMacro = Shader.getMacroByName("OASIS_COLORSPACE_GAMMA");
 
+    _lightManager: LightManager = new LightManager();
     _componentsManager: ComponentsManager = new ComponentsManager();
     _renderElementPool: ClassPool<RenderElement> = new ClassPool(RenderElement);
 
@@ -262,6 +264,7 @@ export class Engine {
         const deltaTime = this.time.deltaTime;
         componentsManager.callRendererOnUpdate(deltaTime);
 
+        this._lightManager.updateShaderData(scene.shaderData)
         scene._updateShaderData();
 
         if (cameras.length > 0) {

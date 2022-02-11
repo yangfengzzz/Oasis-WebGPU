@@ -6,6 +6,7 @@ import {Entity} from "./Entity";
 import {ShaderDataGroup} from "./shader/ShaderDataGroup";
 import {ShaderData} from "./shader";
 import {ShaderMacroCollection} from "./shader/ShaderMacroCollection";
+import {AmbientLight} from "./lighting";
 
 /**
  * Scene.
@@ -28,28 +29,28 @@ export class Scene extends EngineObject {
     _globalShaderMacro: ShaderMacroCollection = new ShaderMacroCollection();
 
     private _rootEntities: Entity[] = [];
-    // private _ambientLight: AmbientLight;
-    //
-    // /**
-    //  * Ambient light.
-    //  */
-    // get ambientLight(): AmbientLight {
-    //     return this._ambientLight;
-    // }
-    //
-    // set ambientLight(value: AmbientLight) {
-    //     if (!value) {
-    //         Logger.warn("The scene must have one ambient light");
-    //         return;
-    //     }
-    //
-    //     const lastAmbientLight = this._ambientLight;
-    //     if (lastAmbientLight !== value) {
-    //         lastAmbientLight && lastAmbientLight._setScene(null);
-    //         value._setScene(this);
-    //         this._ambientLight = value;
-    //     }
-    // }
+    private _ambientLight: AmbientLight;
+
+    /**
+     * Ambient light.
+     */
+    get ambientLight(): AmbientLight {
+        return this._ambientLight;
+    }
+
+    set ambientLight(value: AmbientLight) {
+        if (!value) {
+            Logger.warn("The scene must have one ambient light");
+            return;
+        }
+
+        const lastAmbientLight = this._ambientLight;
+        if (lastAmbientLight !== value) {
+            lastAmbientLight && lastAmbientLight._setScene(null);
+            value._setScene(this);
+            this._ambientLight = value;
+        }
+    }
 
     /**
      * Count of root entities.
@@ -77,7 +78,7 @@ export class Scene extends EngineObject {
 
         const shaderData = this.shaderData;
         shaderData._addRefCount(1);
-        // this.ambientLight = new AmbientLight();
+        this.ambientLight = new AmbientLight();
     }
 
     /**
