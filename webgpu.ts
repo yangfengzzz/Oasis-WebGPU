@@ -3,7 +3,7 @@ import {Camera} from "./core/Camera";
 import {MeshRenderer} from "./core/mesh/MeshRenderer";
 import {PrimitiveMesh} from "./core/mesh/PrimitiveMesh";
 import {UnlitMaterial} from "./core/material";
-import {Vector3} from "@oasis-engine/math";
+import {Vector3, Color} from "@oasis-engine/math";
 import {Script} from "./core/Script";
 import {OrbitControl} from "./core/control";
 
@@ -33,7 +33,9 @@ engine.init().then(() => {
     cubeEntity.addComponent(MoveScript);
     const renderer = cubeEntity.addComponent(MeshRenderer);
     renderer.mesh = PrimitiveMesh.createCuboid(engine, 1);
-    renderer.setMaterial(new UnlitMaterial(engine));
+    const material = new UnlitMaterial(engine);
+    material.baseColor = new Color(0.4, 0.3, 0.2, 1);
+    renderer.setMaterial(material);
 
     const sphereEntity = rootEntity.createChild();
     sphereEntity.transform.setPosition(0, 5, 0);
