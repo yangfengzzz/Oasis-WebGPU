@@ -178,14 +178,20 @@ export abstract class SamplerTexture extends RefObject {
     }
 
     protected _createImageCopyBuffer(buffer: GPUBuffer,
-                                     offset: number,
-                                     bytesPerRow: number,
-                                     rowsPerImage: number): ImageCopyBuffer {
+                                     offset?: number,
+                                     bytesPerRow?: number,
+                                     rowsPerImage?: number): ImageCopyBuffer {
         const imageCopyBuffer = SamplerTexture._imageCopyBuffer;
         imageCopyBuffer.buffer = buffer;
-        imageCopyBuffer.offset = offset;
-        imageCopyBuffer.bytesPerRow = bytesPerRow;
-        imageCopyBuffer.rowsPerImage = rowsPerImage;
+        if (offset) {
+            imageCopyBuffer.offset = offset;
+        }
+        if (bytesPerRow) {
+            imageCopyBuffer.bytesPerRow = bytesPerRow;
+        }
+        if (rowsPerImage) {
+            imageCopyBuffer.rowsPerImage = rowsPerImage;
+        }
         return imageCopyBuffer;
     }
 

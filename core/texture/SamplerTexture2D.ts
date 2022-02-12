@@ -17,6 +17,7 @@ export class SamplerTexture2D extends SamplerTexture {
     private static _imageCopyExternalImage: ImageCopyExternalImage = new ImageCopyExternalImage();
     private static _imageCopyTextureTagged = new ImageCopyTextureTagged();
     private static _extent3DDictStrict = new Extent3DDictStrict();
+    private static _bufferDescriptor = new BufferDescriptor();
 
     /**
      * Texture format.
@@ -36,8 +37,8 @@ export class SamplerTexture2D extends SamplerTexture {
      */
     constructor(
         engine: Engine,
-        width: number,
-        height: number,
+        width: number = 0,
+        height: number = 0,
         format: GPUTextureFormat = 'rgba8unorm',
         usage: GPUTextureUsageFlags = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
         mipmap: boolean = true
@@ -84,20 +85,22 @@ export class SamplerTexture2D extends SamplerTexture {
     ): void {
         const device = this.engine.device;
 
-        const descriptor = new BufferDescriptor();
+        const descriptor = SamplerTexture2D._bufferDescriptor;
         descriptor.size = colorBuffer.byteLength;
         descriptor.usage = GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST;
         const stagingBuffer = device.createBuffer(descriptor);
         device.queue.writeBuffer(stagingBuffer, 0, colorBuffer, 0, colorBuffer.byteLength);
 
-        const imageCopyBuffer = this._createImageCopyBuffer(stagingBuffer, 0, bytesPerPixel(this._platformTextureDesc.format) * width, 0);
+        const imageCopyBuffer = this._createImageCopyBuffer(stagingBuffer, 0, bytesPerPixel(this._platformTextureDesc.format) * width);
         const imageCopyTexture = this._createImageCopyTexture(mipLevel, {x, y});
+
         const extent3DDictStrict = SamplerTexture2D._extent3DDictStrict;
-        extent3DDictStrict.width = this._platformTextureDesc.size.width;
-        extent3DDictStrict.height = this._platformTextureDesc.size.height;
+        const size = this._platformTextureDesc.size;
+        extent3DDictStrict.width = Math.max(1, size.width / Math.pow(2, mipLevel));
+        extent3DDictStrict.height = Math.max(1, size.height / Math.pow(2, mipLevel));
+
         const encoder = device.createCommandEncoder();
         encoder.copyBufferToTexture(imageCopyBuffer, imageCopyTexture, extent3DDictStrict);
-
         device.queue.submit([encoder.finish()]);
     }
 
@@ -105,7 +108,6 @@ export class SamplerTexture2D extends SamplerTexture {
      * Setting pixels data through TexImageSource, designated area and texture mipmapping level.
      * @param imageSource - The source of texture
      * @param mipLevel - Texture mipmapping level
-     * @param flipY - Whether to flip the Y axis
      * @param premultiplyAlpha - Whether to premultiply the transparent channel
      * @param x - X coordinate of area start
      * @param y - Y coordinate of area start
@@ -113,7 +115,6 @@ export class SamplerTexture2D extends SamplerTexture {
     setImageSource(
         imageSource: ImageBitmap | HTMLCanvasElement | OffscreenCanvas,
         mipLevel: number = 0,
-        flipY: boolean = false,
         premultiplyAlpha: boolean = false,
         x: number = 0,
         y: number = 0
@@ -121,14 +122,17 @@ export class SamplerTexture2D extends SamplerTexture {
         const imageCopyExternalImage = SamplerTexture2D._imageCopyExternalImage;
         imageCopyExternalImage.source = imageSource;
         imageCopyExternalImage.origin = [x, y];
+
         const imageCopyTextureTagged = SamplerTexture2D._imageCopyTextureTagged;
         imageCopyTextureTagged.texture = this._platformTexture;
         imageCopyTextureTagged.aspect = 'all'
         imageCopyTextureTagged.mipLevel = mipLevel;
         imageCopyTextureTagged.premultipliedAlpha = premultiplyAlpha;
+
         const extent3DDictStrict = SamplerTexture2D._extent3DDictStrict;
-        extent3DDictStrict.width = Math.max(1, this._platformTextureDesc.size.width / Math.pow(2, mipLevel));
-        extent3DDictStrict.height = Math.max(1, this._platformTextureDesc.size.height / Math.pow(2, mipLevel));
+        const size = this._platformTextureDesc.size;
+        extent3DDictStrict.width = Math.max(1, size.width / Math.pow(2, mipLevel));
+        extent3DDictStrict.height = Math.max(1, size.height / Math.pow(2, mipLevel));
 
         this._engine.device.queue.copyExternalImageToTexture(imageCopyExternalImage, imageCopyTextureTagged, extent3DDictStrict)
     }
