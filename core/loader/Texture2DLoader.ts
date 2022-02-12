@@ -1,19 +1,19 @@
 import {AssetPromise, LoadItem, Loader, AssetType, resourceLoader, ResourceManager} from "../asset";
-import {SamplerTexture2D} from "../texture/SamplerTexture2D";
+import {SampledTexture2D} from "../texture";
 import {imageBitmapOptions} from "./Image";
 
 @resourceLoader(AssetType.Texture2D, ["png", "jpg", "webp", "jpeg"])
-class Texture2DLoader extends Loader<SamplerTexture2D> {
+class Texture2DLoader extends Loader<SampledTexture2D> {
     private static _imageBitmapOptions = new imageBitmapOptions();
 
-    load(item: LoadItem, resourceManager: ResourceManager): AssetPromise<SamplerTexture2D> {
+    load(item: LoadItem, resourceManager: ResourceManager): AssetPromise<SampledTexture2D> {
         return new AssetPromise((resolve, reject) => {
             this.request<HTMLImageElement>(item.url, {
                 ...item,
                 type: "image"
             })
                 .then((image) => {
-                    const texture = new SamplerTexture2D(resourceManager.engine, image.width, image.height);
+                    const texture = new SampledTexture2D(resourceManager.engine, image.width, image.height);
                     /** @ts-ignore */
                     if (!texture._platformTexture) return;
 

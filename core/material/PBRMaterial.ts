@@ -1,7 +1,7 @@
 import {Engine} from "../Engine";
 import {Shader} from "../shader";
 import {PBRBaseMaterial} from "./PBRBaseMaterial";
-import {SamplerTexture2D} from "../texture/SamplerTexture2D";
+import {SampledTexture2D} from "../texture/SampledTexture2D";
 
 /**
  * PBR (Metallic-Roughness Workflow) Material.
@@ -13,7 +13,7 @@ export class PBRMaterial extends PBRBaseMaterial {
 
     // metallic, roughness, _pad1, _pad2
     private _pbrData: Float32Array = new Float32Array(4);
-    private _roughnessMetallicTexture: SamplerTexture2D;
+    private _roughnessMetallicTexture: SampledTexture2D;
 
     /**
      * Metallic.
@@ -45,11 +45,11 @@ export class PBRMaterial extends PBRBaseMaterial {
      * Roughness metallic texture.
      * @remarks G channel is roughness, B channel is metallic
      */
-    get roughnessMetallicTexture(): SamplerTexture2D {
+    get roughnessMetallicTexture(): SampledTexture2D {
         return this._roughnessMetallicTexture;
     }
 
-    set roughnessMetallicTexture(value: SamplerTexture2D) {
+    set roughnessMetallicTexture(value: SampledTexture2D) {
         this._roughnessMetallicTexture = value;
         this.shaderData.setSampledTexture(PBRMaterial._metallicRoughnessTextureProp, PBRMaterial._metallicRoughnessSamplerProp, value);
         if (value) {

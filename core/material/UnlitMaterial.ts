@@ -1,7 +1,7 @@
 import {Color, Vector4} from "@oasis-engine/math";
 import {Shader} from "../shader";
 import {BaseMaterial} from "./BaseMaterial";
-import {SamplerTexture2D} from "../texture/SamplerTexture2D";
+import {SampledTexture2D} from "../texture/SampledTexture2D";
 import {Engine} from "../Engine";
 
 /**
@@ -13,7 +13,7 @@ export class UnlitMaterial extends BaseMaterial {
     private static _baseSamplerProp = Shader.getPropertyByName("u_baseSampler");
 
     private _baseColor = new Color(1, 1, 1, 1);
-    private _baseTexture: SamplerTexture2D;
+    private _baseTexture: SampledTexture2D;
 
     /**
      * Base color.
@@ -33,11 +33,11 @@ export class UnlitMaterial extends BaseMaterial {
     /**
      * Base texture.
      */
-    get baseTexture(): SamplerTexture2D {
+    get baseTexture(): SampledTexture2D {
         return this._baseTexture;
     }
 
-    set baseTexture(value: SamplerTexture2D) {
+    set baseTexture(value: SampledTexture2D) {
         this._baseTexture = value;
         this.shaderData.setSampledTexture(UnlitMaterial._baseTextureProp, UnlitMaterial._baseSamplerProp, value);
         if (value) {

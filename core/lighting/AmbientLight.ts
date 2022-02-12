@@ -4,7 +4,7 @@ import {Shader} from "../shader";
 import {ShaderMacro} from "../shader/ShaderMacro";
 import {ShaderProperty} from "../shader/ShaderProperty";
 import {DiffuseMode} from "./enums/DiffuseMode";
-import {SamplerTexture} from "../texture/SamplerTexture";
+import {SampledTexture} from "../texture/SampledTexture";
 
 /**
  * Ambient light.
@@ -33,10 +33,10 @@ export class AmbientLight {
     private _diffuseSphericalHarmonics: SphericalHarmonics3;
     private _shArray: Float32Array = new Float32Array(27);
 
-    private _diffuseTexture: SamplerTexture;
+    private _diffuseTexture: SampledTexture;
 
     private _specularTextureDecodeRGBM: boolean = false;
-    private _specularReflection: SamplerTexture;
+    private _specularReflection: SampledTexture;
 
     /**
      * Diffuse mode of ambient light.
@@ -128,11 +128,11 @@ export class AmbientLight {
      * Specular reflection texture.
      * @remarks This texture must be baked from @oasis-engine/baker
      */
-    get specularTexture(): SamplerTexture {
+    get specularTexture(): SampledTexture {
         return this._specularReflection;
     }
 
-    set specularTexture(value: SamplerTexture) {
+    set specularTexture(value: SampledTexture) {
         this._specularReflection = value;
         if (!this._scene) return;
 

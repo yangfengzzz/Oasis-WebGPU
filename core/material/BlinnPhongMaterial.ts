@@ -2,7 +2,7 @@ import {Color} from "@oasis-engine/math";
 import {Engine} from "../Engine";
 import {Shader} from "../shader";
 import {BaseMaterial} from "./BaseMaterial";
-import {SamplerTexture2D} from "../texture/SamplerTexture2D";
+import {SampledTexture2D} from "../texture/SampledTexture2D";
 
 /**
  * Blinn-phong Material.
@@ -20,10 +20,10 @@ export class BlinnPhongMaterial extends BaseMaterial {
 
     // baseColor, specularColor, emissiveColor, normalIntensity, shininess, _pad1, _pad2
     private _blinnPhongData: Float32Array = new Float32Array(16);
-    private _baseTexture: SamplerTexture2D;
-    private _specularTexture: SamplerTexture2D;
-    private _emissiveTexture: SamplerTexture2D;
-    private _normalTexture: SamplerTexture2D;
+    private _baseTexture: SampledTexture2D;
+    private _specularTexture: SampledTexture2D;
+    private _emissiveTexture: SampledTexture2D;
+    private _normalTexture: SampledTexture2D;
 
     /**
      * Base color.
@@ -46,11 +46,11 @@ export class BlinnPhongMaterial extends BaseMaterial {
     /**
      * Base texture.
      */
-    get baseTexture(): SamplerTexture2D {
+    get baseTexture(): SampledTexture2D {
         return this._baseTexture;
     }
 
-    set baseTexture(value: SamplerTexture2D) {
+    set baseTexture(value: SampledTexture2D) {
         this._baseTexture = value;
         this.shaderData.setSampledTexture(BlinnPhongMaterial._baseTextureProp, BlinnPhongMaterial._baseSamplerProp, value);
         if (value) {
@@ -81,11 +81,11 @@ export class BlinnPhongMaterial extends BaseMaterial {
     /**
      * Specular texture.
      */
-    get specularTexture(): SamplerTexture2D {
+    get specularTexture(): SampledTexture2D {
         return this._specularTexture;
     }
 
-    set specularTexture(value: SamplerTexture2D) {
+    set specularTexture(value: SampledTexture2D) {
         this._specularTexture = value;
         this.shaderData.setSampledTexture(BlinnPhongMaterial._specularTextureProp, BlinnPhongMaterial._specularSamplerProp, value);
         if (value) {
@@ -116,11 +116,11 @@ export class BlinnPhongMaterial extends BaseMaterial {
     /**
      * Emissive texture.
      */
-    get emissiveTexture(): SamplerTexture2D {
+    get emissiveTexture(): SampledTexture2D {
         return this._emissiveTexture;
     }
 
-    set emissiveTexture(value: SamplerTexture2D) {
+    set emissiveTexture(value: SampledTexture2D) {
         this._emissiveTexture = value;
         this.shaderData.setSampledTexture(BlinnPhongMaterial._emissiveTextureProp, BlinnPhongMaterial._emissiveSamplerProp, value);
         if (value) {
@@ -133,11 +133,11 @@ export class BlinnPhongMaterial extends BaseMaterial {
     /**
      * Normal texture.
      */
-    get normalTexture(): SamplerTexture2D {
+    get normalTexture(): SampledTexture2D {
         return this._normalTexture;
     }
 
-    set normalTexture(value: SamplerTexture2D) {
+    set normalTexture(value: SampledTexture2D) {
         this._normalTexture = value;
         this.shaderData.setSampledTexture(BlinnPhongMaterial._normalTextureProp, BlinnPhongMaterial._normalSamplerProp, value);
         if (value) {

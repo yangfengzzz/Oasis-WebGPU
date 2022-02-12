@@ -1,7 +1,7 @@
-import {SamplerTexture2D} from "./SamplerTexture2D";
+import {SampledTexture2D} from "./SampledTexture2D";
 import {Engine} from "../Engine";
 
-export class SampledTexture2DView extends SamplerTexture2D {
+export class SampledTexture2DView extends SampledTexture2D {
     private readonly _creator: () => GPUTextureView;
 
     constructor(engine: Engine, creator: () => GPUTextureView) {

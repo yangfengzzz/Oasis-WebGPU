@@ -5,7 +5,7 @@ import {Engine} from "../Engine";
 /**
  * The base class of texture, contains some common functions of texture-related classes.
  */
-export abstract class SamplerTexture extends RefObject {
+export abstract class SampledTexture extends RefObject {
     private static _imageCopyBuffer: ImageCopyBuffer = new ImageCopyBuffer();
     private static _imageCopyTexture: ImageCopyTexture = new ImageCopyTexture();
 
@@ -181,7 +181,7 @@ export abstract class SamplerTexture extends RefObject {
                                      offset?: number,
                                      bytesPerRow?: number,
                                      rowsPerImage?: number): ImageCopyBuffer {
-        const imageCopyBuffer = SamplerTexture._imageCopyBuffer;
+        const imageCopyBuffer = SampledTexture._imageCopyBuffer;
         imageCopyBuffer.buffer = buffer;
         if (offset) {
             imageCopyBuffer.offset = offset;
@@ -197,7 +197,7 @@ export abstract class SamplerTexture extends RefObject {
 
     protected _createImageCopyTexture(mipLevel: number, origin: GPUOrigin3D,
                                       aspect: GPUTextureAspect = 'all'): ImageCopyTexture {
-        const imageCopyTexture = SamplerTexture._imageCopyTexture;
+        const imageCopyTexture = SampledTexture._imageCopyTexture;
         imageCopyTexture.texture = this._platformTexture;
         imageCopyTexture.mipLevel = mipLevel;
         imageCopyTexture.origin = origin;

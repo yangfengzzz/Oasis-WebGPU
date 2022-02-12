@@ -2,7 +2,7 @@ import {Color} from "@oasis-engine/math";
 import {Engine} from "../Engine";
 import {Shader} from "../shader";
 import {PBRBaseMaterial} from "./PBRBaseMaterial";
-import {SamplerTexture2D} from "../texture/SamplerTexture2D";
+import {SampledTexture2D} from "../texture/SampledTexture2D";
 
 /**
  * PBR (Specular-Glossiness Workflow) Material.
@@ -14,7 +14,7 @@ export class PBRSpecularMaterial extends PBRBaseMaterial {
 
     // specularColor, glossiness, _pad1, _pad2, _pad3
     private _pbrSpecularData: Float32Array = new Float32Array(8);
-    private _specularGlossinessTexture: SamplerTexture2D;
+    private _specularGlossinessTexture: SampledTexture2D;
 
     /**
      * Specular color.
@@ -51,11 +51,11 @@ export class PBRSpecularMaterial extends PBRBaseMaterial {
      * Specular glossiness texture.
      * @remarks RGB is specular, A is glossiness
      */
-    get specularGlossinessTexture(): SamplerTexture2D {
+    get specularGlossinessTexture(): SampledTexture2D {
         return this._specularGlossinessTexture;
     }
 
-    set specularGlossinessTexture(value: SamplerTexture2D) {
+    set specularGlossinessTexture(value: SampledTexture2D) {
         this._specularGlossinessTexture = value;
         this.shaderData.setSampledTexture(PBRSpecularMaterial._specularGlossinessTextureProp, PBRSpecularMaterial._specularGlossinessSamplerProp, value);
         if (value) {

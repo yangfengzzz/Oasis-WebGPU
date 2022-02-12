@@ -2,7 +2,7 @@ import {Color} from "@oasis-engine/math";
 import {Engine} from "../Engine";
 import {Shader} from "../shader";
 import {BaseMaterial} from "./BaseMaterial";
-import {SamplerTexture2D} from "../texture/SamplerTexture2D";
+import {SampledTexture2D} from "../texture/SampledTexture2D";
 
 /**
  * PBR (Physically-Based Rendering) Material.
@@ -20,10 +20,10 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
 
     // baseColor, emissiveColor, normalTextureIntensity, occlusionTextureIntensity
     private _pbrBaseData: Float32Array = new Float32Array(12);
-    private _baseTexture: SamplerTexture2D;
-    private _normalTexture: SamplerTexture2D;
-    private _emissiveTexture: SamplerTexture2D;
-    private _occlusionTexture: SamplerTexture2D;
+    private _baseTexture: SampledTexture2D;
+    private _normalTexture: SampledTexture2D;
+    private _emissiveTexture: SampledTexture2D;
+    private _occlusionTexture: SampledTexture2D;
 
     /**
      * Base color.
@@ -46,11 +46,11 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
     /**
      * Base texture.
      */
-    get baseTexture(): SamplerTexture2D {
+    get baseTexture(): SampledTexture2D {
         return this._baseTexture;
     }
 
-    set baseTexture(value: SamplerTexture2D) {
+    set baseTexture(value: SampledTexture2D) {
         this._baseTexture = value;
         this.shaderData.setSampledTexture(PBRBaseMaterial._baseTextureProp, PBRBaseMaterial._baseSamplerProp, value);
         if (value) {
@@ -63,11 +63,11 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
     /**
      * Normal texture.
      */
-    get normalTexture(): SamplerTexture2D {
+    get normalTexture(): SampledTexture2D {
         return this._normalTexture;
     }
 
-    set normalTexture(value: SamplerTexture2D) {
+    set normalTexture(value: SampledTexture2D) {
         this._normalTexture = value;
         this.shaderData.setSampledTexture(PBRBaseMaterial._normalTextureProp, PBRBaseMaterial._normalSamplerProp, value);
         if (value) {
@@ -111,11 +111,11 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
     /**
      * Emissive texture.
      */
-    get emissiveTexture(): SamplerTexture2D {
+    get emissiveTexture(): SampledTexture2D {
         return this._emissiveTexture;
     }
 
-    set emissiveTexture(value: SamplerTexture2D) {
+    set emissiveTexture(value: SampledTexture2D) {
         this._emissiveTexture = value;
         this.shaderData.setSampledTexture(PBRBaseMaterial._emissiveTextureProp, PBRBaseMaterial._emissiveSamplerProp, value);
         if (value) {
@@ -128,11 +128,11 @@ export abstract class PBRBaseMaterial extends BaseMaterial {
     /**
      * Occlusion texture.
      */
-    get occlusionTexture(): SamplerTexture2D {
+    get occlusionTexture(): SampledTexture2D {
         return this._occlusionTexture;
     }
 
-    set occlusionTexture(value: SamplerTexture2D) {
+    set occlusionTexture(value: SampledTexture2D) {
         this._occlusionTexture = value;
         this.shaderData.setSampledTexture(PBRBaseMaterial._occlusionTextureProp, PBRBaseMaterial._occlusionSamplerProp, value);
         if (value) {

@@ -6,15 +6,15 @@ import {Shader} from "./Shader";
 import {ShaderMacro} from "./ShaderMacro";
 import {ShaderMacroCollection} from "./ShaderMacroCollection";
 import {ShaderProperty} from "./ShaderProperty";
-import {SamplerTexture2D} from "../texture/SamplerTexture2D";
-import {SamplerTexture} from "../texture/SamplerTexture";
+import {SampledTexture2D} from "../texture/SampledTexture2D";
+import {SampledTexture} from "../texture/SampledTexture";
 import {Buffer} from "../graphic/Buffer";
 import {Engine} from "../Engine";
 import {MacroName} from "./InternalMacroName";
 
 export type ShaderPropertyResourceType =
     | Buffer
-    | SamplerTexture
+    | SampledTexture
 
 /**
  * Shader data collection,Correspondence includes shader properties data and macros data.
@@ -528,7 +528,7 @@ export class ShaderData implements IRefObject, IClone {
      * @param samplerName - Shader property name
      * @param value - Texture
      */
-    setSampledTexture(textureName: string, samplerName: string, value: SamplerTexture2D): void;
+    setSampledTexture(textureName: string, samplerName: string, value: SampledTexture2D): void;
 
     /**
      * Set texture by shader property.
@@ -536,9 +536,9 @@ export class ShaderData implements IRefObject, IClone {
      * @param samplerProperty - Shader property
      * @param value - Texture
      */
-    setSampledTexture(textureProperty: ShaderProperty, samplerProperty: ShaderProperty, value: SamplerTexture2D): void;
+    setSampledTexture(textureProperty: ShaderProperty, samplerProperty: ShaderProperty, value: SampledTexture2D): void;
 
-    setSampledTexture(textureProperty: string | ShaderProperty, samplerProperty: string | ShaderProperty, value: SamplerTexture2D): void {
+    setSampledTexture(textureProperty: string | ShaderProperty, samplerProperty: string | ShaderProperty, value: SampledTexture2D): void {
         this._setSampledTexture(textureProperty, samplerProperty, value);
     }
 
@@ -660,7 +660,7 @@ export class ShaderData implements IRefObject, IClone {
      */
     _setSampledTexture(texProperty: string | ShaderProperty,
                        sampleProperty: string | ShaderProperty,
-                       value: SamplerTexture): void {
+                       value: SampledTexture): void {
         // texture
         {
             if (typeof texProperty === "string") {
@@ -722,7 +722,7 @@ export class ShaderData implements IRefObject, IClone {
         if (typeof property !== "string" && typeof property !== "number") {
             property = property._uniqueId;
         }
-        return (<SamplerTexture>this._propertyResources[property]).sampler;
+        return (<SampledTexture>this._propertyResources[property]).sampler;
     }
 
     _getTextureView(property: number | string | ShaderProperty): GPUTextureView {
@@ -732,7 +732,7 @@ export class ShaderData implements IRefObject, IClone {
         if (typeof property !== "string" && typeof property !== "number") {
             property = property._uniqueId;
         }
-        return (<SamplerTexture>this._propertyResources[property]).textureView;
+        return (<SampledTexture>this._propertyResources[property]).textureView;
     }
 
     /**
@@ -751,7 +751,7 @@ export class ShaderData implements IRefObject, IClone {
         for (const k in properties) {
             const property = properties[k];
             // @todo: Separate array to speed performance.
-            if (property && property instanceof SamplerTexture2D) {
+            if (property && property instanceof SampledTexture2D) {
                 property._addRefCount(value);
             }
         }
