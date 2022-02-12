@@ -1,6 +1,12 @@
 import {SamplerTexture} from "./SamplerTexture";
 import {Engine} from "../Engine";
-import {Extent3DDictStrict, ImageCopyExternalImage, ImageCopyTextureTagged, TextureViewDescriptor} from "../webgpu";
+import {
+    BufferDescriptor, bytesPerPixel,
+    Extent3DDictStrict,
+    ImageCopyExternalImage,
+    ImageCopyTextureTagged,
+    TextureViewDescriptor
+} from "../webgpu";
 import {Extent3DDict} from "../webgpu";
 
 /**
@@ -8,6 +14,9 @@ import {Extent3DDict} from "../webgpu";
  */
 export class SamplerTexture2D extends SamplerTexture {
     private static _textureViewDescriptor: TextureViewDescriptor = new TextureViewDescriptor();
+    private static _imageCopyExternalImage: ImageCopyExternalImage = new ImageCopyExternalImage();
+    private static _imageCopyTextureTagged = new ImageCopyTextureTagged();
+    private static _extent3DDictStrict = new Extent3DDictStrict();
 
     /**
      * Texture format.
@@ -31,7 +40,7 @@ export class SamplerTexture2D extends SamplerTexture {
         height: number,
         format: GPUTextureFormat = 'rgba8unorm',
         usage: GPUTextureUsageFlags = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-        mipmap: boolean = false
+        mipmap: boolean = true
     ) {
         super(engine);
         const textureDesc = this._platformTextureDesc;
@@ -56,6 +65,43 @@ export class SamplerTexture2D extends SamplerTexture {
     }
 
     /**
+     * Setting pixels data through color buffer data, designated area and texture mipmapping level,it's also applicable to compressed formats.
+     * @remarks If it is the WebGL1.0 platform and the texture format is compressed, the first upload must be filled with textures.
+     * @param colorBuffer - Color buffer data
+     * @param mipLevel - Texture mipmapping level
+     * @param x - X coordinate of area start
+     * @param y - Y coordinate of area start
+     * @param width - Data width. if it's empty, width is the width corresponding to mipLevel minus x , width corresponding to mipLevel is Math.max(1, this.width >> mipLevel)
+     * @param height - Data height. if it's empty, height is the height corresponding to mipLevel minus y , height corresponding to mipLevel is Math.max(1, this.height >> mipLevel)
+     */
+    setPixelBuffer(
+        colorBuffer: ArrayBufferView,
+        mipLevel: number = 0,
+        x?: number,
+        y?: number,
+        width?: number,
+        height?: number
+    ): void {
+        const device = this.engine.device;
+
+        const descriptor = new BufferDescriptor();
+        descriptor.size = colorBuffer.byteLength;
+        descriptor.usage = GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST;
+        const stagingBuffer = device.createBuffer(descriptor);
+        device.queue.writeBuffer(stagingBuffer, 0, colorBuffer, 0, colorBuffer.byteLength);
+
+        const imageCopyBuffer = this._createImageCopyBuffer(stagingBuffer, 0, bytesPerPixel(this._platformTextureDesc.format) * width, 0);
+        const imageCopyTexture = this._createImageCopyTexture(mipLevel, {x, y});
+        const extent3DDictStrict = SamplerTexture2D._extent3DDictStrict;
+        extent3DDictStrict.width = this._platformTextureDesc.size.width;
+        extent3DDictStrict.height = this._platformTextureDesc.size.height;
+        const encoder = device.createCommandEncoder();
+        encoder.copyBufferToTexture(imageCopyBuffer, imageCopyTexture, extent3DDictStrict);
+
+        device.queue.submit([encoder.finish()]);
+    }
+
+    /**
      * Setting pixels data through TexImageSource, designated area and texture mipmapping level.
      * @param imageSource - The source of texture
      * @param mipLevel - Texture mipmapping level
@@ -69,20 +115,20 @@ export class SamplerTexture2D extends SamplerTexture {
         mipLevel: number = 0,
         flipY: boolean = false,
         premultiplyAlpha: boolean = false,
-        x?: number,
-        y?: number
+        x: number = 0,
+        y: number = 0
     ): void {
-        const imageCopyExternalImage = new ImageCopyExternalImage();
+        const imageCopyExternalImage = SamplerTexture2D._imageCopyExternalImage;
         imageCopyExternalImage.source = imageSource;
-        imageCopyExternalImage.origin = [0, 0];
-        const imageCopyTextureTagged = new ImageCopyTextureTagged();
+        imageCopyExternalImage.origin = [x, y];
+        const imageCopyTextureTagged = SamplerTexture2D._imageCopyTextureTagged;
         imageCopyTextureTagged.texture = this._platformTexture;
         imageCopyTextureTagged.aspect = 'all'
-        imageCopyTextureTagged.mipLevel = 0;
+        imageCopyTextureTagged.mipLevel = mipLevel;
         imageCopyTextureTagged.premultipliedAlpha = premultiplyAlpha;
-        const extent3DDictStrict = new Extent3DDictStrict();
-        extent3DDictStrict.width = this._platformTextureDesc.size.width;
-        extent3DDictStrict.height = this._platformTextureDesc.size.height;
+        const extent3DDictStrict = SamplerTexture2D._extent3DDictStrict;
+        extent3DDictStrict.width = Math.max(1, this._platformTextureDesc.size.width / Math.pow(2, mipLevel));
+        extent3DDictStrict.height = Math.max(1, this._platformTextureDesc.size.height / Math.pow(2, mipLevel));
 
         this._engine.device.queue.copyExternalImageToTexture(imageCopyExternalImage, imageCopyTextureTagged, extent3DDictStrict)
     }
