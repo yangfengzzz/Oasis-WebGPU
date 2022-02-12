@@ -6,16 +6,16 @@ import {BufferDescriptor} from "../webgpu";
 /**
  * Buffer.
  */
-export class Buffer extends RefObject {
+export class Buffer extends RefObject implements GPUBufferBinding {
     private static _bufferDescriptor: BufferDescriptor = new BufferDescriptor();
     private readonly _nativeBuffer: GPUBuffer;
-    private readonly _byteLength: number;
+    private readonly _size: number;
 
     /**
      * Byte length.
      */
-    get byteLength(): number {
-        return this._byteLength;
+    get size(): number {
+        return this._size;
     }
 
     get buffer(): GPUBuffer {
@@ -44,13 +44,13 @@ export class Buffer extends RefObject {
         super(engine);
         const bufferDescriptor = Buffer._bufferDescriptor;
         if (typeof byteLengthOrData === "number") {
-            this._byteLength = byteLengthOrData;
+            this._size = byteLengthOrData;
         } else {
-            this._byteLength = byteLengthOrData.byteLength;
+            this._size = byteLengthOrData.byteLength;
         }
 
         bufferDescriptor.usage = bufferUsage;
-        bufferDescriptor.size = this._byteLength;
+        bufferDescriptor.size = this._size;
         this._nativeBuffer = engine.device.createBuffer(bufferDescriptor);
     }
 

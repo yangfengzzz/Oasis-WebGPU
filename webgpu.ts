@@ -7,7 +7,7 @@ import {Vector3, Color} from "@oasis-engine/math";
 import {Script} from "./core/Script";
 import {OrbitControl} from "./core/control";
 import {PointLight} from "./core/lighting";
-import {SampledTexture2D} from "./core/texture/SampledTexture2D";
+import {SampledTexture2D} from "./core/texture";
 import "./core/loader/Texture2DLoader"
 
 class MoveScript extends Script {

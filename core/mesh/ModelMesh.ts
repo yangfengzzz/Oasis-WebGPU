@@ -343,7 +343,7 @@ export class ModelMesh extends Mesh {
 
         const indexBuffer = this._indexBufferBinding?._buffer;
         if (_indices) {
-            if (!indexBuffer || _indices.byteLength != indexBuffer.byteLength) {
+            if (!indexBuffer || _indices.byteLength != indexBuffer.size) {
                 // indexBuffer?.destroy();
                 let newIndexBuffer = new Buffer(this.engine, <Uint32Array>this._indices, GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST);
                 newIndexBuffer.uploadData(<Uint32Array>this._indices, 0, 0, this._indices.length);
