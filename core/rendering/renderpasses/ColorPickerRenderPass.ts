@@ -27,7 +27,7 @@ export class ColorPickerRenderPass extends RenderPass {
     private _colorPickerTexture: GPUTexture;
     private _needPick: boolean;
     private _onPick: (renderer: Renderer, mesh: Mesh) => void;
-    private _pickPos: Vector2;
+    private _pickPos = new Vector2();
 
     private _pixel = new Uint8Array(4);
     private _stageBuffer: GPUBuffer;
@@ -52,8 +52,10 @@ export class ColorPickerRenderPass extends RenderPass {
         this._engine = engine;
 
         const colorPickerTextureDesc = this._colorPickerTextureDesc;
+        colorPickerTextureDesc.size = new Extent3DDict();
         colorPickerTextureDesc.size.width = engine.canvas.width;
         colorPickerTextureDesc.size.height = engine.canvas.height;
+        colorPickerTextureDesc.format = 'bgra8unorm';
         colorPickerTextureDesc.mipLevelCount = 1;
         colorPickerTextureDesc.dimension = '2d';
         colorPickerTextureDesc.usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC;
@@ -63,6 +65,7 @@ export class ColorPickerRenderPass extends RenderPass {
         const colorPickerColorAttachments = this._colorPickerColorAttachments;
         colorPickerColorAttachments.storeOp = 'store';
         colorPickerColorAttachments.loadValue = {r: 1.0, g: 1.0, b: 1.0, a: 1.0};
+        colorPickerColorAttachments.view = this._colorPickerTexture.createView();
         const colorPickerDepthStencilAttachment = this._colorPickerDepthStencilAttachment;
         colorPickerDepthStencilAttachment.depthLoadValue = 1.0;
         colorPickerDepthStencilAttachment.depthStoreOp = 'store';

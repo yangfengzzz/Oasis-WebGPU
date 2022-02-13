@@ -237,14 +237,14 @@ export class ColorPickerSubpass extends Subpass {
      * Convert RGB color to id.
      * @param color - Color
      */
-    color2Id(color): number {
+    color2Id(color: Uint8Array): number {
         return color[0] | (color[1] << 8) | (color[2] << 16);
     }
 
     /**
      * Get renderer element by color.
      */
-    getObjectByColor(color) {
+    getObjectByColor(color: Uint8Array) {
         return this._primitivesMap[this.color2Id(color)];
     }
 }

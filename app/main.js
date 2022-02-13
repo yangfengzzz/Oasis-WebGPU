@@ -1,3 +1,3 @@
 // import "./PrimitiveApp";
-import "./SkyboxApp"
-// import "./FramebufferPickerApp"
+// import "./SkyboxApp"
+import "./FramebufferPickerApp"
