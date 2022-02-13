@@ -70,32 +70,34 @@ export class WGSLEncoder {
     addUniformBinding(uniformName: string, type: string, group: number = 0) {
         const property = Shader.getPropertyByName(uniformName);
         if (property !== null) {
-            const binding = property._uniqueId;
-
-            this._uniformBlock += `@group(${group.toString()}) @binding(${binding.toString()})\n var<uniform> ${uniformName}: ${type};\n `;
-            const entry = new BindGroupLayoutEntry();
-            entry.binding = binding;
-            entry.visibility = this._currentStage;
-            entry.buffer = new BufferBindingLayout();
-            entry.buffer.type = 'uniform';
-
-            const bindGroupLayoutEntryMap = this._bindGroupLayoutEntryMap;
-            if (!bindGroupLayoutEntryMap.has(group)) {
-                bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
-                bindGroupLayoutEntryMap.get(group).set(binding, entry);
-            } else {
-                if (!bindGroupLayoutEntryMap.get(group).has(binding)) {
-                    bindGroupLayoutEntryMap.get(group).set(binding, entry);
-                }
-            }
-            if (!this._bindGroupInfo.has(group)) {
-                this._bindGroupInfo.set(group, new Set<number>());
-            }
-            this._bindGroupInfo.get(group).add(binding);
-            this._needFlush = true;
+            this.addManualUniformBinding(uniformName, type, property._uniqueId, group);
         } else {
             throw  "Unknown Uniform Name";
         }
+    }
+
+    addManualUniformBinding(uniformName: string, type: string, binding: number, group: number = 0) {
+        this._uniformBlock += `@group(${group.toString()}) @binding(${binding.toString()})\n var<uniform> ${uniformName}: ${type};\n `;
+        const entry = new BindGroupLayoutEntry();
+        entry.binding = binding;
+        entry.visibility = this._currentStage;
+        entry.buffer = new BufferBindingLayout();
+        entry.buffer.type = 'uniform';
+
+        const bindGroupLayoutEntryMap = this._bindGroupLayoutEntryMap;
+        if (!bindGroupLayoutEntryMap.has(group)) {
+            bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
+            bindGroupLayoutEntryMap.get(group).set(binding, entry);
+        } else {
+            if (!bindGroupLayoutEntryMap.get(group).has(binding)) {
+                bindGroupLayoutEntryMap.get(group).set(binding, entry);
+            }
+        }
+        if (!this._bindGroupInfo.has(group)) {
+            this._bindGroupInfo.set(group, new Set<number>());
+        }
+        this._bindGroupInfo.get(group).add(binding);
+        this._needFlush = true;
     }
 
     addSampledTextureBinding(texName: string, texType: TextureType,
@@ -105,60 +107,71 @@ export class WGSLEncoder {
         const samplerProperty = Shader.getPropertyByName(samplerName);
         if (texProperty != undefined && samplerProperty != undefined) {
             const texBinding = texProperty._uniqueId;
+            this.addManualTextureBinding(texName, texType, texBinding, group);
+
             const samplerBinding = samplerProperty._uniqueId;
-
-            this._uniformBlock += `@group(${group}) @binding(${texBinding}) 
-            var ${texName}: ${texType};\n 
-            @group(${group}) @binding(${samplerBinding}) 
-            var ${samplerName}: ${samplerType};\n `;
-
-            const bindGroupLayoutEntryMap = this._bindGroupLayoutEntryMap;
-            // Texture
-            {
-                const entry = new BindGroupLayoutEntry();
-                entry.binding = texBinding;
-                entry.visibility = this._currentStage;
-                entry.texture = new TextureBindingLayout();
-                entry.texture.multisampled = isMultisampled(texType);
-                entry.texture.viewDimension = textureViewDimension(texType);
-                entry.texture.sampleType = sampleType(texType);
-                if (!bindGroupLayoutEntryMap.has(group)) {
-                    bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
-                    bindGroupLayoutEntryMap.get(group).set(texBinding, entry);
-                } else {
-                    if (!bindGroupLayoutEntryMap.get(group).has(texBinding)) {
-                        bindGroupLayoutEntryMap.get(group).set(texBinding, entry);
-                    }
-                }
-                if (!this._bindGroupInfo.has(group)) {
-                    this._bindGroupInfo.set(group, new Set<number>());
-                }
-                this._bindGroupInfo.get(group).add(texBinding);
-            }
-            // Sampler
-            {
-                const entry = new BindGroupLayoutEntry();
-                entry.binding = samplerBinding;
-                entry.visibility = this._currentStage;
-                entry.sampler = new SamplerBindingLayout();
-                entry.sampler.type = bindingType(samplerType);
-                if (!bindGroupLayoutEntryMap.has(group)) {
-                    bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
-                    bindGroupLayoutEntryMap.get(group).set(samplerBinding, entry);
-                } else {
-                    if (!bindGroupLayoutEntryMap.get(group).has(samplerBinding)) {
-                        bindGroupLayoutEntryMap.get(group).set(samplerBinding, entry);
-                    }
-                }
-                if (!this._bindGroupInfo.has(group)) {
-                    this._bindGroupInfo.set(group, new Set<number>());
-                }
-                this._bindGroupInfo.get(group).add(samplerBinding);
-            }
-            this._needFlush = true;
+            this.addManualSamplerBinding(samplerName, samplerType, samplerBinding, group);
         } else {
             throw  "Unknown Uniform Name";
         }
+    }
+
+    addManualTextureBinding(texName: string, texType: TextureType, texBinding: number, group: number = 0) {
+        this._uniformBlock += `@group(${group}) @binding(${texBinding}) 
+            var ${texName}: ${texType};\n `;
+
+        const bindGroupLayoutEntryMap = this._bindGroupLayoutEntryMap;
+        // Texture
+        {
+            const entry = new BindGroupLayoutEntry();
+            entry.binding = texBinding;
+            entry.visibility = this._currentStage;
+            entry.texture = new TextureBindingLayout();
+            entry.texture.multisampled = isMultisampled(texType);
+            entry.texture.viewDimension = textureViewDimension(texType);
+            entry.texture.sampleType = sampleType(texType);
+            if (!bindGroupLayoutEntryMap.has(group)) {
+                bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
+                bindGroupLayoutEntryMap.get(group).set(texBinding, entry);
+            } else {
+                if (!bindGroupLayoutEntryMap.get(group).has(texBinding)) {
+                    bindGroupLayoutEntryMap.get(group).set(texBinding, entry);
+                }
+            }
+            if (!this._bindGroupInfo.has(group)) {
+                this._bindGroupInfo.set(group, new Set<number>());
+            }
+            this._bindGroupInfo.get(group).add(texBinding);
+        }
+        this._needFlush = true;
+    }
+
+    addManualSamplerBinding(samplerName: string, samplerType: SamplerType, samplerBinding: number, group: number = 0) {
+        this._uniformBlock += `@group(${group}) @binding(${samplerBinding}) 
+            var ${samplerName}: ${samplerType};\n `;
+
+        const bindGroupLayoutEntryMap = this._bindGroupLayoutEntryMap;
+        // Sampler
+        {
+            const entry = new BindGroupLayoutEntry();
+            entry.binding = samplerBinding;
+            entry.visibility = this._currentStage;
+            entry.sampler = new SamplerBindingLayout();
+            entry.sampler.type = bindingType(samplerType);
+            if (!bindGroupLayoutEntryMap.has(group)) {
+                bindGroupLayoutEntryMap.set(group, new Map<number, BindGroupLayoutEntry>());
+                bindGroupLayoutEntryMap.get(group).set(samplerBinding, entry);
+            } else {
+                if (!bindGroupLayoutEntryMap.get(group).has(samplerBinding)) {
+                    bindGroupLayoutEntryMap.get(group).set(samplerBinding, entry);
+                }
+            }
+            if (!this._bindGroupInfo.has(group)) {
+                this._bindGroupInfo.set(group, new Set<number>());
+            }
+            this._bindGroupInfo.get(group).add(samplerBinding);
+        }
+        this._needFlush = true;
     }
 
     addStorageTextureBinding(texName: string, texType: StorageTextureType,
