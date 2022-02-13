@@ -1,14 +1,14 @@
-import {WebGPUEngine} from "./core/WebGPUEngine";
-import {Camera} from "./core/Camera";
-import {MeshRenderer} from "./core/mesh/MeshRenderer";
-import {PrimitiveMesh} from "./core/mesh/PrimitiveMesh";
-import {BlinnPhongMaterial, UnlitMaterial} from "./core/material";
+import {WebGPUEngine} from "../core/WebGPUEngine";
+import {Camera} from "../core/Camera";
+import {MeshRenderer} from "../core/mesh/MeshRenderer";
+import {PrimitiveMesh} from "../core/mesh/PrimitiveMesh";
+import {BlinnPhongMaterial} from "../core/material";
 import {Vector3, Color} from "@oasis-engine/math";
-import {Script} from "./core/Script";
-import {OrbitControl} from "./core/control";
-import {PointLight} from "./core/lighting";
-import {SampledTexture2D} from "./core/texture";
-import "./core/loader/Texture2DLoader"
+import {Script} from "../core/Script";
+import {OrbitControl} from "../core/control";
+import {PointLight} from "../core/lighting";
+import {SampledTexture2D} from "../core/texture";
+import "../core/loader/Texture2DLoader"
 
 class MoveScript extends Script {
     private _rTri = 0
