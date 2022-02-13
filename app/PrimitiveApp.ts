@@ -57,7 +57,7 @@ engine.init().then(() => {
     sphereRenderer.mesh = PrimitiveMesh.createSphere(engine, 1);
 
     engine.resourceManager
-        .load<SampledTexture2D>("http://192.168.31.204:8000/wood.png")
+        .load<SampledTexture2D>("http://192.168.31.204:8000/Textures/wood.png")
         .then((texture) => {
             const unlit = new BlinnPhongMaterial(engine)
             unlit.baseTexture = texture;

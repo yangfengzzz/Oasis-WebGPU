@@ -1,3 +1,6 @@
 [submodule "third_party/wgsl_reflect"]
 	path = third_party/wgsl_reflect
 	url = https://github.com/brendan-duncan/wgsl_reflect.git
+[submodule "assets"]
+	path = assets
+	url = https://github.com/yangfengzzz/Assets.git
