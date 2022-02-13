@@ -54,7 +54,9 @@ engine.init().then(() => {
     const colorPicker = new ColorPickerRenderPass(engine);
     colorPicker.mainCamera = mainCamera;
     colorPicker.onPick = (renderer: Renderer, mesh: Mesh) => {
-        (<BlinnPhongMaterial>renderer.getMaterial()).setBaseColor(new Color(1, 1, 1, 1));
+        if(renderer) {
+            (<BlinnPhongMaterial>renderer.getMaterial()).setBaseColor(new Color(Math.random(), Math.random(), Math.random(), 1));
+        }
     }
     window.addEventListener("mousedown", (event) => {
         colorPicker.pick(event.offsetX, event.offsetY);

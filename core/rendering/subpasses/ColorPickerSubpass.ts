@@ -227,9 +227,9 @@ export class ColorPickerSubpass extends Subpass {
             return color;
         }
 
-        color[0] = (id & 0xff) / 255;
+        color[2] = (id & 0xff) / 255;
         color[1] = ((id & 0xff00) >> 8) / 255;
-        color[2] = ((id & 0xff0000) >> 16) / 255;
+        color[0] = ((id & 0xff0000) >> 16) / 255;
         return color;
     }
 
@@ -244,7 +244,12 @@ export class ColorPickerSubpass extends Subpass {
     /**
      * Get renderer element by color.
      */
-    getObjectByColor(color: Uint8Array) {
-        return this._primitivesMap[this.color2Id(color)];
+    getObjectByColor(color: Uint8Array): [Renderer, Mesh] {
+        const result = this._primitivesMap[this.color2Id(color)];
+        if (result === undefined) {
+            return [undefined, undefined];
+        } else {
+            return result;
+        }
     }
 }

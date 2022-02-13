@@ -29,7 +29,6 @@ export class ColorPickerRenderPass extends RenderPass {
     private _onPick: (renderer: Renderer, mesh: Mesh) => void;
     private _pickPos = new Vector2();
 
-    private _pixel = new Uint8Array(4);
     private _stageBuffer: GPUBuffer;
     private _imageCopyTexture = new ImageCopyTexture();
     private _imageCopyBuffer = new ImageCopyBuffer();
@@ -65,7 +64,6 @@ export class ColorPickerRenderPass extends RenderPass {
         const colorPickerColorAttachments = this._colorPickerColorAttachments;
         colorPickerColorAttachments.storeOp = 'store';
         colorPickerColorAttachments.loadValue = {r: 1.0, g: 1.0, b: 1.0, a: 1.0};
-        colorPickerColorAttachments.view = this._colorPickerTexture.createView();
         const colorPickerDepthStencilAttachment = this._colorPickerDepthStencilAttachment;
         colorPickerDepthStencilAttachment.depthLoadValue = 1.0;
         colorPickerDepthStencilAttachment.depthStoreOp = 'store';
@@ -105,7 +103,8 @@ export class ColorPickerRenderPass extends RenderPass {
     }
 
     draw(scene: Scene, camera: Camera, commandEncoder: GPUCommandEncoder) {
-        if (this._needPick && camera == this._mainCamera) {
+        if (this._needPick && camera === this._mainCamera) {
+            this._colorPickerColorAttachments.view = this._colorPickerTexture.createView();
             super.draw(scene, camera, commandEncoder);
             this._copyRenderTargetToBuffer(commandEncoder);
         }
@@ -142,12 +141,8 @@ export class ColorPickerRenderPass extends RenderPass {
 
     private _readColorFromRenderTarget() {
         this._stageBuffer.mapAsync(GPUMapMode.READ, 0, 4).then(() => {
-            const arrayBuffer = this._stageBuffer.getMappedRange(0, 4);
-            this._pixel[0] = arrayBuffer[0];
-            this._pixel[1] = arrayBuffer[1];
-            this._pixel[2] = arrayBuffer[2];
-            this._pixel[3] = arrayBuffer[3];
-            const picker = this._colorPickerSubpass.getObjectByColor(this._pixel);
+            const arrayBuffer = this._stageBuffer.getMappedRange();
+            const picker = this._colorPickerSubpass.getObjectByColor(new Uint8Array(arrayBuffer));
             this._onPick(picker[0], picker[1]);
             this._stageBuffer.unmap();
         })
