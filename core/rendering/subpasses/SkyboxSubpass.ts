@@ -5,7 +5,7 @@ import {Camera} from "../../Camera";
 import {SampledTextureCube} from "../../texture";
 import {ModelMesh} from "../../mesh/ModelMesh";
 import {Buffer} from "../../graphic/Buffer";
-import {WGSL} from "../../shaderlib";
+import {WGSL, WGSLSkyboxFragment, WGSLSkyboxVertex} from "../../shaderlib";
 import {
     BindGroupDescriptor,
     BindGroupEntry,
@@ -26,6 +26,8 @@ import {
 } from "../../webgpu";
 import {PrimitiveMesh} from "../../mesh/PrimitiveMesh";
 import {Matrix} from "@oasis-engine/math";
+import {ShaderMacroCollection} from "../../shader/ShaderMacroCollection";
+import {ShaderProgram} from "../../shader/ShaderProgram";
 
 export class SkyboxSubpass extends Subpass {
     private static _vpMatrix: Matrix = new Matrix();
@@ -71,7 +73,8 @@ export class SkyboxSubpass extends Subpass {
         super(engine);
         this._vpBuffer = new Buffer(engine, 64, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
         this.createCuboid();
-
+        this._vertexSource = new WGSLSkyboxVertex();
+        this._fragmentSource = new WGSLSkyboxFragment();
     }
 
     createSphere(radius: number) {
@@ -93,6 +96,17 @@ export class SkyboxSubpass extends Subpass {
         this._forwardPipelineDescriptor.multisample = this._multisample;
         this._forwardPipelineDescriptor.vertex = this._vertex;
         this._forwardPipelineDescriptor.label = "Skybox Pipeline";
+        // Shader
+        {
+            const macros = new ShaderMacroCollection();
+            const program = new ShaderProgram(this.engine.device,
+                this._vertexSource.compile(macros)[0],
+                this._fragmentSource.compile(macros)[0], null);
+            this._vertex.entryPoint = 'main';
+            this._vertex.module = program.vertexShader;
+            this._fragment.entryPoint = 'main';
+            this._fragment.module = program.vertexShader;
+        }
         // DepthStencilState
         {
             this._depthStencilState.format = this.engine.renderContext.depthStencilTextureFormat();
