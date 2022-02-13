@@ -86,8 +86,8 @@ export class SampledTextureCube extends SampledTexture {
         imageSource: ImageBitmap | HTMLCanvasElement | OffscreenCanvas,
         mipLevel: number = 0,
         premultiplyAlpha: boolean = false,
-        x?: number,
-        y?: number
+        x: number = 0,
+        y: number = 0
     ): void {
         const imageCopyExternalImage = SampledTextureCube._imageCopyExternalImage;
         imageCopyExternalImage.source = imageSource;
@@ -97,13 +97,13 @@ export class SampledTextureCube extends SampledTexture {
         imageCopyTextureTagged.texture = this._platformTexture;
         imageCopyTextureTagged.aspect = 'all'
         imageCopyTextureTagged.mipLevel = mipLevel;
+        imageCopyTextureTagged.origin = [x, y, face];
         imageCopyTextureTagged.premultipliedAlpha = premultiplyAlpha;
 
         const extent3DDictStrict = SampledTextureCube._extent3DDictStrict;
         const size = this._platformTextureDesc.size;
         extent3DDictStrict.width = Math.max(1, size.width / Math.pow(2, mipLevel));
         extent3DDictStrict.height = Math.max(1, size.height / Math.pow(2, mipLevel));
-        extent3DDictStrict.depthOrArrayLayers = face;
 
         this._engine.device.queue.copyExternalImageToTexture(imageCopyExternalImage, imageCopyTextureTagged, extent3DDictStrict)
     }

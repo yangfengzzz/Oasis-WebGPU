@@ -24,7 +24,7 @@ class TextureCubeLoader extends Loader<SampledTextureCube> {
                         return;
                     }
 
-                    const tex = new SampledTextureCube(resourceManager.engine, width);
+                    const tex = new SampledTextureCube(resourceManager.engine, width, height);
 
                     /** @ts-ignore */
                     if (!tex._platformTexture) return;

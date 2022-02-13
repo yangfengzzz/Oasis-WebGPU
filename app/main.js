@@ -1,2 +1,2 @@
-import "./PrimitiveApp";
-// import "./SkyboxApp"
+// import "./PrimitiveApp";
+import "./SkyboxApp"

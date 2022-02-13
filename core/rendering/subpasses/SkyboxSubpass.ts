@@ -47,13 +47,13 @@ export class SkyboxSubpass extends Subpass {
     private _vertex = new VertexState();
 
     private _bindGroupLayoutEntry: BindGroupLayoutEntry[] = [];
-    private _bindGroupLayoutDescriptor: BindGroupLayoutDescriptor;
+    private _bindGroupLayoutDescriptor = new BindGroupLayoutDescriptor();
     private _bindGroupLayout: BindGroupLayout;
 
     private _bindGroupEntries: BindGroupEntry[] = [];
-    private _bindGroupDescriptor: BindGroupDescriptor;
+    private _bindGroupDescriptor = new BindGroupDescriptor();
 
-    private _pipelineLayoutDescriptor: PipelineLayoutDescriptor;
+    private _pipelineLayoutDescriptor = new PipelineLayoutDescriptor();
     private _pipelineLayout: GPUPipelineLayout;
 
     private _renderPipeline: GPURenderPipeline;
@@ -101,7 +101,7 @@ export class SkyboxSubpass extends Subpass {
             const macros = new ShaderMacroCollection();
             const program = new ShaderProgram(this.engine.device,
                 this._vertexSource.compile(macros)[0],
-                this._fragmentSource.compile(macros)[0], null);
+                this._fragmentSource.compile(macros)[0]);
             this._vertex.entryPoint = 'main';
             this._vertex.module = program.vertexShader;
             this._fragment.entryPoint = 'main';
@@ -124,6 +124,7 @@ export class SkyboxSubpass extends Subpass {
         {
             this._bindGroupLayoutEntry.length = 3;
             this._bindGroupLayoutEntry[0] = new BindGroupLayoutEntry();
+            this._bindGroupLayoutEntry[0].binding = 10;
             this._bindGroupLayoutEntry[0].visibility = GPUShaderStage.VERTEX;
             this._bindGroupLayoutEntry[0].buffer = new BufferBindingLayout();
             this._bindGroupLayoutEntry[0].buffer.type = 'uniform';
@@ -148,9 +149,12 @@ export class SkyboxSubpass extends Subpass {
         // BindGroup
         {
             this._bindGroupEntries.length = 3;
+            this._bindGroupEntries[0] = new BindGroupEntry();
             this._bindGroupEntries[0].binding = 10;
             this._bindGroupEntries[0].resource = this._vpBuffer;
+            this._bindGroupEntries[1] = new BindGroupEntry();
             this._bindGroupEntries[1].binding = 0;
+            this._bindGroupEntries[2] = new BindGroupEntry();
             this._bindGroupEntries[2].binding = 1;
             this._bindGroupDescriptor.entries = this._bindGroupEntries;
             this._bindGroupDescriptor.layout = this._bindGroupLayout;
