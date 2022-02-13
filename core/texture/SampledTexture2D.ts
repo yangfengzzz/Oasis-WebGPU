@@ -78,8 +78,8 @@ export class SampledTexture2D extends SampledTexture {
     setPixelBuffer(
         colorBuffer: ArrayBufferView,
         mipLevel: number = 0,
-        x?: number,
-        y?: number,
+        x: number = 0,
+        y: number = 0,
         width?: number,
         height?: number
     ): void {
