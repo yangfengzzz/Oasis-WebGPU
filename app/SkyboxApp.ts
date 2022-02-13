@@ -32,7 +32,7 @@ engine.init().then(() => {
             const skybox = new SkyboxSubpass(engine);
             skybox.createCuboid();
             skybox.textureCubeMap = cubeMap;
-            engine.renderPass.addSubpass(skybox);
+            engine.defaultRenderPass.addSubpass(skybox);
         })
 
     const scene = engine.sceneManager.activeScene;

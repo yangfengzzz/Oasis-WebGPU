@@ -3,25 +3,19 @@ import {WebCanvas} from "./WebCanvas";
 import {EngineSettings} from "./EngineSettings";
 import {ColorSpace} from "./enums/ColorSpace";
 import {Entity} from "./Entity";
-import {RenderContext} from "./rendering/RenderContext";
+import {RenderContext, RenderPass} from "./rendering";
 import {ComponentsManager} from "./ComponentsManager";
 import {ResourceManager} from "./asset";
-import {
-    RenderPassColorAttachment,
-    RenderPassDepthStencilAttachment,
-    RenderPassDescriptor
-} from "./webgpu";
-import {RenderPass} from "./rendering/RenderPass";
 import {SceneManager} from "./SceneManager";
 import {Scene} from "./Scene";
 import {ShaderMacro} from "./shader/ShaderMacro";
 import {Shader, ShaderPool} from "./shader";
 import {ShaderMacroCollection} from "./shader/ShaderMacroCollection";
-import {ForwardSubpass} from "./rendering/subpasses/ForwardSubpass";
 import {RenderElement} from "./rendering/RenderElement";
 import {ClassPool} from "./rendering/ClassPool";
 import {ShaderProgramPool} from "./shader/ShaderProgramPool";
 import {LightManager} from "./lighting";
+import {ForwardRenderPass} from "./rendering/renderpasses/ForwardRenderPass";
 
 ShaderPool.init();
 
@@ -55,10 +49,8 @@ export class Engine {
     private _adapter: GPUAdapter;
     private _device: GPUDevice;
     private _renderContext: RenderContext;
-    private _renderPassDescriptor = new RenderPassDescriptor();
-    private _renderPassColorAttachment = new RenderPassColorAttachment();
-    private _renderPassDepthStencilAttachment = new RenderPassDepthStencilAttachment();
-    private _renderPass: RenderPass;
+
+    private _renderPasses: RenderPass[] = [];
 
     get device(): GPUDevice {
         return this._device;
@@ -68,8 +60,12 @@ export class Engine {
         return this._renderContext;
     }
 
-    get renderPass(): RenderPass {
-        return this._renderPass;
+    get renderPasses(): RenderPass[] {
+        return this._renderPasses;
+    }
+
+    get defaultRenderPass():RenderPass {
+        return this._renderPasses[0];
     }
 
     private _animate = () => {
@@ -188,18 +184,7 @@ export class Engine {
 
         this._device = await this._adapter.requestDevice();
         this._renderContext = this._canvas.createRenderContext(this._adapter, this._device);
-
-        this._renderPassDescriptor.colorAttachments.push(this._renderPassColorAttachment);
-        this._renderPassDescriptor.depthStencilAttachment = this._renderPassDepthStencilAttachment;
-        this._renderPassColorAttachment.storeOp = 'store';
-        this._renderPassColorAttachment.loadValue = {r: 0.4, g: 0.4, b: 0.4, a: 1.0};
-        this._renderPassDepthStencilAttachment.depthLoadValue = 1.0;
-        this._renderPassDepthStencilAttachment.depthStoreOp = 'store';
-        this._renderPassDepthStencilAttachment.stencilLoadValue = 0.0;
-        this._renderPassDepthStencilAttachment.stencilStoreOp = 'store';
-        this._renderPassDepthStencilAttachment.view = this._renderContext.depthStencilTexture();
-        this._renderPass = new RenderPass(this._renderPassDescriptor);
-        this._renderPass.addSubpass(new ForwardSubpass(this));
+        this._renderPasses.push(new ForwardRenderPass(this));
 
         this._sceneManager.activeScene = new Scene(this, "DefaultScene");
     }
@@ -278,10 +263,12 @@ export class Engine {
                 if (camera.enabled && cameraEntity.isActiveInHierarchy) {
                     componentsManager.callCameraOnBeginRender(camera);
 
-                    this._renderPassColorAttachment.view = this._renderContext.currentDrawableTexture();
-                    const commandEncoder = this._device.createCommandEncoder();
                     camera._updateShaderData();
-                    this._renderPass.draw(scene, camera, commandEncoder);
+                    const commandEncoder = this._device.createCommandEncoder();
+                    for (let j = 0, n = this._renderPasses.length; j < n; j++) {
+                        const renderPass = this._renderPasses[j];
+                        renderPass.draw(scene, camera, commandEncoder);
+                    }
                     this._device.queue.submit([commandEncoder.finish()]);
 
                     componentsManager.callCameraOnEndRender(camera);

@@ -4,14 +4,10 @@ import {Scene} from "../Scene";
 import {Camera} from "../Camera";
 
 export class RenderPass {
-    private _desc: RenderPassDescriptor;
+    renderPassDescriptor = new RenderPassDescriptor();
 
     private _subpasses: Subpass[] = [];
     private _activeSubpassIndex: number = 0;
-
-    get renderPassDescriptor(): RenderPassDescriptor {
-        return this._desc;
-    }
 
     get subpasses(): Subpass[] {
         return this._subpasses;
@@ -25,10 +21,6 @@ export class RenderPass {
         return this._subpasses[this._activeSubpassIndex];
     }
 
-    constructor(desc: RenderPassDescriptor) {
-        this._desc = desc;
-    }
-
     /**
      * @brief Appends a subpass to the pipeline
      * @param subpass Subpass to append
@@ -39,7 +31,7 @@ export class RenderPass {
     }
 
     draw(scene: Scene, camera: Camera, commandEncoder: GPUCommandEncoder) {
-        const renderPassEncoder = commandEncoder.beginRenderPass(this._desc);
+        const renderPassEncoder = commandEncoder.beginRenderPass(this.renderPassDescriptor);
         for (let i: number = 0; i < this._subpasses.length; ++i) {
             this._activeSubpassIndex = i;
             this._subpasses[i].draw(scene, camera, renderPassEncoder);
