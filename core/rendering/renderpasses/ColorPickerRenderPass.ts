@@ -35,6 +35,18 @@ export class ColorPickerRenderPass extends RenderPass {
     private _imageCopyBuffer = new ImageCopyBuffer();
     private _extent = new Extent3DDict();
 
+    /**
+     * Set the callback function after pick up.
+     * @param {Function} fun Callback function. if there is an renderer selected, the parameter 1 is {component, primitive }, otherwise it is undefined
+     */
+    set onPick(fun: (renderer: Renderer, mesh: Mesh) => void) {
+        this._onPick = fun;
+    }
+
+    set mainCamera(camera: Camera) {
+        this._mainCamera = camera;
+    }
+
     constructor(engine: Engine) {
         super();
         this._engine = engine;
@@ -77,18 +89,6 @@ export class ColorPickerRenderPass extends RenderPass {
 
         this._extent.width = 1;
         this._extent.height = 1;
-    }
-
-    /**
-     * Set the callback function after pick up.
-     * @param {Function} fun Callback function. if there is an renderer selected, the parameter 1 is {component, primitive }, otherwise it is undefined
-     */
-    set onPick(fun: (renderer: Renderer, mesh: Mesh) => void) {
-        this._onPick = fun;
-    }
-
-    set mainCamera(camera: Camera) {
-        this._mainCamera = camera;
     }
 
     /**
