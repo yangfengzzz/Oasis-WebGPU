@@ -25,7 +25,7 @@ export class ColorPickerRenderPass extends RenderPass {
     private _colorPickerSubpass: ColorPickerSubpass
     private _colorPickerTextureDesc = new TextureDescriptor();
     private _colorPickerTexture: GPUTexture;
-    private _needPick: boolean;
+    private _needPick: boolean = false;
     private _onPick: (renderer: Renderer, mesh: Mesh) => void;
     private _pickPos = new Vector2();
 

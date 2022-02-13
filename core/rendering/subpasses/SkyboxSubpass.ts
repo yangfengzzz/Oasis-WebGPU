@@ -180,17 +180,17 @@ export class SkyboxSubpass extends Subpass {
 
         const device = this.engine.device;
 
+        const vpMatrix = SkyboxSubpass._vpMatrix;
         const projectionMatrix = camera.projectionMatrix;
-        const viewMatrix = camera.viewMatrix;
+        camera.viewMatrix.cloneTo(vpMatrix);
         if (this._type == SkyBoxType.Cuboid) {
-            viewMatrix.elements[12] = 0;
-            viewMatrix.elements[13] = 0;
-            viewMatrix.elements[14] = 0;
-            viewMatrix.elements[15] = 1;
+            vpMatrix.elements[12] = 0;
+            vpMatrix.elements[13] = 0;
+            vpMatrix.elements[14] = 0;
+            vpMatrix.elements[15] = 1;
         }
 
-        const vpMatrix = SkyboxSubpass._vpMatrix;
-        Matrix.multiply(projectionMatrix, viewMatrix, vpMatrix);
+        Matrix.multiply(projectionMatrix, vpMatrix, vpMatrix);
         device.queue.writeBuffer(this._vpBuffer.buffer, 0, vpMatrix.elements, 0,16);
 
         this._bindGroupEntries[1].resource = this._cubeMap.textureView;
