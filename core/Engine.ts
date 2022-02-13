@@ -68,6 +68,10 @@ export class Engine {
         return this._renderContext;
     }
 
+    get renderPass(): RenderPass {
+        return this._renderPass;
+    }
+
     private _animate = () => {
         if (this._vSyncCount) {
             this._requestId = requestAnimationFrame(this._animate);
