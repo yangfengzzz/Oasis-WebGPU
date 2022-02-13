@@ -105,7 +105,7 @@ export class SkyboxSubpass extends Subpass {
             this._vertex.entryPoint = 'main';
             this._vertex.module = program.vertexShader;
             this._fragment.entryPoint = 'main';
-            this._fragment.module = program.vertexShader;
+            this._fragment.module = program.fragmentShader;
         }
         // DepthStencilState
         {
@@ -168,7 +168,7 @@ export class SkyboxSubpass extends Subpass {
         // RenderPipeline
         {
             this._forwardPipelineDescriptor.primitive.frontFace = 'ccw';
-            this._forwardPipelineDescriptor.primitive.cullMode = 'back';
+            this._forwardPipelineDescriptor.primitive.cullMode = 'front';
             this._forwardPipelineDescriptor.primitive.topology = 'triangle-list';
             this._forwardPipelineDescriptor.vertex.buffers = this._mesh._vertexBufferLayouts;
             this._renderPipeline = device.createRenderPipeline(this._forwardPipelineDescriptor);
@@ -191,7 +191,7 @@ export class SkyboxSubpass extends Subpass {
 
         const vpMatrix = SkyboxSubpass._vpMatrix;
         Matrix.multiply(projectionMatrix, viewMatrix, vpMatrix);
-        device.queue.writeBuffer(this._vpBuffer.buffer, 0, vpMatrix.elements, 16);
+        device.queue.writeBuffer(this._vpBuffer.buffer, 0, vpMatrix.elements, 0,16);
 
         this._bindGroupEntries[1].resource = this._cubeMap.textureView;
         this._bindGroupEntries[2].resource = this._cubeMap.sampler;

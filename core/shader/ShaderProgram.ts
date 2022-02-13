@@ -37,6 +37,10 @@ export class ShaderProgram {
             }))
         }
 
+        // console.log(vertexSource);
+        // console.log(fragmentSource);
+        // debugger;
+
         this._device = device;
         this._createProgram(vertexSource, fragmentSource);
     }
